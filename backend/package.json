@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "./src/index.ts",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "seed": "ts-node ./src/database/seeder/index.ts"
   },
   "keywords": [],
   "author": "",
