@@ -51,7 +51,7 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
 export async function jwtCheck(req: Request, res: Response, next: NextFunction) {
     try {
         // console.log('Received cookies (jwtCheck):', req.cookies)
-        const token = req.cookies.accessToken
+        const token = req.accessToken
         // console.log(token)
         if (token && jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
             // console.log(token)
