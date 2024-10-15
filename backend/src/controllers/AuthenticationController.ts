@@ -159,3 +159,31 @@ async function authenticateUser(req: Request, res: Response) {
         return
     }
 }
+
+async function verifyEmail(req: Request, res: Response) {
+    const {token} = req.query
+    try {
+        const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE verification_token = ?', [token])
+
+        if (user.length === 0) {
+            res.status(400).json({message: 'Invalid token.'})
+            return
+        }
+
+        await pool.execute('UPDATE users SET is_verified = ?, verification_token = NULL WHERE id = ?', [true, user[0].id])
+
+        res.status(200).json({message: "Email verified successfully. Please log in."})
+        return
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Failed to verify email.' })
+        return
+    }
+}
+
+export default {
+    loginUser,
+    authenticateUser,
+    verifyEmail
+}
