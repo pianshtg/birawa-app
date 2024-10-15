@@ -48,18 +48,21 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
             }
         }
 
+        // Check if there's an accessToken
         if (!accessToken) {
             // console.log("There's no access token.") (debugging)
             res.status(401).json({message: "Invalid access token."})
             return
         }
 
+        // Check if there's refresh token
         if (!refreshToken) {
             // console.log("There's no refresh token.") (debugging)
             res.status(401).json({message: "Invalid refresh token."})
             return
         }
 
+        // Set the access and refresh token
         req.accessToken = accessToken
         req.refreshToken = refreshToken
         console.log("Proceeding to the next middleware...")
