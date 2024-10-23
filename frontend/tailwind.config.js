@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: ["class"],
-    content: [],
+    content: [
+		"./index.html",
+		"./src/**/*.{js,ts,jsx,tsx}",
+	  ],
   theme: {
   	extend: {
   		borderRadius: {
@@ -9,6 +12,12 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+		textColor : {
+			primary : '#4147D5'
+		},
+		backgroundColor : {
+			opacitynav : '#D7DFFF'
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
