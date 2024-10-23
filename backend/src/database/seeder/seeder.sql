@@ -332,6 +332,7 @@ INSERT INTO users (
         role_id,
         nama_lengkap,
         nomor_telepon,
+        is_verified,
         created_by,
         updated_by
     )
@@ -345,6 +346,7 @@ VALUES (
         ),
         'Admin User',
         '081234567890',
+        true,
         NULL,
         NULL
     ),
@@ -358,6 +360,7 @@ VALUES (
         ),
         'Mitra One',
         '081234567891',
+        true,
         NULL,
         NULL
     ),
@@ -371,6 +374,7 @@ VALUES (
         ),
         'Mitra Two',
         '081234567892',
+        true,
         NULL,
         NULL
     ),
@@ -384,6 +388,7 @@ VALUES (
         ),
         'Mitra Three',
         '081234567893',
+        true,
         NULL,
         NULL
     ),
@@ -397,6 +402,7 @@ VALUES (
         ),
         'Mitra Four',
         '081234567894',
+        true,
         NULL,
         NULL
     ),
@@ -410,6 +416,7 @@ VALUES (
         ),
         'Mitra Five',
         '081234567895',
+        true,
         NULL,
         NULL
     ),
@@ -423,6 +430,7 @@ VALUES (
         ),
         'Mitra Six',
         '081234567896',
+        true,
         NULL,
         NULL
     ),
@@ -436,6 +444,7 @@ VALUES (
         ),
         'Mitra Seven',
         '081234567897',
+        true,
         NULL,
         NULL
     ),
@@ -449,6 +458,7 @@ VALUES (
         ),
         'Mitra Eight',
         '081234567898',
+        true,
         NULL,
         NULL
     ),
@@ -462,6 +472,7 @@ VALUES (
         ),
         'Mitra Nine',
         '081234567899',
+        true,
         NULL,
         NULL
     ),
@@ -475,6 +486,7 @@ VALUES (
         ),
         'Mitra Ten',
         '081234567991',
+        true,
         NULL,
         NULL
     ),
@@ -488,6 +500,7 @@ VALUES (
         ),
         'Mitra Eleven',
         '081234567992',
+        false,
         NULL,
         NULL
     );
