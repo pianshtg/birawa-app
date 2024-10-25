@@ -10,12 +10,12 @@ async function createMitra (req: Request, res: Response) {
         const [mitra]= await pool.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [nama])
         
         if (mitra.length > 0) {
-            res.status(409).json({message: 'User already exists.'})
+            res.status(409).json({message: 'Mitra already exists.'})
             return
         }
 
         const id = uuidv4()
-        await pool.execute('INSERT INTO mitra (id, nama, nomor_telepon, alamat) VALUES (?, ?, ?, ?)', [id, nama, nomor_telepon, alamat])
+        await pool.execute('INSERT IGNORE INTO mitra (id, nama, nomor_telepon, alamat) VALUES (?, ?, ?, ?)', [id, nama, nomor_telepon, alamat])
 
         res.status(200).json({
             message: "Mitra created successfully.",
