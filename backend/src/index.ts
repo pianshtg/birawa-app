@@ -10,6 +10,7 @@ import mitraRoute from './routes/MitraRoute'
 import kontrakRoute from './routes/KontrakRoute'
 import pekerjaanRoute from './routes/PekerjaanRoute'
 import userRoute from './routes/UserRoute'
+
 const app = express()
 
 // Middlewares
