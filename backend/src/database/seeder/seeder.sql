@@ -878,6 +878,16 @@ VALUES (
         '6298ef8cc45035d8633f2c0352d878eee3052ad2c702575e70fd18e52f839b0386732882d732f2b6a22fc08734434499a64e789de73ac0a68dff6607b481d699',
         NULL,
         NULL
+    ),
+    (
+        (
+            SELECT id
+            FROM users
+            WHERE email = 'birawaprj@gmail.com'
+        ),
+        '787915eba7b23deasdfghjklabb4c1571d2fa58be22d042fdcabb61df8e66c0f6bb10f3c4179a8ae55fd1e05959d48e9c68a4c8110f66f4a34dd65d9e9790bc7',
+        NULL,
+        NULL
     );
 -- Insert data into users_hashed_refresh_token
 INSERT INTO users_hashed_refresh_token (
