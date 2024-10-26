@@ -1,5 +1,5 @@
 import path from "path"
-import { pool } from ".."
+import { tempPool } from ".."
 import fs from 'fs'
 
 async function seeder() {
@@ -10,13 +10,13 @@ async function seeder() {
         const seederQuery = fs.readFileSync(seederFile, 'utf8')
         console.log("Running the query...")
 
-        await pool.query(seederQuery)
+        await tempPool.query(seederQuery)
         console.log('Database tables created and seeded successfully!')
         
     } catch (error) {
         console.error("Error seeding the database:", error)
     } finally {
-        await pool.end()
+        await tempPool.end()
         console.log("Database connection closed.")
     }
 }
