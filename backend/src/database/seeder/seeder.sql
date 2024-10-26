@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS birawa;
+USE birawa;
 CREATE TABLE roles (
     id CHAR(36) PRIMARY KEY,
     nama ENUM('admin', 'mitra'),
@@ -40,6 +42,7 @@ CREATE TABLE mitra (
     nama VARCHAR(100),
     nomor_telepon VARCHAR(50),
     alamat VARCHAR(100),
+    is_active TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT NULL,
@@ -501,6 +504,20 @@ VALUES (
         'Mitra Eleven',
         '081234567992',
         false,
+        NULL,
+        NULL
+    ),
+    (
+        UUID(),
+        'birawaprj@gmail.com',
+        (
+            SELECT id
+            FROM roles
+            WHERE nama = 'admin'
+        ),
+        'Admin Birawa',
+        '081386039162',
+        true,
         NULL,
         NULL
     );
