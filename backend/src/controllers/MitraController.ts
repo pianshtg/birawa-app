@@ -17,7 +17,7 @@ async function createMitra (req: Request, res: Response) {
         const id = uuidv4()
         await pool.execute('INSERT IGNORE INTO mitra (id, nama, nomor_telepon, alamat) VALUES (?, ?, ?, ?)', [id, nama, nomor_telepon, alamat])
 
-        res.status(200).json({
+        res.status(201).json({
             message: "Mitra created successfully.",
             created_mitra: {
                 id,
@@ -35,6 +35,18 @@ async function createMitra (req: Request, res: Response) {
     }
 }
 
+async function getMitra(req: Request, res: Response) {}
+
+async function getMitras(req: Request, res: Response) {}
+
+async function updateMitra (req: Request, res: Response) {}
+
+async function deleteMitra (req: Request, res: Response) {}
+
 export default {
     createMitra,
+    getMitra,
+    getMitras,
+    updateMitra,
+    deleteMitra
 }
