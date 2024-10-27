@@ -15,7 +15,6 @@ async function createPekerjaan(req: Request, res: Response) {
         }
 
         // Insert pekerjaan into the database.
-        const id = uuidv4()
         const kontrak_id = _kontrak[0].id
         await pool.execute('INSERT IGNORE INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi) VALUES (?, ?, ?, ?)', [id, kontrak_id, nama, lokasi])
 
@@ -23,7 +22,6 @@ async function createPekerjaan(req: Request, res: Response) {
         res.status(200).json({
             message: "Pekerjaan created successfully.",
             created_pekerjaan: {
-                id,
                 kontrak_id,
                 nama,
                 lokasi
