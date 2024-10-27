@@ -3,10 +3,15 @@ import { pool } from "../database";
 import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
 
+type Pekerjaan = {
+    nama: string,
+    lokasi: string
+}
+
 async function createPekerjaan(req: Request, res: Response) {
     try {
-        const {nomor_kontrak, nama, lokasi} = req.body
-        const [_kontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ?', nomor_kontrak)
+        const {nomor_kontrak, pekerjaanArr} = req.body
+        const [_kontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ?', [nomor_kontrak])
 
         // Check if mitra exist.
         if (_kontrak.length === 0) {
@@ -17,7 +22,14 @@ async function createPekerjaan(req: Request, res: Response) {
         // Insert pekerjaan into the database.
         const id = uuidv4()
         const kontrak_id = _kontrak[0].id
-        await pool.execute('INSERT IGNORE INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi) VALUES (?, ?, ?, ?)', [id, kontrak_id, nama, lokasi])
+        await Promise.all(
+            pekerjaanArr.map(
+                async (pekerjaan: Pekerjaan) => {
+                    const id = uuidv4()
+                    await pool.execute('INSERT IGNORE INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi) VALUES (?, ?, ?, ?)', [id, kontrak_id, pekerjaan.nama, pekerjaan.lokasi])
+                }
+            )
+        )
 
         // Debug.
         res.status(200).json({
@@ -25,8 +37,7 @@ async function createPekerjaan(req: Request, res: Response) {
             created_pekerjaan: {
                 id,
                 kontrak_id,
-                nama,
-                lokasi
+                pekerjaanArr
             }
         })
         return
