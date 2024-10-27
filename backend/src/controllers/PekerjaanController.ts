@@ -10,8 +10,8 @@ type Pekerjaan = {
 
 async function createPekerjaan(req: Request, res: Response) {
     try {
-        const {nomor_kontrak, pekerjaanArr} = req.body
-        const [_kontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ?', [nomor_kontrak])
+        const {nama_mitra, nomor_kontrak, pekerjaanArr} = req.body
+        const [_kontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ? AND mitra_id = (SELECT id FROM mitra WHERE nama = ?)', [nomor_kontrak, nama_mitra])
 
         // Check if mitra exist.
         if (_kontrak.length === 0) {
@@ -31,7 +31,7 @@ async function createPekerjaan(req: Request, res: Response) {
         )
 
         // Debug.
-        res.status(200).json({
+        res.status(201).json({
             message: "Pekerjaan created successfully.",
             created_pekerjaan: {
                 kontrak_id,
