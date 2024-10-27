@@ -102,6 +102,32 @@ async function createUser(req: Request, res: Response) {
 
 }
 
+async function getUser(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [metaData.user_id])
+
+        if (user.length === 0) {
+            // console.log("User doesn't exist.") //Debug
+            res.status(409).json({message: "User not found."})
+            return
+        } else {
+            // console.log(user) //Debug
+            res.status(200).json({
+                user
+            })
+            return
+        }
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message: "Error reading User."})
+        return
+    }
+}
+
 export default {
     createUser,
+    getUser,
 }
