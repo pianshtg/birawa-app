@@ -170,7 +170,7 @@ async function verifyEmail(req: Request, res: Response) {
             return
         }
 
-        await pool.execute('UPDATE users SET is_verified = ?, verification_token = NULL WHERE id = ?', [true, user[0].id])
+        await pool.execute('UPDATE users SET is_verified = ?, verification_token = NULL WHERE id = ?', [1, user[0].id])
 
         res.status(200).json({message: "Email verified successfully. Please log in."})
         return
