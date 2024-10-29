@@ -28,27 +28,27 @@ async function createMitra (req: Request, res: Response) {
             const {mitra, kontrak, pekerjaan, user} = req.body
     
             // Creating mitra.
-            const [existingMitra]= await pool.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [mitra.nama])
+            const [existingMitra]= await connection.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [mitra.nama])
             
             if (existingMitra.length > 0) {
                 res.status(409).json({message: 'Mitra already exists.'})
                 return
             }
-    
+            
             const mitraId = uuidv4()
-            await pool.execute('INSERT INTO mitra (id, nama, nomor_telepon, alamat, created_by) VALUES (?, ?, ?, ?, ?)', [mitraId, mitra.nama, mitra.nomor_telepon, mitra.alamat, creator_id])
+            await connection.execute('INSERT INTO mitra (id, nama, nomor_telepon, alamat, created_by) VALUES (?, ?, ?, ?, ?)', [mitraId, mitra.nama, mitra.nomor_telepon, mitra.alamat, creator_id])
             console.log("Mitra successfully created:", mitraId, mitra) //Debug.
             
             // Creating kontrak
             const kontrakId = uuidv4()
-            await pool.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [kontrakId, mitraId, kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu, creator_id])
+            await connection.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [kontrakId, mitraId, kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu, creator_id])
             console.log("Kontrak successfully created:", kontrakId, kontrak)
     
             // Creating pekerjaan
             await Promise.all(
                 pekerjaan.map(async (_pekerjaan: Pekerjaan) => {
                     const pekerjaanId = uuidv4()
-                    await pool.execute('INSERT INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi, created_by) VALUES (?, ?, ?, ?, ?)', [pekerjaanId, kontrakId, _pekerjaan.nama, _pekerjaan.lokasi, creator_id])
+                    await connection.execute('INSERT INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi, created_by) VALUES (?, ?, ?, ?, ?)', [pekerjaanId, kontrakId, _pekerjaan.nama, _pekerjaan.lokasi, creator_id])
                     console.log(`Pekerjaan "${_pekerjaan.nama}" di "${_pekerjaan.lokasi}" successfully created.`) //Debug.
                 })
             )
@@ -65,7 +65,7 @@ async function createMitra (req: Request, res: Response) {
                 // Assign id to user and insert it into the database.
             const userId = uuidv4()
             const verificationToken = uuidv4()
-            await pool.execute('INSERT INTO users (id, role_id, email, nama_lengkap, nomor_telepon, verification_token, created_by) VALUES (?, (SELECT id FROM roles WHERE nama = "mitra"), ?, ?, ?, ?, ?)', [userId, user.email, user.nama_lengkap, user.nomor_telepon, verificationToken, creator_id])
+            await connection.execute('INSERT INTO users (id, role_id, email, nama_lengkap, nomor_telepon, verification_token, created_by) VALUES (?, (SELECT id FROM roles WHERE nama = "mitra"), ?, ?, ?, ?, ?)', [userId, user.email, user.nama_lengkap, user.nomor_telepon, verificationToken, creator_id])
     
                 // Generate password and insert it into the database.
             const password = uuidv4()
@@ -74,7 +74,7 @@ async function createMitra (req: Request, res: Response) {
     
                 // Generate mitra_users id and insert it into the database.
             const mitraUsersId = uuidv4()
-            await pool.execute('INSERT INTO mitra_users (id, mitra_id, user_id, created_by) VALUES (?, ?, ?, ?)', [mitraUsersId, mitraId, userId, creator_id])
+            await connection.execute('INSERT INTO mitra_users (id, mitra_id, user_id, created_by) VALUES (?, ?, ?, ?)', [mitraUsersId, mitraId, userId, creator_id])
     
             // Delivering the verification email to the user process
                 // Creating the transporter
