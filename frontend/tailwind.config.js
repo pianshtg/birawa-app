@@ -8,15 +8,18 @@ export default {
   theme: {
   	extend: {
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			lg: '12px',
+  			md: '6px',
+  			sm: '4px'
   		},
 		textColor : {
-			primary : '#4147D5'
+			primary : '#E60012'
 		},
 		backgroundColor : {
-			opacitynav : '#D7DFFF'
+			Merah2 : '#CD3541',
+			primary : "#E60012",
+			opacitynav : "#FFD4D1",
+			buttonsidebar : "#27272A",
 		},
   		colors: {
   			background: 'hsl(var(--background))',
@@ -49,7 +52,7 @@ export default {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
-  			border: 'hsl(var(--border))',
+  			border: '#B8B8B8',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			chart: {
@@ -59,7 +62,14 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
-  		}
+  		},
+		  boxShadow: {
+			'custom-login': `
+			  10px 17px 30px rgba(128, 128, 128, 0.01), 
+			  12px 8px 40px rgba(128, 128, 128, 0.01), 
+			  1px 10px 22px rgba(128, 128, 128, 0.1)
+			`,
+		},
   	}
   },
   plugins: [require("tailwindcss-animate")],
