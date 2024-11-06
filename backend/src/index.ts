@@ -1,5 +1,6 @@
+import "dotenv/config";
 import express, { Request, Response } from 'express'
-import { testConnection } from './database'
+import {v2 as cloudinary} from 'cloudinary'
 import helmet from 'helmet'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
@@ -11,8 +12,15 @@ import kontrakRoute from './routes/KontrakRoute'
 import pekerjaanRoute from './routes/PekerjaanRoute'
 import userRoute from './routes/UserRoute'
 import { clientType, jwtCheck } from './middlewares/auth'
+import { testConnection } from './database'
 
 const app = express()
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 // Middlewares
 app.use(helmet())
