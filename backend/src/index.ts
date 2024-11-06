@@ -11,6 +11,7 @@ import mitraRoute from './routes/MitraRoute'
 import kontrakRoute from './routes/KontrakRoute'
 import pekerjaanRoute from './routes/PekerjaanRoute'
 import userRoute from './routes/UserRoute'
+import laporanRoute from './routes/LaporanRoute'
 import { clientType, jwtCheck } from './middlewares/auth'
 import { testConnection } from './database'
 
