@@ -10,6 +10,7 @@ import mitraRoute from './routes/MitraRoute'
 import kontrakRoute from './routes/KontrakRoute'
 import pekerjaanRoute from './routes/PekerjaanRoute'
 import userRoute from './routes/UserRoute'
+import { clientType, jwtCheck } from './middlewares/auth'
 
 const app = express()
 
@@ -28,13 +29,16 @@ app.get("/", async (req: Request, res: Response) => {
     res.json({message: "Hi!"})
 })
 
-//Routes
-app.use("/api/auth", authenticationRoute)
+// Test Route
 app.use("/api/test", testRoute)
-app.use("/api/mitra", mitraRoute)
-app.use("/api/kontrak", kontrakRoute)
-app.use("/api/pekerjaan", pekerjaanRoute)
-app.use("/api/user", userRoute)
+
+// Routes
+app.use("/api/auth", authenticationRoute)
+app.use("/api/mitra", clientType, jwtCheck, mitraRoute)
+app.use("/api/kontrak", clientType, jwtCheck, kontrakRoute)
+app.use("/api/pekerjaan", clientType, jwtCheck, pekerjaanRoute)
+app.use("/api/user", clientType, jwtCheck, userRoute)
+app.use("/api/laporan", clientType, jwtCheck, laporanRoute)
 
 // Start Server
 async function startServer() {
