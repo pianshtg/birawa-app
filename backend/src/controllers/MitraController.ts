@@ -78,6 +78,8 @@ async function createMitra (req: Request, res: Response) {
             const mitraUsersId = uuidv4()
             await connection.execute('INSERT INTO mitra_users (id, mitra_id, user_id, created_by) VALUES (?, ?, ?, ?)', [mitraUsersId, mitraId, userId, creator_id])
             
+            // Commit all the queries
+            await connection.commit()
 
             // Delivering the verification email to the user process
                 // Creating the transporter
