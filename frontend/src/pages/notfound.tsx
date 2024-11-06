@@ -1,13 +1,21 @@
 // src/components/pages/NotFound.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import useIsMobile from '@/hooks/UseIsMobile';
+import MobilePage from './mobilepage';
 const NotFound: React.FC = () => {
+  const isMobile = useIsMobile(620);
   const navigate = useNavigate();
 
   const goHome = () => {
     navigate('/');
   };
+
+  if (isMobile) {
+    return (
+      <MobilePage/>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
