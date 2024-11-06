@@ -6,10 +6,11 @@ import { Pekerjaan } from "../types";
 
 async function createPekerjaan(req: Request, res: Response) {
     try {
-        const {nama_mitra, nomor_kontrak, pekerjaanArr} = req.body
-        const [_kontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ? AND mitra_id = (SELECT id FROM mitra WHERE nama = ?)', [nomor_kontrak, nama_mitra])
+        // Get request parameter
+        const {nama_mitra, nomor_kontrak, pekerjaan_arr} = req.body
 
         // Check if mitra exist.
+        const [_kontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ? AND mitra_id = (SELECT id FROM mitra WHERE nama = ?)', [nomor_kontrak, nama_mitra])
         if (_kontrak.length === 0) {
             res.status(409).json({message: "Kontrak doesn't exist"})
             return
@@ -17,9 +18,11 @@ async function createPekerjaan(req: Request, res: Response) {
 
         // Insert pekerjaan into the database.
         const kontrak_id = _kontrak[0].id
+            // Mapping array of pekerjaan.
         await Promise.all(
-            pekerjaanArr.map(
+            pekerjaan_arr.map(
                 async (pekerjaan: Pekerjaan) => {
+            // Generate pekerjaan_id and insert it into the database.
                     const id = uuidv4()
                     await pool.execute('INSERT IGNORE INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi) VALUES (?, ?, ?, ?)', [id, kontrak_id, pekerjaan.nama, pekerjaan.lokasi])
                 }
@@ -31,7 +34,7 @@ async function createPekerjaan(req: Request, res: Response) {
             message: "Pekerjaan created successfully.",
             created_pekerjaan: {
                 kontrak_id,
-                pekerjaanArr
+                pekerjaan_arr
             }
         })
         return
