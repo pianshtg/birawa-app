@@ -116,7 +116,7 @@ async function getUser(req: Request, res: Response) {
             })
             return
         }
-
+        
     } catch (error) {
         console.error(error)
         res.status(500).json({message: "Error reading User."})
@@ -124,7 +124,16 @@ async function getUser(req: Request, res: Response) {
     }
 }
 
+async function getUsers(req: Request, res: Response) {}
+
+async function updateUser(req: Request, res: Response) {}
+
+async function deleteUser(req: Request, res: Response) {}
+
 export default {
     createUser,
     getUser,
+    getUsers,
+    updateUser,
+    deleteUser
 }
