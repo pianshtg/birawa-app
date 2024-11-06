@@ -2,11 +2,7 @@ import { Request, Response } from "express";
 import { pool } from "../database";
 import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
-
-type Pekerjaan = {
-    nama: string,
-    lokasi: string
-}
+import { Pekerjaan } from "../types";
 
 async function createPekerjaan(req: Request, res: Response) {
     try {

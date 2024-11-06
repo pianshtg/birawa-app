@@ -5,11 +5,7 @@ import { RowDataPacket } from "mysql2"
 import {v4 as uuidv4} from 'uuid'
 import bcrypt from 'bcrypt'
 import nodemailer from 'nodemailer'
-
-type Pekerjaan = {
-    nama: string,
-    lokasi: string
-}
+import { Pekerjaan } from "../types"
 
 async function createMitra (req: Request, res: Response) {
     const connection = await pool.getConnection()
