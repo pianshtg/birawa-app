@@ -25,6 +25,9 @@ export function generateRefreshToken (data: any) {
 }
 
 export async function clientType(req: Request, res:Response, next: NextFunction) {
+    
+    console.log("Checking the client type...") // Debug.
+    
     try {
         const clientType = req.headers['x-client-type']
         let accessToken: string | undefined
@@ -50,14 +53,14 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
 
         // Check if there's an accessToken
         if (!accessToken) {
-            // console.log("There's no access token.") (debugging)
+            // console.log("There's no access token.") // Debug.
             res.status(401).json({message: "Invalid access token."})
             return
         }
 
         // Check if there's refresh token
         if (!refreshToken) {
-            // console.log("There's no refresh token.") (debugging)
+            // console.log("There's no refresh token.") // Debug.
             res.status(401).json({message: "Invalid refresh token."})
             return
         }
@@ -65,7 +68,9 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
         // Set the access and refresh token
         req.accessToken = accessToken
         req.refreshToken = refreshToken
-        console.log("Proceeding to the next middleware...")
+        
+        console.log("Client type:", clientType)
+        console.log("Proceeding to check jwt...\n")
         next()
     } catch (error) {
         console.error("Error fetching client type:", error)
@@ -76,19 +81,19 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
 export async function jwtCheck(req: Request, res: Response, next: NextFunction) {
     console.log("Jwt checking...")
     try {
-        // console.log('Received cookies (jwtCheck):', req.cookies) (debugging)
+        // console.log('Received cookies (jwtCheck):', req.cookies) // Debug.
         const accessToken = req.accessToken
         // console.log(token) (debuggin)
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
-            // console.log(token) (debugging)
+            // console.log(token) // Debug.
             next()
         } else {
-            // console.log("there's no access token") (debugging)
+            // console.log("there's no access token") // Debug.
             res.status(401).json({message: "Unauthorized"})
             return
         }
     } catch (error) {
-        console.log("Access token verification failed:", error)
+        console.log("Access token verification failed:", error) // Debug.
 
         if (error instanceof jwt.TokenExpiredError) {
             const refreshToken = req.refreshToken!
@@ -126,6 +131,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                         // Passing the new access token to the controller to be sent as json data
                         req.newAccessToken = newAccessToken
                     }
+                    console.log("Successfuly renew the accessToken: ", newAccessToken, "\n") // Debug.
                     next()
                     
                 } else {
@@ -133,7 +139,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                     return
                 }
             } catch (error) {
-                console.error(error)
+                console.error(error) // Debug.
                 res.status(401).json({message: "Unauthorized"})
                 return
             }
