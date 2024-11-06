@@ -19,12 +19,6 @@ async function createUser(req: Request, res: Response) {
 
         if (permissions.includes('manage_users')) { // don't forget to further specify the role's permissions
             const {nama_lengkap, email, nomor_telepon, mitra_nama} = req.body
-
-            // Validate request input
-            if (!nama_lengkap || !email || !nomor_telepon || !mitra_nama) {
-                res.status(400).json({message: "Missing nama lengkap, email, nomor telepon, or nama mitra."})
-                return
-            }
             
             // Checking if mitra exists
             const [mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [mitra_nama])
