@@ -5,14 +5,15 @@ interface ButtonProps {
   IsDisabled? : boolean,
   onClick?: () => void;
   children: React.ReactNode;
+  classname?:string,
 }
 
-const Button: React.FC<ButtonProps> = ({ type, onClick, children, IsDisabled }) => (
+const Button: React.FC<ButtonProps> = ({ type, onClick, children, IsDisabled,classname }) => (
   <button
     type={type}
     onClick={onClick}
     disabled={IsDisabled}
-    className="bg-primary w-full hover:bg-primary/70 ease-in-out duration-150 text-white font-semibold py-2 px-4 rounded focus:outline-none"
+    className={`bg-primary w-full hover:bg-primary/70 ease-in-out duration-300 text-white font-semibold py-2 px-4 rounded focus:outline-none ${classname}`}
   >
     {children}
   </button>
