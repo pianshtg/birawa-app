@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Button from '../atom/Button';
 
 const Logging = () => {
   const logs = [
@@ -41,22 +42,21 @@ const Logging = () => {
     <div className='flex flex-col gap-y-7'>
       <div className='p-3'>
         <h1 className="text-2xl font-semibold mb-2">Logging Viewer</h1>
-        <div className="space-x-2 mb-5">
-          <label htmlFor="caritanggal" className="text-sm font-medium text-gray-500">Cari Berdasarkan Tanggal</label>
-          <input
-            type="date"
-            id="caritanggal"
-            name="caritanggal"
-            className="appearance-none border rounded-md w-fit py-2 px-3 text-gray-700 leading-tight"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          <button
-            onClick={handleFilterLogs}
-            className="ml-2 bg-blue-500 text-white py-2 px-4 rounded"
-          >
-            Cari
-          </button>
+        <div className="flex gap-x-2 mb-4">
+          <div className='space-x-2'>
+            <label htmlFor="caritanggal" className="text-sm font-medium text-gray-500">Cari Berdasarkan Tanggal</label>
+              <input
+                type="date"
+                id="caritanggal"
+                name="caritanggal"
+                className="appearance-none border rounded-md w-fit py-2 px-3 text-gray-700 leading-tight"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+          </div>
+          <div className='w-fit'>
+            <Button onClick={handleFilterLogs} type='button' >Cari</Button>
+          </div>
         </div>
 
         <div className="overflow-auto">
