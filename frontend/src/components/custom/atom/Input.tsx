@@ -8,6 +8,7 @@ interface InputProps {
   placeholder?: string;
   required?: boolean;
   className?: string;
+  readonly? :boolean;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -17,7 +18,8 @@ const Input: React.FC<InputProps> = ({
   onChange,
   placeholder = '',
   required = false,
-  className = "appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-red-500 ",
+  readonly,
+  className = "appearance-none border rounded-md w-full  py-2 px-3 text-gray-700 leading-tight focus:outline-red-500 ",
 }) => {
   return (
     <input
@@ -28,6 +30,7 @@ const Input: React.FC<InputProps> = ({
       placeholder={placeholder}
       required={required}
       className={className}
+      readOnly={readonly}
     />
   );
 };
