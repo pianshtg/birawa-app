@@ -5,10 +5,11 @@ import {v4 as uuidv4} from 'uuid'
 
 async function createKontrak(req: Request, res: Response) {
     try {
+        // Get request parameter.
         const {nama_mitra, nama, nomor, tanggal, nilai, jangka_waktu} = req.body
-        const [_mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
 
-        // Check if mitra exist
+        // Check if mitra exists.
+        const [_mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
         if (_mitra.length === 0) {
             res.status(409).json({message: "Mitra doesn't exist"})
             return
@@ -16,8 +17,9 @@ async function createKontrak(req: Request, res: Response) {
 
         // Insert kontrak into the database.
         const id = uuidv4()
-        await pool.execute('INSERT IGNORE INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu) VALUES (?, ?, ?, ?, ?, ?, ?)', [id, _mitra[0].id, nama, nomor, tanggal, nilai, jangka_waktu])
+        await pool.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu) VALUES (?, ?, ?, ?, ?, ?, ?)', [id, _mitra[0].id, nama, nomor, tanggal, nilai, jangka_waktu])
         
+        // Debug.
         res.status(201).json({
             message: "Kontrak created successfully.",
             created_kontrak: {
@@ -33,7 +35,7 @@ async function createKontrak(req: Request, res: Response) {
         return
 
     } catch (error) {
-        console.error(error)
+        console.error(error) // Debug.
         res.status(500).json({message: "Error creating Kontrak."})
         return
     }

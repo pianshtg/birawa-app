@@ -5,62 +5,64 @@ import { RowDataPacket } from "mysql2"
 import {v4 as uuidv4} from 'uuid'
 import bcrypt from 'bcrypt'
 import nodemailer from 'nodemailer'
-
-type Pekerjaan = {
-    nama: string,
-    lokasi: string
-}
+import { Pekerjaan } from "../types"
 
 async function createMitra (req: Request, res: Response) {
     const connection = await pool.getConnection()
     try {
         
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) (debugging)
+        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) (debugging)
+        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
 
         if (permissions.includes('manage_users')) {
+            // Begin transaction
             await connection.beginTransaction()
-            const {mitra, kontrak, pekerjaan, user} = req.body
+            // Get request parameters.
+            const {mitra, kontrak, pekerjaan_arr, user} = req.body
     
             // Creating mitra.
+                // Checking if mitra already exists.
             const [existingMitra]= await connection.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [mitra.nama])
-            
             if (existingMitra.length > 0) {
                 res.status(409).json({message: 'Mitra already exists.'})
                 return
             }
-            
+                // Generate mitra id and insert mitra into the database
             const mitraId = uuidv4()
             await connection.execute('INSERT INTO mitra (id, nama, nomor_telepon, alamat, created_by) VALUES (?, ?, ?, ?, ?)', [mitraId, mitra.nama, mitra.nomor_telepon, mitra.alamat, creator_id])
             console.log("Mitra successfully created:", mitraId, mitra) //Debug.
             
             // Creating kontrak
+                // Generate kontrak id and insert kontrak into the database
             const kontrakId = uuidv4()
             await connection.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [kontrakId, mitraId, kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu, creator_id])
             console.log("Kontrak successfully created:", kontrakId, kontrak)
     
             // Creating pekerjaan
+                // Mapping array of pekerjaan
             await Promise.all(
-                pekerjaan.map(async (_pekerjaan: Pekerjaan) => {
+                pekerjaan_arr.map(async (pekerjaan: Pekerjaan) => {
+                // Generate pekerjaan_id and insert it into the database.
                     const pekerjaanId = uuidv4()
-                    await connection.execute('INSERT INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi, created_by) VALUES (?, ?, ?, ?, ?)', [pekerjaanId, kontrakId, _pekerjaan.nama, _pekerjaan.lokasi, creator_id])
-                    console.log(`Pekerjaan "${_pekerjaan.nama}" di "${_pekerjaan.lokasi}" successfully created.`) //Debug.
+                    await connection.execute('INSERT INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi, created_by) VALUES (?, ?, ?, ?, ?)', [pekerjaanId, kontrakId, pekerjaan.nama, pekerjaan.lokasi, creator_id])
+                    console.log(`Pekerjaan "${pekerjaan.nama}" di "${pekerjaan.lokasi}" successfully created.`) //Debug.
                 })
             )
-            console.log("Pekerjaan successfully created:", pekerjaan) //Debug.
+            console.log("Pekerjaan successfully created:", pekerjaan_arr) //Debug.
     
             // Creating user
                 //Checking if the user is already exists.
-                const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [user.email])
-                if (existingUser.length > 0) {
-                    res.status(409).json({message: "User already exists."})
-                    return
-                }
+            const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [user.email])
+            if (existingUser.length > 0) {
+                res.status(409).json({message: "User already exists."})
+                return
+            }
                 
                 // Assign id to user and insert it into the database.
             const userId = uuidv4()
@@ -75,7 +77,10 @@ async function createMitra (req: Request, res: Response) {
                 // Generate mitra_users id and insert it into the database.
             const mitraUsersId = uuidv4()
             await connection.execute('INSERT INTO mitra_users (id, mitra_id, user_id, created_by) VALUES (?, ?, ?, ?)', [mitraUsersId, mitraId, userId, creator_id])
-    
+            
+            // Commit all the queries
+            await connection.commit()
+
             // Delivering the verification email to the user process
                 // Creating the transporter
             const transporter = nodemailer.createTransport({
@@ -100,7 +105,7 @@ async function createMitra (req: Request, res: Response) {
                 message: "Mitra created successfully. Check the email verification to verify the user account.",
                 created_mitra: mitra,
                 created_kontrak: kontrak,
-                created_pekerjaan: pekerjaan,
+                created_pekerjaan: pekerjaan_arr,
                 created_user: user,
                 newAccessToken
             })
@@ -110,8 +115,9 @@ async function createMitra (req: Request, res: Response) {
             return
         }
     } catch (error) {
+        // Rollback the connection if there's error.
         await connection.rollback()
-        console.error(error)
+        console.error(error) // Debug.
         res.status(500).json({message: "Error creating Mitra."})
         return
         
