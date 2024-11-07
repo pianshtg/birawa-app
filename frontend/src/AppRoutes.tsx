@@ -15,7 +15,7 @@ function AppRoutes() {
       <Route path='/' element={<Home />} />
       <Route path="/dashboard" element={<ResponsiveLayout><Dashboard /></ResponsiveLayout>} />
       <Route path='/ceklaporan' element={<ResponsiveLayout><Ceklaporan /></ResponsiveLayout>} />
-      <Route path='/inbox' element={<ResponsiveLayout><Inbox /></ResponsiveLayout>} />
+      <Route path='/inbox/' element={<ResponsiveLayout><Inbox /></ResponsiveLayout>} />
       <Route path='/buatlaporan' element={<ResponsiveLayout><Buatlaporan /></ResponsiveLayout>} />
       <Route path='/profile' element={<ResponsiveLayout><Profile /></ResponsiveLayout>} />
       <Route path='/forgotpassword' element={<Forgotpassword />} />
