@@ -1,5 +1,6 @@
+import "dotenv/config";
 import express, { Request, Response } from 'express'
-import { testConnection } from './database'
+import {v2 as cloudinary} from 'cloudinary'
 import helmet from 'helmet'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
@@ -10,16 +11,25 @@ import mitraRoute from './routes/MitraRoute'
 import kontrakRoute from './routes/KontrakRoute'
 import pekerjaanRoute from './routes/PekerjaanRoute'
 import userRoute from './routes/UserRoute'
+import laporanRoute from './routes/LaporanRoute'
+import { clientType, jwtCheck } from './middlewares/auth'
+import { testConnection } from './database'
 
 const app = express()
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 // Middlewares
 app.use(helmet())
 app.use(express.json())
-// app.use(cors({
-//     origin:'http://localhost:5173',
-//     credentials: true
-// }))
+app.use(cors({
+    origin:['http://localhost:5173'],
+    credentials: true
+}))
 app.use(cookieParser())
 // app.use(csrfProtection)
 
@@ -28,13 +38,16 @@ app.get("/", async (req: Request, res: Response) => {
     res.json({message: "Hi!"})
 })
 
-//Routes
-app.use("/api/auth", authenticationRoute)
+// Test Route
 app.use("/api/test", testRoute)
-app.use("/api/mitra", mitraRoute)
-app.use("/api/kontrak", kontrakRoute)
-app.use("/api/pekerjaan", pekerjaanRoute)
-app.use("/api/user", userRoute)
+
+// Routes
+app.use("/api/auth", authenticationRoute)
+app.use("/api/mitra", clientType, jwtCheck, mitraRoute)
+app.use("/api/kontrak", clientType, jwtCheck, kontrakRoute)
+app.use("/api/pekerjaan", clientType, jwtCheck, pekerjaanRoute)
+app.use("/api/user", clientType, jwtCheck, userRoute)
+app.use("/api/laporan", clientType, jwtCheck, laporanRoute)
 
 // Start Server
 async function startServer() {

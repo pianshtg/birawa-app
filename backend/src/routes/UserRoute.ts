@@ -1,11 +1,12 @@
 import express from 'express'
 import UserController from '../controllers/UserController'
 import { clientType, jwtCheck } from '../middlewares/auth'
+import { validateUserRequest } from '../middlewares/validation'
 
 const router = express.Router()
 
-router.post('/', clientType, jwtCheck, UserController.createUser)
-router.get('/', clientType, jwtCheck, UserController.getUser)
+router.post('/', validateUserRequest, UserController.createUser)
+router.get('/', UserController.getUser)
 router.patch('/', UserController.updateUser)
 router.delete('/', UserController.deleteUser)
 
