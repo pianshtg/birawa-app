@@ -34,14 +34,15 @@ export function validateNumberOfFiles(req: Request, res: Response, next: NextFun
         
         if (files.length != expectedFileCount) {
             res.status(400).json({
-                message: `Expected ${expectedFileCount} images for ${aktivitas_arr.length} aktivitas.Received ${files.length} instead.`
+                message: `Expected ${expectedFileCount} images for ${aktivitas_arr.length} aktivitas. Received ${files.length} instead.`
             })
             return
         }
         
         console.log("Number of Images Validated. Proceeding to the controller...") // Debug.
         
-        next()
+        next() 
+        
     } catch (error) {
         res.status(400).send()
         return

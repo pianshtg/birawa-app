@@ -24,6 +24,7 @@ async function test (req: Request, res: Response) {
         })
         return
     } catch (error) {
+        console.error(error) // Debug.
         res.status(500).json({message: "Error testing."})
         return
     }
