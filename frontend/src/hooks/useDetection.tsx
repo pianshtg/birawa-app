@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
  * @param {number} maxWidth - Lebar maksimum untuk dianggap sebagai mobile, defaultnya adalah 620px
  * @returns {boolean} - true jika perangkat adalah mobile
  */
-const useIsMobile = (maxWidth = 620) => {
+const useDetection = (maxWidth = 620) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -22,4 +22,4 @@ const useIsMobile = (maxWidth = 620) => {
   return isMobile;
 };
 
-export default useIsMobile;
+export default useDetection;
