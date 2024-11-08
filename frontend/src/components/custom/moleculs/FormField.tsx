@@ -9,6 +9,8 @@ interface FormFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
+  readonly?: boolean;
+  IsHorizontal?: boolean;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -18,11 +20,13 @@ const FormField: React.FC<FormFieldProps> = ({
   value,
   onChange,
   placeholder,
+  IsHorizontal = false,
   required = false,
+  readonly = false,
 }) => {
   return (
-    <div className="mb-4">
-      <div className='flex items-start gap-0.5 justify-start relative '>
+    <div className={`flex  ${IsHorizontal ? "flex-row items-center gap-x-2" : "flex-col"}`}>
+      <div className='flex items-start gap-0.5 justify-start relative w-[90px] '>
         <Label htmlFor={id}>{label}</Label>
         {required && <span className='text-primary relative -top-1'>*</span>}
       </div>
@@ -33,6 +37,7 @@ const FormField: React.FC<FormFieldProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        readonly={readonly}
       />
     </div>
   );

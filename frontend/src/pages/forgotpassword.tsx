@@ -1,5 +1,4 @@
 import ForgotPass from '@/components/custom/organism/ForgotPass'
-import React from 'react'
 
 export default function forgotpassword() {
   return (
