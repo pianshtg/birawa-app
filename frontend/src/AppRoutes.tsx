@@ -28,11 +28,11 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path='/' element={<Home />} />
-      <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-      <Route path='/ceklaporan' element={<Layout><Ceklaporan /></Layout>} />
-      <Route path='/inbox' element={<Layout><Inbox /></Layout>} />
-      <Route path='/buatlaporan' element={<Layout><Buatlaporan /></Layout>} />
-      <Route path='/profile' element={<Layout><Profile /></Layout>} />
+      <Route path="/dashboard" element={<ResponsiveLayout><Dashboard /></ResponsiveLayout>} />
+      <Route path='/ceklaporan' element={<ResponsiveLayout><Ceklaporan /></ResponsiveLayout>} />
+      <Route path='/inbox/' element={<ResponsiveLayout><Inbox /></ResponsiveLayout>} />
+      <Route path='/buatlaporan' element={<ResponsiveLayout><Buatlaporan /></ResponsiveLayout>} />
+      <Route path='/profile' element={<ResponsiveLayout><Profile /></ResponsiveLayout>} />
       <Route path='/forgotpassword' element={<Forgotpassword />} />
       <Route path='/settings/*' element={<SettingsPage />} />
 
