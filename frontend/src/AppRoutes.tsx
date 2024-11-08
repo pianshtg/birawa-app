@@ -7,9 +7,9 @@ import Buatlaporan from "./pages/Mitra/buatlaporan";
 import NotFound from "./pages/notfound";
 import Profile from "./pages/settings";
 import Forgotpassword from "./pages/forgotpassword";
-import Layout from "./components/custom/layout/Layout";
-import SettingsPage from "./pages/settings";
-import MobilePage from "./pages/mobilepage"; // Halaman khusus mobile
+import ResponsiveLayout from "@/components/custom/layout/ResponsiveLayout";
+import SettingsPage from "@/pages/settings";
+import MobilePage from "@/pages/mobilepage"; // Halaman khusus mobile
 import useDetection from "@/hooks/useDetection"; // Import custom hook
 
 function AppRoutes() {

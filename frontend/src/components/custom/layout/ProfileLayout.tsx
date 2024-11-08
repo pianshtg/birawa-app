@@ -3,7 +3,7 @@ import Profile from '../organism/Profile';
 const ProfileLayout = () => {
   return (
     <div>
-     <Profile/>
+      <Profile/>
     </div>
   );
 };

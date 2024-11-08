@@ -1,4 +1,4 @@
-import Logging from '../organism/Loggin';
+import Logging from '../organism/Logging';
 
 const LoggingLayout = () => {
   return (
