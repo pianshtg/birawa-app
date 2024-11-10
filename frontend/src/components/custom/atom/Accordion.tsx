@@ -15,7 +15,7 @@ export const Accordion: React.FC<AccordionProps> = ({ title, children }) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-md mb-4"> {/* Add `mb-4` here */}
+    <div className="w-full bg-white rounded-lg shadow mb-4"> 
       <div
         className="flex justify-between items-center p-4 cursor-pointer"
         onClick={toggleAccordion}

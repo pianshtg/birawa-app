@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import SettingsLayout from '@/components/custom/layout/SettingsLayout';
 import ProfileLayout from '@/components/custom/layout/ProfileLayout';
