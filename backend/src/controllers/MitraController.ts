@@ -10,7 +10,6 @@ import { Pekerjaan } from "../types"
 async function createMitra (req: Request, res: Response) {
     const connection = await pool.getConnection()
     try {
-        
         const accessToken = req.accessToken
         // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
@@ -20,7 +19,7 @@ async function createMitra (req: Request, res: Response) {
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
 
-        if (permissions.includes('manage_users')) {
+        if (permissions.includes('create_mitra')) {
             // Begin transaction
             await connection.beginTransaction()
             // Get request parameters.
@@ -128,7 +127,34 @@ async function createMitra (req: Request, res: Response) {
 
 async function getMitra(req: Request, res: Response) {}
 
-async function getMitras(req: Request, res: Response) {}
+async function getMitras(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        const creator_id = metaData.user_id
+
+        if (permissions.includes('create_mitra')) {
+            const [mitras] = await pool.execute<RowDataPacket[]>('SELECT nama, alamat, nomor_telepon FROM mitra WHERE is_active = 1')
+            res.status(200).json({
+                message: "Successfully retrieved mitras.",
+                mitras
+            })
+            return
+        } else {
+            res.status(401).json({message: "Unauthorised."})
+            return
+        }
+    } catch (error) {
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error getting mitras."})
+        return
+    }
+}
 
 async function updateMitra (req: Request, res: Response) {}
 
