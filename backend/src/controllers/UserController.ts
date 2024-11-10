@@ -10,21 +10,16 @@ import bcrypt from 'bcrypt'
 async function createUser(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) (debugging)
+        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) (debugging)
+        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
 
         if (permissions.includes('manage_users')) { // don't forget to further specify the role's permissions
             const {nama_lengkap, email, nomor_telepon, mitra_nama} = req.body
-
-            // Validate request input
-            if (!nama_lengkap || !email || !nomor_telepon || !mitra_nama) {
-                res.status(400).json({message: "Missing nama lengkap, email, nomor telepon, or nama mitra."})
-                return
-            }
             
             // Checking if mitra exists
             const [mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [mitra_nama])
@@ -90,12 +85,13 @@ async function createUser(req: Request, res: Response) {
             return
 
         } else {
+        // User doesn't have the permissions.
             res.status(401).json({message: "Unauthorised."})
             return
         }
 
     } catch (error) {
-        console.error(error)
+        console.error(error) // Debug.
         res.status(500).json({message: "Error creating the user."})
         return
     }
@@ -104,10 +100,11 @@ async function createUser(req: Request, res: Response) {
 
 async function getUser(req: Request, res: Response) {
     try {
+        // Get access token and metadata.
         const accessToken = req.accessToken
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // Check if user exists in the database.
         const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [metaData.user_id])
-
         if (user.length === 0) {
             // console.log("User doesn't exist.") //Debug
             res.status(409).json({message: "User not found."})
@@ -119,7 +116,7 @@ async function getUser(req: Request, res: Response) {
             })
             return
         }
-
+        
     } catch (error) {
         console.error(error)
         res.status(500).json({message: "Error reading User."})
@@ -127,7 +124,16 @@ async function getUser(req: Request, res: Response) {
     }
 }
 
+async function getUsers(req: Request, res: Response) {}
+
+async function updateUser(req: Request, res: Response) {}
+
+async function deleteUser(req: Request, res: Response) {}
+
 export default {
     createUser,
     getUser,
+    getUsers,
+    updateUser,
+    deleteUser
 }

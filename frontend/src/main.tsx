@@ -4,6 +4,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import AppRoutes from './AppRoutes.tsx'
 import './index.css'
+import { Toaster } from 'sonner'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
     <Router>
       <QueryClientProvider client={queryClient}>
         <AppRoutes/>
+        <Toaster visibleToasts={1} position='top-right' richColors />
       </QueryClientProvider>
     </Router>
   </StrictMode>,

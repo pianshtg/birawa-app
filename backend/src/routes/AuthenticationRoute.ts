@@ -4,7 +4,6 @@ import { csrfToken } from '../middlewares/csurf'
 
 const router = express.Router()
 
-router.post('/', AuthenticationController.authenticateUser)
 router.post('/signin', AuthenticationController.loginUser)
 router.get('/verify-email', AuthenticationController.verifyEmail)
 router.get('/csrf-token', csrfToken)

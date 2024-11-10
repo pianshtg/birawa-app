@@ -1,12 +1,11 @@
-// src/components/Sidebar.tsx
-import React from "react";
 import { NavLink } from "react-router-dom";
 import LogoTelkom from "../assets/logotelkom.png";
 import { RxDashboard } from "react-icons/rx";
 import { TbReportMedical, TbReportSearch } from "react-icons/tb";
 import { HiOutlineInbox } from "react-icons/hi";
-import { FiUser, FiLogOut } from "react-icons/fi";
+import { FiLogOut } from "react-icons/fi";
 import { RiMenuUnfold4Line, RiMenuUnfold3Line } from "react-icons/ri";
+import { IoSettingsOutline } from "react-icons/io5";
 import {
   Tooltip,
   TooltipContent,
@@ -28,7 +27,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   ];
 
   const bottomItems = [
-    { label: "Profile", icon: <FiUser className="min-w-[24px] min-h-[24px]" />, path: "/profile" },
+    { label: "Settings", icon: <IoSettingsOutline className="min-w-[24px] min-h-[24px]" />, path: "/settings/profile" },
     { label: "Logout", icon: <FiLogOut className="min-w-[24px] min-h-[24px]" />, path: "/logout" }
   ];
 
@@ -69,14 +68,14 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
         {/* Navigation menu */}
         <nav className="flex-grow px-4">
-          <ul className={`flex flex-col gap-2 ${!isOpen && "mt-2"}`}>
+          <ul className={`flex flex-col gap-3 ${!isOpen && "mt-2"}`}>
             {menuItems.map((item, index) => (
               <li key={index}>
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center ${isOpen ? 'gap-4' : 'justify-center'} rounded-md p-3 font-medium cursor-pointer hover:bg-opacitynav/85 ${
-                      isActive ? 'bg-opacitynav text-primary' : 'text-slate-600 bg-transparent'
+                    `flex items-center ${isOpen ? 'gap-4' : 'justify-center'} rounded-md p-3 font-medium cursor-pointer  ${
+                      isActive ? 'bg-primary text-white' : 'text-primary bg-transparent hover:bg-opacitynav/85'
                     }`
                   }
                 >
@@ -102,7 +101,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 to={item.path}
                 className={({ isActive }) =>
                   `flex items-center ${isOpen ? 'gap-4' : 'justify-center'} rounded-md p-3 font-medium cursor-pointer hover:bg-slate-200/60 ${
-                    isActive ? 'bg-slate-200/60 text-black' : 'text-gray-600 bg-transparent'
+                    isActive ? 'bg-' : 'text-gray-800 bg-transparent'
                   }`
                 }
               >

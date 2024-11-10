@@ -112,54 +112,6 @@ async function loginUser (req: Request, res: Response) {
     }
 }
 
-async function authenticateUser(req: Request, res: Response) {
-    try {
-        // console.log('Received Cookies:', req.cookies); (debugging)
-        const accessToken = req.accessToken;
-        if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
-            res.status(201).json({message: 'Access token is valid.'}) //dont forget to delete json
-            return
-        } else {
-            const refreshToken = req.cookies.refreshToken
-            if (refreshToken) {
-                const verifiedRefreshToken =  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload
-                if (verifiedRefreshToken) {
-                    const [hashed_refresh_token] = await pool.execute<RowDataPacket[]>('SELECT hashed_refresh_token FROM user_token WHERE user_id = ?', [verifiedRefreshToken.user_id])
-                    if (hashed_refresh_token.length > 0) {
-                        const user_id = verifiedRefreshToken.user_id
-                        const newAccessToken = generateAccessToken({user_id})
-                        res.cookie('accessToken', newAccessToken, {
-                            httpOnly: true,
-                            secure: (process.env.NODE_ENV as string) === 'production',
-                            sameSite: 'none',
-                            maxAge: 15 * 60 * 1000, // 15 minutes
-                            path: '/'
-                        })
-                        res.status(201).json({message: 'Token renewed!'})
-                        return
-                    } else {
-                        console.log('invalid refresh token (database)')
-                        res.status(401).json({message: "Refresh token doesn't exist in the database."})
-                        return
-                    }
-                } else {
-                    console.log('invalid refresh token')
-                    res.status(401).json({message: 'Invalid refresh token'})
-                    return
-                }
-            } else {
-                console.log("There's no refresh token")
-                res.status(401).json({message :"Refresh token expired"})
-                return
-            }
-        }
-    } catch (error) {
-        console.error('JWT Check Error:', error); // Log detailed error
-        res.status(401).json({ message: 'Invalid token' }); //don't forget to reevaluate the json
-        return
-    }
-}
-
 async function verifyEmail(req: Request, res: Response) {
     const {token} = req.query
     try {
@@ -184,6 +136,5 @@ async function verifyEmail(req: Request, res: Response) {
 
 export default {
     loginUser,
-    authenticateUser,
     verifyEmail
 }
