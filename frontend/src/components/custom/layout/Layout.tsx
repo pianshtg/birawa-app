@@ -18,7 +18,7 @@ export default function Layout({ children }: Props) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-grow py-7 px-5 overflow-auto ml-4">
+      <div className="flex-grow py-7 px-10 overflow-auto  bg-content h-[100dvh]">
         {children}
       </div>
     </div>

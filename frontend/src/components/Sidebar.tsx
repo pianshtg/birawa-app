@@ -21,7 +21,7 @@ type SidebarProps = {
 export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const menuItems = [
     { label: "Dashboard", icon: <RxDashboard className="min-w-[24px] min-h-[24px]" />, path: "/dashboard" },
-    { label: "Buat Laporan", icon: <TbReportMedical className="min-w-[24px] min-h-[24px]" />, path: "/buatlaporan" },
+    { label: "Buat Laporan", icon: <TbReportMedical className="min-w-[24px] min-h-[24px]" />, path: "/daftarpekerjaan" },
     { label: "Cek Laporan", icon: <TbReportSearch className="min-w-[24px] min-h-[24px]" />, path: "/ceklaporan" },
     { label: "Kotak Masuk", icon: <HiOutlineInbox className="min-w-[24px] min-h-[24px]" />, path: "/inbox" }
   ];
@@ -41,7 +41,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-              <button 
+            <button 
               onClick={onToggle} // Menggunakan onToggle dari props
               className={`w-10 h-10 bg-white flex items-center justify-center transition duration-300 ease-in-out backdrop-blur-md rounded-md  ${isOpen ? "absolute top-12 -right-5 border border-r hover:bg-slate-50 " : "absolute top-5 right-[17px]"}`}
             >
