@@ -9,7 +9,6 @@ import authenticationRoute from './routes/AuthenticationRoute'
 import testRoute from './routes/TestRoute'
 import mitraRoute from './routes/MitraRoute'
 import kontrakRoute from './routes/KontrakRoute'
-import pekerjaanRoute from './routes/PekerjaanRoute'
 import userRoute from './routes/UserRoute'
 import laporanRoute from './routes/LaporanRoute'
 import { clientType, jwtCheck } from './middlewares/auth'
@@ -45,7 +44,6 @@ app.use("/api/test", testRoute)
 app.use("/api/auth", authenticationRoute)
 app.use("/api/mitra", clientType, jwtCheck, mitraRoute)
 app.use("/api/kontrak", clientType, jwtCheck, kontrakRoute)
-app.use("/api/pekerjaan", clientType, jwtCheck, pekerjaanRoute)
 app.use("/api/user", clientType, jwtCheck, userRoute)
 app.use("/api/laporan", clientType, jwtCheck, laporanRoute)
 
