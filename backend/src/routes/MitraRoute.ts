@@ -6,6 +6,7 @@ const router = express.Router()
 
 router.post('/', validateMitraRequest, MitraController.createMitra)
 router.get('/', MitraController.getMitra)
+router.get('/all', MitraController.getMitras)
 router.patch('/', MitraController.updateMitra)
 router.delete('/', MitraController.deleteMitra)
 
