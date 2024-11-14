@@ -20,6 +20,7 @@ export default {
 			primary : "#E60012",
 			opacitynav : "#FFD4D1",
 			buttonsidebar : "#27272A",
+			content : "#F5F5F5"
 		},
   		colors: {
   			background: 'hsl(var(--background))',
