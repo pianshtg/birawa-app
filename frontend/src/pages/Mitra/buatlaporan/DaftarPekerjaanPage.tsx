@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Route, useNavigate } from 'react-router-dom';
 
 const DaftarPekerjaan: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
@@ -11,7 +11,8 @@ const DaftarPekerjaan: React.FC = () => {
     { id: "P-003", name: "Pengecatan Dinding", location: "Surabaya Timur", contract: "Pekerjaan Interior", lastUpdate: "02/10/2024" },
     { id: "P-004", name: "Pemasangan AC", location: "Bandung Kota", contract: "Pekerjaan HVAC", lastUpdate: "08/11/2024" },
     { id: "P-005", name: "Perbaikan Pipa", location: "Medan Barat", contract: "Pekerjaan Plumbing", lastUpdate: "20/08/2024" }
-  ];
+  ]; 
+
   
   const handleCheckboxChange = (index: number) => {
     setSelectedRow(index === selectedRow ? null : index);
@@ -20,12 +21,12 @@ const DaftarPekerjaan: React.FC = () => {
   const handleBuatLaporanClick = () => {
     if (selectedRow !== null) {
       // Navigate with the selected job data as state
-      navigate('/buatlaporan', { state: jobData[selectedRow] });
+      navigate('/daftarpekerjaan/buatlaporan', { state: jobData[selectedRow] });
     }
   };
 
   return (
-    <div className="p-8 flex-1 bg-gray-50 min-h-screen">
+    <div className="p-8 flex-1  min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Buat Laporan</h1>
       
       <div className="bg-white shadow rounded-lg p-6">
@@ -47,7 +48,7 @@ const DaftarPekerjaan: React.FC = () => {
               onClick={handleBuatLaporanClick}
               disabled={selectedRow === null}
               className={`px-12 py-1 rounded font-semibold ${
-                selectedRow !== null ? 'bg-indigo-700 text-white' : 'bg-gray-300 text-black cursor-not-allowed'
+                selectedRow !== null ? 'bg-primary text-white' : 'bg-gray-300 text-black cursor-not-allowed'
               }`}
             >
               Buat Laporan
