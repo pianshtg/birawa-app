@@ -33,7 +33,7 @@ const ForgotPass: React.FC = () => {
                 required
             />
             <div>
-            <Button type="submit" className='text-white'>Continue</Button>
+              <Button type="submit" className='mt-5 text-white'>Continue</Button>
             </div>
         </form>
         <span className='text-sm'> Back To <Link to="/" className="text-center text-primary mt-4 hover:underline font-semibold">Login?</Link></span>

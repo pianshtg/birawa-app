@@ -67,7 +67,7 @@ const Login = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl className="relative top-[-4px]">
-                    <Input placeholder="Masukan Password Anda" type='password'  {...field} required />
+                    <Input placeholder="Masukan Password Anda" type='password' className="font-sans" {...field} required />
                   </FormControl>
                 </FormItem>
               )}
