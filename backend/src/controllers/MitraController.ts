@@ -192,6 +192,43 @@ async function getMitraUsers(req: Request, res: Response) {
     }
 }
 
+async function getMitraKontraks(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('get_mitra_kontraks')) {
+            const {nama_mitra} = req.body
+            
+            const [existingMitraKontraks] = await pool.execute<RowDataPacket[]>('SELECT kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu FROM kontrak INNER JOIN mitra ON kontrak.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])
+            if (existingMitraKontraks.length > 0) {
+                res.status(200).json({
+                    message: "Successfully retrieved mitra's kontraks.",
+                    mitra_kontraks: existingMitraKontraks,
+                    newAccessToken
+                })
+                return
+            } else {
+                res.status(409).json({message: "Failed to find Mitra."})
+                return
+            }
+        } else {
+            console.log(permissions) //Debug.
+            res.status(401).json({message: "Unauthorised."})
+            return
+        }
+    } catch (error) {
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error getting mitra's kontraks."})
+        return
+    }
+}
+
 async function updateMitra (req: Request, res: Response) {}
 
 async function deleteMitra (req: Request, res: Response) {}
@@ -199,6 +236,8 @@ async function deleteMitra (req: Request, res: Response) {}
 export default {
     createMitra,
     getMitra,
+    getMitraUsers,
+    getMitraKontraks,
     getMitras,
     updateMitra,
     deleteMitra
