@@ -19,7 +19,7 @@ async function createLaporan(req: Request, res: Response) {
         const creator_id = metaData.user_id
 
         // Check the user permission
-        if (permissions.includes('manage_users')) { // don't forget to change the permissions
+        if (permissions.includes('create_laporan')) { // don't forget to change the permissions
             // Begin transactions
             await connection.beginTransaction()
             // Get request parameter
@@ -39,19 +39,27 @@ async function createLaporan(req: Request, res: Response) {
             const kontrak_ss_pekerjaan_id = pekerjaan[0].id
 
             // Creating shift.
-                // Check if the shift already exists.
-            const [existingShift]= await connection.execute<RowDataPacket[]>('SELECT * FROM mitra INNER JOIN kontrak ON mitra.id = kontrak.mitra_id INNER JOIN kontrak_ss_pekerjaan ON kontrak.id = kontrak_ss_pekerjaan.kontrak_id INNER JOIN tenaga_kerja ON kontrak_ss_pekerjaan.id = tenaga_kerja.kontrak_ss_pekerjaan_id INNER JOIN shift ON tenaga_kerja.shift_id = shift.id INNER JOIN peran_tenaga_kerja ON tenaga_kerja.peran_tenaga_kerja_id = peran_tenaga_kerja.id WHERE mitra.nama = ? AND kontrak.nomor = ? AND kontrak_ss_pekerjaan.nama = ? AND tenaga_kerja.tanggal = ? AND shift.nama = ?', [nama_mitra, nomor_kontrak, nama_pekerjaan, tanggal, shift.nama])
-            if (existingShift.length > 0) {
-                res.status(409).json({message: 'Shift already exists.'})
+                // Initiating shiftId.
+            let shiftId
+                // Check if the shift for this specific laporan already exists.
+            const [existingShiftLaporan]= await connection.execute<RowDataPacket[]>('SELECT * FROM mitra INNER JOIN kontrak ON mitra.id = kontrak.mitra_id INNER JOIN kontrak_ss_pekerjaan ON kontrak.id = kontrak_ss_pekerjaan.kontrak_id INNER JOIN tenaga_kerja ON kontrak_ss_pekerjaan.id = tenaga_kerja.kontrak_ss_pekerjaan_id INNER JOIN shift ON tenaga_kerja.shift_id = shift.id INNER JOIN peran_tenaga_kerja ON tenaga_kerja.peran_tenaga_kerja_id = peran_tenaga_kerja.id WHERE mitra.nama = ? AND kontrak.nomor = ? AND kontrak_ss_pekerjaan.nama = ? AND tenaga_kerja.tanggal = ? AND shift.nama = ?', [nama_mitra, nomor_kontrak, nama_pekerjaan, tanggal, shift.nama])
+            if (existingShiftLaporan.length > 0) {
+                res.status(409).json({message: `This shift for laporan with mitra: ${nama_mitra}, nomor kontrak: ${nomor_kontrak}, pekerjaan: ${nama_pekerjaan} for tanggal ${tanggal} already exists.`})
                 return
+            } else {
+                // Check if the shift is already exists.
+                const [existingShift] = await connection.execute<RowDataPacket[]>('SELECT id FROM shift WHERE nama = ? AND waktu_mulai = ? AND waktu_berakhir = ?', [shift.nama, shift.waktu_mulai, shift.waktu_berakhir])
+                    // Generate shift id if it doesn't exist already and insert it into the database.
+                if (existingShift.length > 0) {
+                    shiftId = existingShift[0].id
+                    console.log("Shift that is already exists in the database:", existingShift[0]) //Debug.
+                } else {
+                    shiftId = uuidv4()
+                    console.log("Shift to create:", shift) //Debug.
+                    await connection.execute('INSERT INTO shift (id, nama, waktu_mulai, waktu_berakhir, created_by) VALUES (?, ?, ?, ?, ?)', [shiftId, shift.nama, shift.waktu_mulai, shift.waktu_berakhir, creator_id])
+                    console.log("Shift successfully created:", shift) //Debug.
+                }
             }
-
-            console.log("Shift to create:", shift) //Debug.
-            
-                // Generate shift id and insert it into the database
-            const shiftId = uuidv4()
-            await connection.execute('INSERT INTO shift (id, nama, waktu_mulai, waktu_berakhir, created_by) VALUES (?, ?, ?, ?, ?)', [shiftId, shift.nama, shift.waktu_mulai, shift.waktu_berakhir, creator_id])
-            console.log("Shift successfully created:", shift) //Debug.
             
             // Creating tenaga_kerja.
                 // Mapping array of tenaga_kerja.
@@ -81,28 +89,31 @@ async function createLaporan(req: Request, res: Response) {
             
     
             // Creating aktivitas.
+                // Checking the existence of tipe_aktivitas in the database.    
+                    // Initiating tipe_aktivitas_id 
+            let tipeAktivitasId: string
+            for (const aktivitas of aktivitas_arr) {
+                const [existingTipeAktivitas] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_aktivitas WHERE nama = ?', [aktivitas.tipe])
+                console.log(existingTipeAktivitas) //Debug.
+                if (existingTipeAktivitas.length === 0){
+                // Generate tipe_aktivitas_id and insert new tipe_aktivitas into the database if tipe_aktivitas doesn't exist.
+                    tipeAktivitasId = uuidv4()
+                    await connection.execute('INSERT INTO tipe_aktivitas (id, nama, created_by) VALUES (?, ?, ?)', [tipeAktivitasId, aktivitas.tipe, creator_id])
+                    console.log(`Tipe aktivitas "${aktivitas.tipe}" berhasil dibuat.`) //Debug.
+                } else {
+                // Assign tipe_aktivitas_id to the existing tipe_aktivitas's id.
+                    tipeAktivitasId = existingTipeAktivitas[0].id
+                }
+            }
                 // Mapping array of aktivitas.
-            let imagesContainer_debug: string[] = [];
+            let imagesContainer_debug: string[] = [] //Debug.
             await Promise.all(
                 aktivitas_arr.map(async (aktivitas: Aktivitas, index_aktivitas: number) => {
                     console.log("Aktivitas to create:", aktivitas) //Debug.
-                // Checking if tipe_aktivitas exists.
-                    const [tipeAktivitas] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_aktivitas WHERE nama = ?', [aktivitas.tipe])
-                    // Initiating tipe_aktivitas_id.
-                    let tipeAktivitasId
-                    if (tipeAktivitas.length === 0){
-                    // Generate tipe_aktivitas_id and insert new tipe_aktivitas into the database if tipe_aktivitas doesn't exist.
-                        tipeAktivitasId = uuidv4()
-                        await connection.execute('INSERT INTO tipe_aktivitas (id, nama, created_by) VALUES (?, ?, ?)', [tipeAktivitasId, aktivitas.tipe, creator_id])
-                        console.log(`Tipe aktivitas "${aktivitas.tipe}" berhasil dibuat.`) //Debug.
-                    } else {
-                    // Assign tipe_aktivitas_id to the existing tipe_aktivitas's id.
-                        tipeAktivitasId = tipeAktivitas[0].id
-                    }
                 
                 // Generate aktivitas_id and insert aktivitas into the database.
                     const aktivitasId = uuidv4()
-                    await connection.execute('INSERT INTO aktivitas (id, kontrak_ss_pekerjaan_id, tipe_aktivitas_id, nama, tanggal, created_by) VALUES (?, ?, ?, ?, ?, ?)', [aktivitasId, kontrak_ss_pekerjaan_id, tipeAktivitasId, aktivitas.nama, tanggal, creator_id])
+                    await connection.execute('INSERT INTO aktivitas (id, kontrak_ss_pekerjaan_id, tipe_aktivitas_id, nama, tanggal, created_by) VALUES (?, ?, (SELECT id FROM tipe_aktivitas WHERE nama = ?), ?, ?, ?)', [aktivitasId, kontrak_ss_pekerjaan_id, aktivitas.tipe, aktivitas.nama, tanggal, creator_id])
                     console.log(`Aktivitas "${aktivitas.nama}" berhasil dibuat pada pekerjaan "${nama_pekerjaan}" pada tanggal ${tanggal}`) //Debug.
 
                 // Creating documentation
@@ -170,6 +181,11 @@ async function createLaporan(req: Request, res: Response) {
                 })
             )
             console.log("Cuaca successfully created:", cuaca_arr) //Debug.
+            
+            // Creating laporan
+            const laporanId = uuidv4()
+            await connection.execute('INSERT INTO laporan (id, kontrak_ss_pekerjaan_id, tanggal) VALUES (?, ?, ?)', [laporanId, kontrak_ss_pekerjaan_id, tanggal])
+            console.log("Laporan created successfully.")
             
             // Commit all the queries
             await connection.commit()
