@@ -94,4 +94,26 @@
       --chart-2: 160 60% 45%;
     }
   }
- 
+  
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background color of the scrollbar track */
+  border-radius: 100px; /* Optional: Rounded corners for the track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #ef4444; /* Color of the scrollbar thumb */
+  border-radius: 100px; /* Makes the scrollbar thumb more rounded */
+  border: 2px solid #f1f1f1; /* Optional border around the thumb */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Makes the scrollbar thinner */
+  scrollbar-color: #ef4444 #f1f1f1; /* thumb color track color */
+}
