@@ -263,6 +263,44 @@ async function getLaporan(req: Request, res: Response) {
     }
 }
 
+async function getLaporans(req: Request, res: Response) {}
+
+async function getPekerjaanLaporans(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('get_pekerjaan_laporans')) {
+            const {nama_mitra, nomor_kontrak, nama_pekerjaan} = req.body
+            const [existingPekerjaanLaporans] = await pool.execute<RowDataPacket[]>('SELECT laporan.id, kontrak_ss_pekerjaan.nama, laporan.tanggal FROM laporan INNER JOIN kontrak_ss_pekerjaan ON kontrak_ss_pekerjaan.id = laporan.kontrak_ss_pekerjaan_id INNER JOIN kontrak ON kontrak_ss_pekerjaan.kontrak_id = kontrak.id INNER JOIN mitra ON kontrak.mitra_id = mitra.id WHERE mitra.nama = ? AND kontrak.nomor = ? AND kontrak_ss_pekerjaan.nama = ?', [nama_mitra, nomor_kontrak, nama_pekerjaan])
+            if (existingPekerjaanLaporans.length > 0) {
+                res.status(200).json({
+                    message: "Successfully retrieved mitra's kontraks.",
+                    pekerjaan_laporans: existingPekerjaanLaporans,
+                    newAccessToken
+                })
+                return
+            } else {
+                res.status(409).json({message: "Failed to find Pekerjaan."})
+                return
+            }
+        } else {
+            console.log(permissions) //Debug.
+            res.status(401).json({message: "Unauthorised."})
+            return
+        }
+    } catch (error) {
+        console.error(error) // Debug.
+        res.status(500).json({message: "Error retrieving pekerjaan's laporans."})
+        return
+    }
+}
+
 async function updateLaporan(req: Request, res: Response) {}
 
 async function deleteLaporan(req: Request, res: Response) {}
@@ -270,6 +308,8 @@ async function deleteLaporan(req: Request, res: Response) {}
 export default {
     createLaporan,
     getLaporan,
+    getPekerjaanLaporans,
+    getLaporans,
     updateLaporan,
     deleteLaporan
 }
