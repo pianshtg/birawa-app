@@ -90,12 +90,12 @@ async function createLaporan(req: Request, res: Response) {
     
             // Creating aktivitas.
                 // Checking the existence of tipe_aktivitas in the database.    
-                    // Initiating tipe_aktivitas_id 
-            let tipeAktivitasId: string
-            for (const aktivitas of aktivitas_arr) {
-                const [existingTipeAktivitas] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_aktivitas WHERE nama = ?', [aktivitas.tipe])
-                console.log(existingTipeAktivitas) //Debug.
-                if (existingTipeAktivitas.length === 0){
+                for (const aktivitas of aktivitas_arr) {
+                    const [existingTipeAktivitas] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_aktivitas WHERE nama = ?', [aktivitas.tipe])
+                    console.log(existingTipeAktivitas) //Debug.
+                // Initiating tipe_aktivitas_id 
+                    let tipeAktivitasId
+                    if (existingTipeAktivitas.length === 0){
                 // Generate tipe_aktivitas_id and insert new tipe_aktivitas into the database if tipe_aktivitas doesn't exist.
                     tipeAktivitasId = uuidv4()
                     await connection.execute('INSERT INTO tipe_aktivitas (id, nama, created_by) VALUES (?, ?, ?)', [tipeAktivitasId, aktivitas.tipe, creator_id])
@@ -146,7 +146,7 @@ async function createLaporan(req: Request, res: Response) {
                     const [tipeCuaca] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_cuaca WHERE nama = ?', [cuaca.tipe])
                     if (tipeCuaca.length === 0) {
                     // Throw error if tipe_cuaca doesn't exists in the database.
-                        throw new Error ("Error searching for tipe cuaca.")
+                        throw new Error ("Failed to find tipe cuaca.")
                     }
                 // Checking if tipe_cuaca is 'cerah'
                     let waktu_mulai: string = "";

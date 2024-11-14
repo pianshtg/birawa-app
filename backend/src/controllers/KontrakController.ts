@@ -16,21 +16,21 @@ async function createKontrak(req: Request, res: Response) {
         const creator_id = metaData.user_id
 
         // Check the user permission
-        if (permissions.includes('create_kontrak')) { // don't forget to change the permissions
+        if (permissions.includes('create_kontrak')) {
         
             // Get request parameter.
             const {nama_mitra, nama, nomor, tanggal, nilai, jangka_waktu} = req.body
 
             // Check if mitra exists.
-            const [_mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
-            if (_mitra.length === 0) {
+            const [mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
+            if (mitra.length === 0) {
                 res.status(409).json({message: "Mitra doesn't exist"})
                 return
             }
 
             // Insert kontrak into the database.
             const id = uuidv4()
-            await pool.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, _mitra[0].id, nama, nomor, tanggal, nilai, jangka_waktu, creator_id])
+            await pool.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, mitra[0].id, nama, nomor, tanggal, nilai, jangka_waktu, creator_id])
             
             // Debug.
             res.status(201).json({
@@ -61,6 +61,7 @@ async function createKontrak(req: Request, res: Response) {
 }
 
 async function getKontrak(req: Request, res: Response) {}
+
 async function getKontraks(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
@@ -76,7 +77,7 @@ async function getKontraks(req: Request, res: Response) {
             const [kontrak] = await pool.execute<RowDataPacket[]>('SELECT * FROM kontrak')
             if (kontrak.length > 0) {
                 res.status(200).json({
-                    message: "Successfully retrieved all kontraks.",
+                    message: "Successfully retrieved all kontrak.",
                     kontrak,
                     newAccessToken
                 })
@@ -119,7 +120,7 @@ async function getKontrakPekerjaans(req: Request, res: Response) {
             }
             
             res.status(200).json({
-                message: "Successfully retrieved kontrak's pekerjaan.",
+                message: "Successfully retrieved kontrak's pekerjaan(s).",
                 kontrak_pekerjaans: existingKontrakPekerjaans,
                 newAccessToken
             })
@@ -131,7 +132,7 @@ async function getKontrakPekerjaans(req: Request, res: Response) {
         
     } catch (error) {
         console.error(error) // Debug.
-        res.status(500).json({message: "Error getting kontrak's pekerjaans."})
+        res.status(500).json({message: "Error getting kontrak's pekerjaan(s)."})
         return
     }
 }

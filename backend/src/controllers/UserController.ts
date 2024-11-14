@@ -101,7 +101,7 @@ async function createUser(req: Request, res: Response) {
         // Rollback the connection if there's error.
         await connection.rollback()
         console.error(error) // Debug.
-        res.status(500).json({message: "Error creating the user."})
+        res.status(500).json({message: "Error creating user."})
         return
     } finally {
         connection.release()
@@ -140,8 +140,8 @@ async function getUser(req: Request, res: Response) {
         }
         
     } catch (error) {
-        console.error(error)
-        res.status(500).json({message: "Error reading User."})
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error reading user."})
         return
     }
 }

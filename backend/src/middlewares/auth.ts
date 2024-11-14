@@ -131,7 +131,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                         // Passing the new access token to the controller to be sent as json data
                         req.newAccessToken = newAccessToken
                     }
-                    console.log("Successfuly renew the accessToken: ", newAccessToken, "\n") // Debug.
+                    console.log("Successfuly renewed the accessToken: ", newAccessToken, "\n") // Debug.
                     next()
                     
                 } else {

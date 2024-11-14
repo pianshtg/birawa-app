@@ -1,5 +1,3 @@
-
-
 const MobilePage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen space-y-3 px-8  bg-white">

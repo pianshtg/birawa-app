@@ -140,7 +140,7 @@ async function getMitras(req: Request, res: Response) {
         if (permissions.includes('view_all_mitra')) {
             const [mitras] = await pool.execute<RowDataPacket[]>('SELECT nama, alamat, nomor_telepon FROM mitra WHERE is_active = 1')
             res.status(200).json({
-                message: "Successfully retrieved mitras.",
+                message: "Successfully retrieved all mitra.",
                 mitras,
                 newAccessToken
             })
