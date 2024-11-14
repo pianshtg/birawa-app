@@ -111,20 +111,31 @@ async function createUser(req: Request, res: Response) {
 
 async function getUser(req: Request, res: Response) {
     try {
-        // Get access token and metadata.
         const accessToken = req.accessToken
-        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // Check if user exists in the database.
-        const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [metaData.user_id])
-        if (user.length === 0) {
-            // console.log("User doesn't exist.") //Debug
-            res.status(409).json({message: "User not found."})
-            return
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = accessToken ? jwt.decode(accessToken!) as jwt.JwtPayload : jwt.decode(newAccessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+
+        if (permissions.includes('get_user')) {
+            // Check if user exists in the database.
+            const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [metaData.user_id])
+            if (user.length === 0) {
+                // console.log("User doesn't exist.") // Debug.
+                res.status(409).json({message: "User not found."})
+                return
+            } else {
+                // console.log(user) // Debug.
+                res.status(200).json({
+                    user,
+                    newAccessToken
+                })
+                return
+            }
         } else {
-            // console.log(user) //Debug
-            res.status(200).json({
-                user
-            })
+            res.status(401).json({message: "Unauthorised."})
             return
         }
         
