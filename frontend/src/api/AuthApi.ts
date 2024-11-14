@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL
 
 export async function getCsrfToken() {
     const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token`, {
