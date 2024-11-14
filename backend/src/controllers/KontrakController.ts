@@ -5,34 +5,52 @@ import {v4 as uuidv4} from 'uuid'
 
 async function createKontrak(req: Request, res: Response) {
     try {
-        // Get request parameter.
-        const {nama_mitra, nama, nomor, tanggal, nilai, jangka_waktu} = req.body
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        const creator_id = metaData.user_id
 
-        // Check if mitra exists.
-        const [_mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
-        if (_mitra.length === 0) {
-            res.status(409).json({message: "Mitra doesn't exist"})
+        // Check the user permission
+        if (permissions.includes('create_kontrak')) { // don't forget to change the permissions
+        
+            // Get request parameter.
+            const {nama_mitra, nama, nomor, tanggal, nilai, jangka_waktu} = req.body
+
+            // Check if mitra exists.
+            const [_mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
+            if (_mitra.length === 0) {
+                res.status(409).json({message: "Mitra doesn't exist"})
+                return
+            }
+
+            // Insert kontrak into the database.
+            const id = uuidv4()
+            await pool.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, _mitra[0].id, nama, nomor, tanggal, nilai, jangka_waktu, creator_id])
+            
+            // Debug.
+            res.status(201).json({
+                message: "Kontrak created successfully.",
+                created_kontrak: {
+                    nama_mitra,
+                    id,
+                    nama,
+                    nomor,
+                    tanggal,
+                    nilai,
+                    jangka_waktu
+                },
+                newAccessToken
+            })
+            return
+        } else {
+            // User doesn't have the permission.
+            res.status(401).json({message: "Unauthorized."})
             return
         }
-
-        // Insert kontrak into the database.
-        const id = uuidv4()
-        await pool.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu) VALUES (?, ?, ?, ?, ?, ?, ?)', [id, _mitra[0].id, nama, nomor, tanggal, nilai, jangka_waktu])
-        
-        // Debug.
-        res.status(201).json({
-            message: "Kontrak created successfully.",
-            created_kontrak: {
-                nama_mitra,
-                id,
-                nama,
-                nomor,
-                tanggal,
-                nilai,
-                jangka_waktu
-            }
-        })
-        return
 
     } catch (error) {
         console.error(error) // Debug.
