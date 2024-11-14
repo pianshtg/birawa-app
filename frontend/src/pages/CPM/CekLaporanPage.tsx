@@ -30,7 +30,7 @@ const CekLaporan: React.FC = () => { //state utk menyimpan bln dan tgl
       <div className="text-sm text-gray-500 mb-2">Daftar Mitra / Cek Laporan</div>
       <h1 className="text-2xl font-semibold text-black mb-6">Cek Laporan</h1>
 
-      <div className="bg-white p-4 rounded-md mb-6 border">
+      <div className="bg-white p-4 mb-6 border rounded-md " >
         <div className="flex items-center justify-between">
           <div className="flex items-center text-red-600 font-semibold mb-2">
             <FaCalendarAlt className="mr-2" />
@@ -66,7 +66,7 @@ const CekLaporan: React.FC = () => { //state utk menyimpan bln dan tgl
       </div>
 
       {/* Form dengan Dropdown */}
-      <div className="bg-white p-6 rounded-md shadow-md">
+      <div className="bg-white p-6 rounded-md border">
         <div className="grid grid-cols-3 gap-4 mb-4">
           <ComboboxComponent
             label="Pilih Mitra"
