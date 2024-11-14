@@ -8,9 +8,10 @@ import NotFound from "./pages/NotFoundPage";
 import Forgotpassword from "./pages/ForgotPasswordPage";
 import Layout from "./components/custom/layout/Layout";
 import SettingsPage from "@/pages/SettingsPage";
-import MobilePage from "@/pages/mobilepage"; // Halaman khusus mobile
+import MobilePage from "@/pages/MobilePage"; // Halaman khusus mobile
 import useDetection from "@/hooks/useDetection"; // Import custom hook
 import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage";
+import TambahMitraPage from "./pages/CPM/TambahMitraPage";
 
 function AppRoutes() {
   const isMobile = useDetection(620); // Tentukan ukuran maksimum untuk dianggap sebagai mobile
@@ -31,6 +32,7 @@ function AppRoutes() {
       <Route path='/forgotpassword' element={<Forgotpassword />} />
 
       <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+      <Route path="/tambahmitra" element={<Layout><TambahMitraPage /></Layout>} />
 
       {/* Buat Laporan Page */}
       <Route path='/daftarpekerjaan' element={<Layout> <DaftarPekerjaan/></Layout>} /> 
@@ -41,13 +43,8 @@ function AppRoutes() {
 
       <Route path='/inbox' element={<Layout><Inbox /></Layout>} />
      
-
-
       <Route path='/settings/*' element={<SettingsPage />} />
     
-
-   
-
 
       {/* 404 Not Found Page */}
       <Route path='*' element={<NotFound />} />
