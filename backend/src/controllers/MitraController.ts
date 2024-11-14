@@ -136,7 +136,6 @@ async function getMitras(req: Request, res: Response) {
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
         // console.log(metaData) // Debug.
         const permissions = metaData.permissions
-        const creator_id = metaData.user_id
 
         if (permissions.includes('view_all_mitra')) {
             const [mitras] = await pool.execute<RowDataPacket[]>('SELECT nama, alamat, nomor_telepon FROM mitra WHERE is_active = 1')
@@ -153,6 +152,42 @@ async function getMitras(req: Request, res: Response) {
     } catch (error) {
         console.error(error) //Debug.
         res.status(500).json({message: "Error getting mitras."})
+        return
+    }
+}
+
+async function getMitraUsers(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('get_mitra_users')) {
+            const {nama_mitra} = req.body
+            
+            const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT users.email, users.nama_lengkap, users.nomor_telepon FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE mitra.nama = ?', [nama_mitra])
+            if (existingMitraUsers.length > 0) {
+                res.status(200).json({
+                    message: "Successfully retrieved mitra's users.",
+                    mitra_users: existingMitraUsers,
+                    newAccessToken
+                })
+                return
+            } else {
+                res.status(409).json({message: "Failed to find Mitra."})
+                return
+            }
+        } else {
+            res.status(401).json({message: "Unauthorised."})
+            return
+        }
+    } catch (error) {
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error getting mitra's users."})
         return
     }
 }
