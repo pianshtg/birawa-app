@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaUserFriends, FaFileAlt, FaInbox, FaEdit, FaBan, FaPlus, FaTimes } from "react-icons/fa";
+import { MdEdit,MdDelete  } from "react-icons/md";
 
 // Type Definitions
 interface Mitra {
@@ -31,6 +32,22 @@ interface User {
 const dataMitra: Mitra[] = [
   {
     id: 1,
+    nama: "PT. Bangun Negeri Selalu",
+    alamat: "Jl. Telekomunikasi No. 1, Dayeuhkolot",
+    telepon: "(022) 555-1234",
+    contracts: [{ id: 1, description: "Peremajaan Lobby Gedung ADHJ", code: "123/AB-234/XZM-10" }],
+    users: [{ id: 1, name: "Budi Tromol", email: "buditromol@bangunnegeriselalu.co.id", status: "active" }],
+  },
+  {
+    id: 2,
+    nama: "PT. Bangun Negeri Selalu",
+    alamat: "Jl. Telekomunikasi No. 1, Dayeuhkolot",
+    telepon: "(022) 555-1234",
+    contracts: [{ id: 1, description: "Peremajaan Lobby Gedung ADHJ", code: "123/AB-234/XZM-10" }],
+    users: [{ id: 1, name: "Budi Tromol", email: "buditromol@bangunnegeriselalu.co.id", status: "active" }],
+  },
+  {
+    id: 3,
     nama: "PT. Bangun Negeri Selalu",
     alamat: "Jl. Telekomunikasi No. 1, Dayeuhkolot",
     telepon: "(022) 555-1234",
@@ -88,27 +105,31 @@ const DashboardPage = () => {
             <h2 className="text-xl font-semibold text-gray-700">Daftar Mitra</h2>
             <table className="w-full border-collapse mt-4">
               <thead>
-                <tr className="text-left bg-blue-200">
-                  <th className="p-3 border-b-2">No</th>
-                  <th className="p-3 border-b-2">Nama Mitra</th>
-                  <th className="p-3 border-b-2">Alamat Mitra</th>
-                  <th className="p-3 border-b-2">Nomor Telepon</th>
-                  <th className="p-3 border-b-2">Action</th>
+                <tr className="text-left bg-slate-100">
+                  <th className="p-3  font-medium border-b-2">No</th>
+                  <th className="p-3  font-medium border-b-2">Nama Mitra</th>
+                  <th className="p-3  font-medium border-b-2">Alamat Mitra</th>
+                  <th className="p-3  font-medium border-b-2">Nomor Telepon</th>
+                  <th className="p-3  font-medium border-b-2">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {dataMitra.map((mitra, index) => (
-                  <tr key={mitra.id} className="border-b">
-                    <td className="p-3">{index + 1}</td>
-                    <td className="p-3 cursor-pointer text-blue-600 hover:underline" onClick={() => handleMitraClick(mitra)}>
+                  <tr key={mitra.id} className="border-b hover:bg-gray-200 duration-100 ease-in-out cursor-pointer">
+                    <td className="p-3 text-sm text-gray-600">{index + 1}</td>
+                    <td className="p-3 text-sm text-gray-600 " onClick={() => handleMitraClick(mitra)}>
                       {mitra.nama}
                     </td>
-                    <td className="p-3">{mitra.alamat}</td>
-                    <td className="p-3">{mitra.telepon}</td>
-                    <td className="p-3">
-                      <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
-                        <FaEdit className="text-blue-600 cursor-pointer" onClick={() => handleEditClick(mitra)} />
-                        <FaBan className="text-red-600 cursor-pointer" />
+                    <td className="p-3 text-sm text-gray-600">{mitra.alamat}</td>
+                    <td className="p-3 text-sm text-gray-600">{mitra.telepon}</td>
+                    <td className="p-3 text-sm text-gray-600">
+                      <div className="flex gap-x-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-50">
+                          <MdEdit color="blue" size={18} className=" " onClick={() => handleEditClick(mitra)} />
+                        </div>
+                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-50">
+                          <MdDelete color="red" size={18} />
+                        </div>
                       </div>
                     </td>
                   </tr>
