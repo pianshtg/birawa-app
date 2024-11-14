@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { pool } from "../database";
 import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
+import jwt from 'jsonwebtoken'
 
 async function createKontrak(req: Request, res: Response) {
     try {
@@ -92,6 +93,49 @@ async function getKontraks(req: Request, res: Response) {
     }
 }
 
+async function getKontrakPekerjaans(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('get_kontrak_pekerjaans')) {
+            const {nomor_kontrak} = req.body
+            
+            const [existingKontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ?', [nomor_kontrak])
+            if (existingKontrak.length === 0) {
+                res.status(409).json({message: "Failed to find kontrak."})
+                return
+            }
+            
+            const [existingKontrakPekerjaans] = await pool.execute<RowDataPacket[]>('SELECT nama, lokasi FROM kontrak_ss_pekerjaan WHERE kontrak_id = ?', existingKontrak[0].id)
+            if (existingKontrakPekerjaans.length === 0) {
+                res.status(409).json({message: "Failed to find pekerjaan."})
+                return
+            }
+            
+            res.status(200).json({
+                message: "Successfully retrieved kontrak's pekerjaan.",
+                kontrak_pekerjaans: existingKontrakPekerjaans,
+                newAccessToken
+            })
+            
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+        
+    } catch (error) {
+        console.error(error) // Debug.
+        res.status(500).json({message: "Error getting kontrak's pekerjaans."})
+        return
+    }
+}
+
 async function updateKontrak(req: Request, res: Response) {}
 
 async function deleteKontrak(req: Request, res: Response) {}
@@ -99,6 +143,8 @@ async function deleteKontrak(req: Request, res: Response) {}
 export default {
     createKontrak,
     getKontrak,
+    getKontraks,
+    getKontrakPekerjaans,
     updateKontrak,
     deleteKontrak
 }
