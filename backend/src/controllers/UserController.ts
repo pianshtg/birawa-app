@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer'
 import bcrypt from 'bcrypt'
 
 async function createUser(req: Request, res: Response) {
+    const connection = await pool.getConnection()
     try {
         const accessToken = req.accessToken
         // console.log("Access token received:", accessToken) // Debug.
@@ -17,19 +18,22 @@ async function createUser(req: Request, res: Response) {
         // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
-
-        if (permissions.includes('manage_users')) { // don't forget to further specify the role's permissions
-            const {nama_lengkap, email, nomor_telepon, mitra_nama} = req.body
+        
+        if (permissions.includes('create_user')) {
+            // Begin transaction
+            await connection.beginTransaction()
+            // Get request parameters
+            const {nama_lengkap, email, nomor_telepon, nama_mitra} = req.body
             
-            // Checking if mitra exists
-            const [mitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [mitra_nama])
+            // Checking mitra
+            const [mitra] = await connection.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
             if (mitra.length === 0) {
                 res.status(409).json({message : "Mitra doesn't exist."})
                 return
             }
 
             // Check if user exists
-            const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
+            const [user] = await connection.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
             console.log(user)
             if (user.length > 0) {
                 res.status(409).json({message: "User already exists."})
@@ -39,18 +43,21 @@ async function createUser(req: Request, res: Response) {
             // Insertion of created user to users table
             const user_id = uuidv4()
             const verificationToken = uuidv4()
-            await pool.execute('INSERT INTO users (id, role_id, email, nama_lengkap, nomor_telepon, verification_token, created_by) VALUES (?, (SELECT id FROM roles WHERE nama = "mitra"), ?, ?, ?, ?, ?)', [user_id, email, nama_lengkap, nomor_telepon, verificationToken, creator_id])
+            await connection.execute('INSERT INTO users (id, role_id, email, nama_lengkap, nomor_telepon, verification_token, created_by) VALUES (?, (SELECT id FROM roles WHERE nama = "mitra"), ?, ?, ?, ?, ?)', [user_id, email, nama_lengkap, nomor_telepon, verificationToken, creator_id])
             
             // Insertion of user's generated password
             const new_password = uuidv4()
             const hashed_new_password = await bcrypt.hash(new_password, 10)
-            await pool.execute('INSERT INTO users_hashed_password (user_id, hashed_password, created_by) VALUES (?, ?, ?)', [user_id, hashed_new_password, creator_id])
+            await connection.execute('INSERT INTO users_hashed_password (user_id, hashed_password, created_by) VALUES (?, ?, ?)', [user_id, hashed_new_password, creator_id])
 
             // Insertion of created user into mitra_users table
             const mitra_id = mitra[0].id
             const mitra_users_id = uuidv4()
-            await pool.execute('INSERT INTO mitra_users (id, mitra_id, user_id, created_by) VALUES (?, ?, ?, ?)', [mitra_users_id, mitra_id, user_id, creator_id])
-        
+            await connection.execute('INSERT INTO mitra_users (id, mitra_id, user_id, created_by) VALUES (?, ?, ?, ?)', [mitra_users_id, mitra_id, user_id, creator_id])
+            
+            // Commit all the queries
+            await connection.commit()
+            
             // Delivering the verification email to the user process
                 // Creating the transporter
             const transporter = nodemailer.createTransport({
@@ -74,7 +81,7 @@ async function createUser(req: Request, res: Response) {
             res.status(201).json({
                 message: "User created successfully. Check the email verification to verify the account.",
                 created_user: {
-                    mitra_nama,
+                    nama_mitra,
                     mitra_id,
                     user_id,
                     nama_lengkap,
@@ -91,9 +98,13 @@ async function createUser(req: Request, res: Response) {
         }
 
     } catch (error) {
+        // Rollback the connection if there's error.
+        await connection.rollback()
         console.error(error) // Debug.
         res.status(500).json({message: "Error creating the user."})
         return
+    } finally {
+        connection.release()
     }
 
 }
