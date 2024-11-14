@@ -90,7 +90,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="py-8 lg:p-8">
       <h1 className="text-2xl font-semibold text-black mb-6">Dashboard</h1>
 
       {!selectedMitra || (!isDetailView && !isEditModalOpen) ? (
@@ -101,33 +101,35 @@ const DashboardPage = () => {
             <SummaryCard title="Total Pesan Masuk" value="5" icon={<FaInbox className="text-white text-4xl" />} bgColor="bg-green-500" />
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+
+
+          <div className="bg-white p-6 rounded-lg border ">
             <h2 className="text-xl font-semibold text-gray-700">Daftar Mitra</h2>
             <table className="w-full border-collapse mt-4">
-              <thead>
-                <tr className="text-left bg-slate-100">
-                  <th className="p-3  font-medium border-b-2">No</th>
-                  <th className="p-3  font-medium border-b-2">Nama Mitra</th>
-                  <th className="p-3  font-medium border-b-2">Alamat Mitra</th>
-                  <th className="p-3  font-medium border-b-2">Nomor Telepon</th>
-                  <th className="p-3  font-medium border-b-2">Action</th>
+              <thead className="bg-slate-200">
+                <tr className="text-left bg-slate-200">
+                  <th className="p-3 font-medium border-b-2">No</th>
+                  <th className="p-3 font-medium border-b-2">Nama Mitra</th>
+                  <th className="p-3 font-medium border-b-2">Alamat Mitra</th>
+                  <th className="p-3 font-medium border-b-2">Nomor Telepon</th>
+                  <th className="p-3 font-medium border-b-2">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {dataMitra.map((mitra, index) => (
-                  <tr key={mitra.id} className="border-b hover:bg-gray-200 duration-100 ease-in-out cursor-pointer">
-                    <td className="p-3 text-sm text-gray-600">{index + 1}</td>
-                    <td className="p-3 text-sm text-gray-600 " onClick={() => handleMitraClick(mitra)}>
+                  <tr key={mitra.id} className="border-b hover:bg-gray-50 duration-100 ease-in-out cursor-pointer">
+                    <td className="p-3 text-sm font-normal text-gray-600">{index + 1}</td>
+                    <td className="p-3 text-sm font-normal text-gray-600 " onClick={() => handleMitraClick(mitra)}>
                       {mitra.nama}
                     </td>
-                    <td className="p-3 text-sm text-gray-600">{mitra.alamat}</td>
-                    <td className="p-3 text-sm text-gray-600">{mitra.telepon}</td>
-                    <td className="p-3 text-sm text-gray-600">
+                    <td className="p-3 text-sm font-normal text-gray-600">{mitra.alamat}</td>
+                    <td className="p-3 text-sm font-normal text-gray-600">{mitra.telepon}</td>
+                    <td className="p-3 text-sm font-normal text-gray-600">
                       <div className="flex gap-x-2" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-50">
+                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-200">
                           <MdEdit color="blue" size={18} className=" " onClick={() => handleEditClick(mitra)} />
                         </div>
-                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-50">
+                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-200">
                           <MdDelete color="red" size={18} />
                         </div>
                       </div>

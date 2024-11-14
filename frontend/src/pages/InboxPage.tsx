@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Mail, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -77,6 +77,51 @@ const InboxComponent: React.FC = () => {
           isAdmin: true
         }
       ]
+    },
+    {
+      id: 2,
+      company: "PT. Bangun Negeri Selalu",
+      date: "27/09/2024",
+      title: "Perubahan Privacy Policy",
+      subject: "Tidak Bisa Upload Foto pada Form Buat Laporan",
+      preview: "Saya tidak bisa upload foto pada buat lapor...",
+      content: "Tidak bisa upload foto pada buat laporan. Mohon bantuan untuk kendala ini.",
+      sender: "bangunnegeriselalu.co.id",
+      time: "Rabu, 27 Sep",
+      replies: [
+        {
+          id: 1,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Mohon maaf kami sedang mengalami kendala teknis. Tim kami sedang bekerja untuk memperbaiki masalah ini secepatnya.",
+          time: "Rabu, 27 Sep",
+          isAdmin: true
+        },
+        {
+          id: 2,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Kami sedang memeriksa masalah ini lebih lanjut. Mohon menunggu update dari kami.",
+          time: "Kamis, 28 Sep",
+          isAdmin: true
+        },
+        {
+          id: 3,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        },
+        {
+          id: 4,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        }
+      ]
     }
   ];
 
@@ -91,8 +136,8 @@ const InboxComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div className="w-1/3 border-r bg-white">
+    <div className="flex min-h-screen ">
+      <div className="w-1/3 border-r bg-white rounded-l-md">
         <div className="p-4 border-b">
           <h2 className="font-bold text-lg text-gray-700">9 Percakapan Aktif</h2>
         </div>
@@ -100,9 +145,9 @@ const InboxComponent: React.FC = () => {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`p-4 cursor-pointer transition-all duration-200 
-                ${selectedMessage?.id === message.id ? 'bg-gray-200 border-l-4 border-red-500' : ''} 
-                hover:bg-gray-100 hover:border-l-4 hover:border-red-500`}
+              className={`p-4 cursor-pointer transition-all duration-100 ease-in-out 
+                ${selectedMessage?.id === message.id ? 'bg-gray-200 border-l-4 border-l-red-500' : ''} 
+                hover:bg-gray-100 hover:border-l-4 hover:border-l-red-500 `}
               onClick={() => {
                 setSelectedMessage(message);
                 setShowNewMessage(false);
@@ -125,8 +170,8 @@ const InboxComponent: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-2/3 p-6">
-        {selectedMessage && !showNewMessage && (
+      <div className="w-2/3 p-6 bg-white rounded-r-md">
+        {selectedMessage && !showNewMessage ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">{selectedMessage.subject}</h2>
@@ -200,7 +245,19 @@ const InboxComponent: React.FC = () => {
               )}
             </div>
           </div>
-        )}
+        )
+        :
+        <>
+         <button
+                onClick={() => {
+                  setShowNewMessage(true);
+                  setSelectedMessage(null);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 mb-3"
+              >
+                Pesan Baru +
+              </button>
+        </>}
 
         {showNewMessage && (
           <div className="bg-red-50 p-6 rounded-lg">

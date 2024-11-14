@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Route, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const DaftarPekerjaan: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
@@ -26,10 +26,10 @@ const DaftarPekerjaan: React.FC = () => {
   };
 
   return (
-    <div className="p-8 flex-1  min-h-screen">
+    <div className="py-8 lg:p-8 flex-1  min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Buat Laporan</h1>
       
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white p-6 border rounded-lg ">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium">Pilih Pekerjaan</h2>
           
@@ -58,14 +58,14 @@ const DaftarPekerjaan: React.FC = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm border-separate border-spacing-0">
-            <thead>
-              <tr className="bg-gray-300">
-                <th className="p-4 border-b"></th>
-                <th className="p-4 border-b">ID Pekerjaan</th>
-                <th className="p-4 border-b">Nama Pekerjaan</th>
-                <th className="p-4 border-b">Lokasi Pekerjaan</th>
-                <th className="p-4 border-b">Asal Kontrak</th>
-                <th className="p-4 border-b">Last Update</th>
+            <thead className='bg-slate-200 text-left'>
+              <tr className="text-left bg-slate-200" >
+                <th className="p-4 font-medium border-b"></th>
+                <th className="p-4 font-medium border-b">ID Pekerjaan</th>
+                <th className="p-4 font-medium border-b">Nama Pekerjaan</th>
+                <th className="p-4 font-medium border-b">Lokasi Pekerjaan</th>
+                <th className="p-4 font-medium border-b">Asal Kontrak</th>
+                <th className="p-4 font-medium border-b">Last Update</th>
               </tr>
             </thead>
             <tbody>
@@ -78,11 +78,11 @@ const DaftarPekerjaan: React.FC = () => {
                       onChange={() => handleCheckboxChange(index)}
                     />
                   </td>
-                  <td className="p-4 border-b">{job.id}</td>
-                  <td className="p-4 border-b">{job.name}</td>
-                  <td className="p-4 border-b">{job.location}</td>
-                  <td className="p-4 border-b">{job.contract}</td>
-                  <td className="p-4 border-b">{job.lastUpdate}</td>
+                  <td className="p-4 text-sm font-normal border-b">{job.id}</td>
+                  <td className="p-4 text-sm font-normal border-b">{job.name}</td>
+                  <td className="p-4 text-sm font-normal border-b">{job.location}</td>
+                  <td className="p-4 text-sm font-normal border-b">{job.contract}</td>
+                  <td className="p-4 text-sm font-normal border-b">{job.lastUpdate}</td>
                 </tr>
               ))}
             </tbody>
