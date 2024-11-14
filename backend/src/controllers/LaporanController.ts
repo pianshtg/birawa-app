@@ -218,7 +218,50 @@ async function createLaporan(req: Request, res: Response) {
     }
 }
 
-async function getLaporan(req: Request, res: Response) {}
+async function getLaporan(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('get_laporan')) {
+            const {laporanId} = req.params
+            
+            const [existingLaporan] = await pool.execute<RowDataPacket[]>('SELECT * FROM laporan WHERE id = ?', [laporanId])
+            if (existingLaporan.length === 0) {
+                res.status(409).json({message: "Failed to find laporan."})
+                return
+            }
+            
+            if (existingLaporan.length > 0) {
+                const [laporanTenagaKerja] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, s.nama AS shift_nama, s.waktu_mulai AS shift_waktu_mulai, s.waktu_berakhir AS shift_waktu_berakhir, ptk.nama AS peran_tenaga_kerja_nama, tk.jumlah AS tenaga_kerja_jumlah FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN tenaga_kerja tk ON ksp.id = tk.kontrak_ss_pekerjaan_id AND l.tanggal = tk.tanggal JOIN shift s ON tk.shift_id = s.id JOIN peran_tenaga_kerja ptk ON tk.peran_tenaga_kerja_id = ptk.id WHERE l.id = ? AND l.deleted_at IS NULL', [laporanId])
+                const [laporanAktivitas] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, ta.nama AS tipe_aktivitas_nama, a.nama AS aktivitas_nama FROM  laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN  mitra m ON k.mitra_id = m.id JOIN aktivitas a ON ksp.id = a.kontrak_ss_pekerjaan_id AND l.tanggal = a.tanggal JOIN  tipe_aktivitas ta ON a.tipe_aktivitas_id = ta.id WHERE  l.id = ? AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND k.deleted_at IS NULL AND ksp.deleted_at IS NULL AND a.deleted_at IS NULL AND ta.deleted_at IS NULL', [laporanId])
+                res.status(200).json({
+                    message: "Successfully retrieved mitra's kontraks.",
+                    laporanTenagaKerja,
+                    laporanAktivitas,
+                    newAccessToken
+                })
+                return
+            } else {
+                res.status(409).json({message: "Failed to find Pekerjaan."})
+                return
+            }
+        } else {
+            console.log(permissions) //Debug.
+            res.status(401).json({message: "Unauthorised."})
+            return
+        }
+    } catch (error) {
+        console.error(error) // Debug.
+        res.status(500).json({message: "Error retrieving laporan."})
+        return
+    }
+}
 
 async function updateLaporan(req: Request, res: Response) {}
 
