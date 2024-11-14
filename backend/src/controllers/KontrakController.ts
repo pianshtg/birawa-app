@@ -60,6 +60,37 @@ async function createKontrak(req: Request, res: Response) {
 }
 
 async function getKontrak(req: Request, res: Response) {}
+async function getKontraks(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+
+        // Check the user permission
+        if (permissions.includes('view_all_kontrak')) {
+            const [kontrak] = await pool.execute<RowDataPacket[]>('SELECT * FROM kontrak')
+            if (kontrak.length > 0) {
+                res.status(200).json({
+                    message: "Successfully retrieved all kontraks.",
+                    kontrak,
+                    newAccessToken
+                })
+                return
+            }
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+    } catch (error) {
+        console.error(error) // Debug.
+        res.status(500).json({message: "Error getting kontraks."})
+        return
+    }
+}
 
 async function updateKontrak(req: Request, res: Response) {}
 
