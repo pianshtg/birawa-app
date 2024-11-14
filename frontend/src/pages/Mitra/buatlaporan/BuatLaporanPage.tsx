@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Accordion } from '@/components/custom/atom/Accordion';
 import { ShadowContainer } from '@/components/custom/atom/ShadowContainer';
 import { Button } from '@/components/ui/button';
