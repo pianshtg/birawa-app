@@ -105,9 +105,9 @@ async function getKontrakPekerjaans(req: Request, res: Response) {
         const permissions = metaData.permissions
         
         if (permissions.includes('get_kontrak_pekerjaans')) {
-            const {nomor_kontrak} = req.body
+            const {mitraId, nomor_kontrak} = req.body
             
-            const [existingKontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE nomor = ?', [nomor_kontrak])
+            const [existingKontrak] = await pool.execute<RowDataPacket[]>('SELECT id FROM kontrak WHERE mitra_id = ? AND nomor = ?', [mitraId, nomor_kontrak])
             if (existingKontrak.length === 0) {
                 res.status(409).json({message: "Failed to find kontrak."})
                 return
