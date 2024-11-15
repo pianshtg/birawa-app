@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { MdEdit,MdDelete  } from "react-icons/md";
 
 export default function Buatlaporan() {
   const location = useLocation();
@@ -122,15 +123,32 @@ export default function Buatlaporan() {
               onSubmit={() => console.log("Data saved")}
             />
           }>
-          <table className="min-w-full text-center text-sm bg-content m-3 border rounded-md">
+          <table className="min-w-full text-center text-sm  m-3 border rounded-md">
             <thead>
-              <tr>
-                <th className="p-4">Nama Aktivitas</th>
+              <tr className='bg-slate-200'>
                 <th className="p-4">Tipe Pekerjaan</th>
+                <th className="p-4">Nama Aktivitas</th>
                 <th className="p-4">Bukti</th>
                 <th className="p-4">Aksi</th>
               </tr>
             </thead>
+            <tbody>
+              <tr>
+                <td className="p-4">Pekerjaan Sipil</td>
+                <td className="p-4">Ciptakan Semen</td>
+                <td className="p-4">Bukti</td>
+                <td className="p-4 flex items-center justify-center">
+                    <div className="flex gap-x-2" >
+                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-200">
+                          <MdEdit color="blue" size={18} className=" " />
+                        </div>
+                        <div className="flex justify-center items-center p-1.5  cursor-pointer rounded-full hover:bg-gray-200">
+                          <MdDelete color="red" size={18} />
+                        </div>
+                    </div>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </ShadowContainer>
       </Accordion>
@@ -145,17 +163,39 @@ export default function Buatlaporan() {
               onSubmit={() => console.log("Data saved")}
             />
           }>
-          <table className="min-w-full text-sm text-center bg-content mb-6 border rounded-md">
-            <thead>
+          <table className="min-w-full text-sm text-center  mb-6 border rounded-md">
+            <thead className='bg-slate-200'>
               <tr>
                 <th className="p-4">Waktu</th>
                 <th className="p-4">Cuaca</th>
                 <th className="p-4">Keterangan</th>
               </tr>
             </thead>
+            <tbody>
+              <tr>
+                <td className="p-4">Pagi</td>
+                <td className="p-4">Tidak Hujan</td>
+                <td className="p-4">-</td>
+              </tr>
+              <tr>
+                <td className="p-4">Siang</td>
+                <td className="p-4">Tidak Hujan</td>
+                <td className="p-4">-</td>
+              </tr>
+              <tr>
+                <td className="p-4">Sore</td>
+                <td className="p-4">Hujan</td>
+                <td className="p-4">15:15 - 17:50</td>
+              </tr>
+              <tr>
+                <td className="p-4">Malam</td>
+                <td className="p-4">Gerimis</td>
+                <td className="p-4">17:59 - 22:00 </td>
+              </tr>
+            </tbody>
           </table>
 
-          <table className="min-w-full text-sm text-center bg-content border rounded-md">
+          <table className="min-w-full text-sm text-center  border rounded-md">
             <thead>
               <tr className="bg-gray-100">
                 <th className="p-4">Waktu</th>
@@ -187,11 +227,11 @@ export default function Buatlaporan() {
       <div className="flex justify-start space-x-4 mt-6">
         
         <div className='w-1/2'>
-          <Button type="button" onClick={handleCancel} className="border border-gray-400 text-black bg-white hover:bg-gray-100 px-6 ">
+          <Button type="button" onClick={handleCancel} variant="outline"  >
             Batal
           </Button>
         </div>
-        <Button type="button" onClick={handleOpenDialog} className='bg-primary w-full ease-in-out duration-150 text-white hover:bg-red-700 font-semibold py-2 px-4 rounded focus:outline-none'>
+        <Button type="button" onClick={handleOpenDialog}  >
           Buat Laporan
         </Button>
       </div>
@@ -200,9 +240,9 @@ export default function Buatlaporan() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className='text-center'>Buat Laporan?</DialogTitle>
+              <DialogTitle className='text-center text-2xl'>Buat Laporan?</DialogTitle>
               <DialogDescription>
-                <div className='py-8 text-center'>
+                <div className='py-8 text-center text-black '>
                   <p>Apakah anda sudah yakin, bahwa laporan yang anda masukan benar?</p>
                 </div>
                 <div className='flex gap-x-2'>
