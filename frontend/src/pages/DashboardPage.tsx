@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { FaUserFriends, FaFileAlt, FaInbox, FaEdit, FaBan, FaPlus, FaTimes } from "react-icons/fa";
 import { MdEdit,MdDelete  } from "react-icons/md";
 import SummaryCard from "@/components/custom/moleculs/CustomCard";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+
+
 // Type Definitions
 interface Mitra {
   id: number;
@@ -87,7 +91,7 @@ const DashboardPage = () => {
   const handleBackToDashboard = () => {
     setSelectedMitra(null);
     setIsDetailView(false);
-  };
+  }; 
 
   return (
     <div className="py-8 lg:p-8">
@@ -101,10 +105,18 @@ const DashboardPage = () => {
             <SummaryCard title="Total Pesan Masuk" value="5" icon={<FaInbox className="text-white text-4xl" />} bgColor="bg-green-500" />
           </div>
 
+          <div className="w-full flex justify-end mb-2 ">
+           <div>
+              <Button asChild>
+                <Link to="/dashboard/tambahmitra"> Tambah Mitra</Link>
+              </Button>
+           </div>
+          </div>
+
 
 
           <div className="bg-white p-6 rounded-lg border ">
-            <h2 className="text-xl font-semibold text-gray-700">Daftar Mitra</h2>
+            <h2 className="text-xl font-semibold text-gray-700">Daftar Mitra</h2>  
             <table className="w-full border-collapse mt-4">
               <thead >
                 <tr className="text-left bg-slate-200">
