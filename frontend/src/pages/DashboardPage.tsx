@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaUserFriends, FaFileAlt, FaInbox, FaEdit, FaBan, FaPlus, FaTimes } from "react-icons/fa";
 import { MdEdit,MdDelete  } from "react-icons/md";
-
+import SummaryCard from "@/components/custom/moleculs/CustomCard";
 // Type Definitions
 interface Mitra {
   id: number;
@@ -154,19 +154,6 @@ const DashboardPage = () => {
     </div>
   );
 };
-
-// Summary Card Component
-const SummaryCard: React.FC<{ title: string; value: string; icon: React.ReactNode; bgColor: string }> = ({ title, value, icon, bgColor }) => (
-  <div className={`p-4 rounded-lg shadow-md text-white ${bgColor}`}>
-    <div className="flex items-center">
-      {icon}
-      <div className="ml-4">
-        <p className="text-lg font-semibold">{title}</p>
-        <p className="text-2xl font-bold">{value}</p>
-      </div>
-    </div>
-  </div>
-);
 
 // Detail View Component
 const MitraDetail: React.FC<{ mitra: Mitra; onAddContract: () => void; onBack: () => void }> = ({ mitra, onAddContract, onBack }) => (
