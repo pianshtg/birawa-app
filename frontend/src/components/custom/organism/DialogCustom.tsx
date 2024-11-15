@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 interface DialogCustomProps {
   type: 'shift' | 'role' | 'weather' | 'activity';
@@ -15,10 +15,10 @@ export default function DialogCustom({ type, onSubmit }: DialogCustomProps) {
               <label className="block text-sm font-semibold mb-2">Shift</label>
               <div className="flex space-x-4 mb-4">
                 {/* Shift buttons with static styles, no state for selection */}
-                <button className="px-4 py-2 rounded border ration-150 ease-linear hover:bg-opacitynav hover:border-transparent text-primary">
+                <button className="px-4 py-2 rounded border  bg-opacitynav text-black  hover:bg-primary hover:text-white">
                   Shift 1
                 </button>
-                <button className="px-4 py-2 rounded border duration-150 ease-linear   bg-primary text-white">
+                <button className="px-4 py-2 rounded border  bg-opacitynav text-black  hover:bg-primary hover:text-white">
                   Shift 2
                 </button>
               </div>
@@ -118,7 +118,10 @@ export default function DialogCustom({ type, onSubmit }: DialogCustomProps) {
             </div>
           </div>
         )}
+        
       </div>
+
+      
 
       <button onClick={onSubmit} className="w-full mt-6 bg-Merah2 text-white font-semibold py-2 rounded">
         Simpan
