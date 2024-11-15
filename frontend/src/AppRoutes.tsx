@@ -8,7 +8,7 @@ import NotFound from "./pages/NotFoundPage";
 import Forgotpassword from "./pages/ForgotPasswordPage";
 import Layout from "./components/custom/layout/Layout";
 import SettingsPage from "@/pages/SettingsPage";
-import MobilePage from "@/pages/MobilePage"; // Halaman khusus mobile
+import MobilePage from "./pages/mobilepage";
 import useDetection from "@/hooks/useDetection"; // Import custom hook
 import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage";
 import TambahMitraPage from "./pages/CPM/TambahMitraPage";
@@ -32,7 +32,7 @@ function AppRoutes() {
       <Route path='/forgotpassword' element={<Forgotpassword />} />
 
       <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-      <Route path="/tambahmitra" element={<Layout><TambahMitraPage /></Layout>} />
+      <Route path="/dashboard/tambahmitra" element={<Layout><TambahMitraPage /></Layout>} />
 
       {/* Buat Laporan Page */}
       <Route path='/daftarpekerjaan' element={<Layout> <DaftarPekerjaan/></Layout>} /> 
