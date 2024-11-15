@@ -53,24 +53,37 @@ const CekLaporan: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex overflow-x-auto space-x-4 pt-4">
-          {daysInMonth.map((day) => (
-            <div
-              key={day.toISOString()}
-              onClick={() => setSelectedDate(day)}
-              className={`p-2 rounded-lg cursor-pointer text-center ${
-                format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-                  ? 'bg-red-200 text-red-600'
-                  : 'text-gray-600'
-              }`}
-              style={{ minWidth: '40px' }}
-            >
-              <div>{format(day, 'd')}</div>
-              <div className="text-xs text-gray-500">{format(day, 'EEE', { locale: idLocale }).slice(0, 3)}</div>
-            </div>
-          ))}
+        
+        <div className="flex overflow-x-auto gap-x-4 pt-4">
+          {daysInMonth.map((day) => {
+            const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+            return (
+              <div
+                key={day.toISOString()}
+                onClick={() => setSelectedDate(day)}
+                className={`p-2 rounded-lg cursor-pointer text-center duration-200 ease-in-out mb-2 ${
+                  isSelected
+                    ? 'bg-red-200 text-primary font-semibold -translate-y-1'
+                    : 'text-gray-500 hover:bg-gray-200 font-medium'
+                }`}
+                style={{ minWidth: '40px' }}
+              >
+                <div>{format(day, 'd')}</div>
+                <div className={`text-xs ${isSelected ? 'text-primary font-semibold' : 'text-gray-500 font-medium'}`}>
+                  {format(day, 'EEE', { locale: idLocale }).slice(0, 3)}
+                </div>
+                { isSelected ?  
+                <p>.</p>
+                : 
+                <> </>
+                }
+              </div>
+            );
+          })}
         </div>
       </div>
+
+      
 
       {/* Form dengan Dropdown */}
       <div className="bg-white p-6 rounded-md border">
@@ -108,7 +121,7 @@ const CekLaporan: React.FC = () => {
       {/* PDF Viewer */}
       {showPDF && (
         <div className="pdf-viewer mt-6">
-          <PDFViewer width="100%" height="600">
+          <PDFViewer width="100%" height="900">
             <ReportTemplate />
           </PDFViewer>
         </div>
