@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import FormField from '../moleculs/FormField';
-import Button from '../atom/Button';
+import { Button } from '@/components/ui/button';
 
 const Profile = () => {
   // State untuk data final (yang sudah tersimpan)
@@ -97,7 +97,7 @@ const Profile = () => {
           />
         </div>
         <div className='flex justify-end p-3 w-fit'>
-          <Button type='submit' IsDisabled={!isEditing}>
+          <Button type='submit' >
             Simpan
           </Button>
         </div>

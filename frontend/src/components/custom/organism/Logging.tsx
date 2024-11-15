@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Button from '../atom/Button';
+import { Button } from '@/components/ui/button';
 
 const Logging = () => {
   const logs = [
