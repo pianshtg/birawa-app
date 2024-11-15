@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
-import { FaCalendarAlt, FaChevronDown,FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaCalendarAlt, FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Combobox } from '@headlessui/react';
 import { id as idLocale } from 'date-fns/locale';
+import { PDFViewer } from '@react-pdf/renderer';
+import ReportTemplate from './ReportTemplate';
 
 //option dropdown
 const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C'];
 
-const CekLaporan: React.FC = () => { //state utk menyimpan bln dan tgl
+const CekLaporan: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMitra, setSelectedMitra] = useState<string>('');
   const [selectedKontrak, setSelectedKontrak] = useState<string>('');
   const [selectedPekerjaan, setSelectedPekerjaan] = useState<string>('');
+  const [showPDF, setShowPDF] = useState(false);
 
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1)); //fungsi utk nextMonth
-  const prevMonth = () => setCurrentMonth(addMonths(currentMonth, -1)); //fungsi utk prevMonth
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const prevMonth = () => setCurrentMonth(addMonths(currentMonth, -1));
 
   const getDaysInMonth = (month: Date) => {
     const start = startOfMonth(month);
@@ -24,6 +27,10 @@ const CekLaporan: React.FC = () => { //state utk menyimpan bln dan tgl
   };
 
   const daysInMonth = getDaysInMonth(currentMonth);
+
+  const handleShowPDF = () => {
+    setShowPDF(true);
+  };
 
   return (
     <div className="p-6">
@@ -38,10 +45,10 @@ const CekLaporan: React.FC = () => { //state utk menyimpan bln dan tgl
           </div>
           <div className="flex space-x-2">
             <button onClick={prevMonth} className="px-1 py-1 text-xl text-red-600 hover:text-red-700">
-              <FaChevronLeft className="h-3 w-3"/>
+              <FaChevronLeft className="h-3 w-3" />
             </button>
             <button onClick={nextMonth} className="px-1 py-1 text-xl text-red-600 hover:text-red-700">
-              <FaChevronRight className="h-3 w-3"/>
+              <FaChevronRight className="h-3 w-3" />
             </button>
           </div>
         </div>
@@ -92,11 +99,20 @@ const CekLaporan: React.FC = () => { //state utk menyimpan bln dan tgl
         </div>
 
         <div className="text-right">
-          <button className="bg-red-600 text-white py-2 px-6 rounded-md font-semibold hover:bg-red-700 transition">
+          <button onClick={handleShowPDF} className="bg-red-600 text-white py-2 px-6 rounded-md font-semibold hover:bg-red-700 transition">
             Tampilkan Laporan
           </button>
         </div>
       </div>
+
+      {/* PDF Viewer */}
+      {showPDF && (
+        <div className="pdf-viewer mt-6">
+          <PDFViewer width="100%" height="600">
+            <ReportTemplate />
+          </PDFViewer>
+        </div>
+      )}
     </div>
   );
 };
@@ -114,9 +130,7 @@ const ComboboxComponent: React.FC<{
   const filteredOptions =
     query === ''
       ? options
-      : options.filter((option) =>
-          option.toLowerCase().includes(query.toLowerCase())
-        );
+      : options.filter((option) => option.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div>
