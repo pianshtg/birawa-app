@@ -106,7 +106,7 @@ const DashboardPage = () => {
           <div className="bg-white p-6 rounded-lg border ">
             <h2 className="text-xl font-semibold text-gray-700">Daftar Mitra</h2>
             <table className="w-full border-collapse mt-4">
-              <thead className="bg-slate-200">
+              <thead >
                 <tr className="text-left bg-slate-200">
                   <th className="p-3 font-medium border-b-2">No</th>
                   <th className="p-3 font-medium border-b-2">Nama Mitra</th>
