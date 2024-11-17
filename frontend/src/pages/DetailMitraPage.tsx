@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaFileAlt, FaPlus, FaUserFriends } from "react-icons/fa";
+import { FaFileAlt, FaPlus} from "react-icons/fa";
 import { MdEdit, MdDelete } from "react-icons/md";
 import {
   Dialog,
@@ -7,7 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"; // Pastikan komponen ini tersedia
+} from "@/components/ui/dialog"; 
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ interface User {
 
 const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra, onBack }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false); // State untuk dialog tambah pengguna
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false); 
   const [contracts, setContracts] = useState<Contract[]>(mitra.contracts || []);
   const [users, setUsers] = useState<User[]>(mitra.users || []);
 
@@ -73,7 +73,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
 
     setContracts([...contracts, newContract]);
     setIsDialogOpen(false);
-    reset(); // Reset form setelah submit
+    reset();
   };
 
   const handleAddUser = (data: any) => {
@@ -86,18 +86,22 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
 
     setUsers([...users, newUser]);
     setIsUserDialogOpen(false);
-    userForm.reset(); // Reset form setelah submit
+    userForm.reset(); 
   };
 
   return (
     <div className="p-6">
-      <button
-        onClick={onBack}
-        className="mb-4 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
-      >
-        &larr; Back to Dashboard
-      </button>
+      <div className="mb-6">
+        <button
+          onClick={onBack}
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-red-300"
+          style={{ marginTop: "-12px" }} 
+        >
+          &larr; Back to Dashboard
+        </button>
+      </div>
       <h2 className="text-2xl font-semibold mb-4">Detail Mitra {mitra.nama}</h2>
+
 
       <div className="grid grid-cols-2 gap-6">
         {/* Daftar Kontrak Kerja */}
@@ -106,7 +110,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
             <h3 className="text-lg font-semibold text-black">Daftar Kontrak Kerja</h3>
             <button
               onClick={() => setIsDialogOpen(true)}
-              className="flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full hover:bg-blue-200"
+              className="flex items-center space-x-2 bg-red-100 text-red-700 px-4 py-2 rounded-full hover:bg-red-200"
             >
               <span>Tambah Kontrak</span>
               <FaPlus />
@@ -114,7 +118,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
           </div>
           <table className="w-full">
             <thead>
-              <tr className="text-left bg-blue-200">
+              <tr className="text-left bg-gray-200">
                 <th className="p-3">Kontrak Kerja</th>
                 <th className="p-3">Action</th>
               </tr>
@@ -174,7 +178,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
             <h3 className="text-lg font-semibold text-black">Daftar Pengguna Mitra</h3>
             <button
               onClick={() => setIsUserDialogOpen(true)}
-              className="flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full hover:bg-blue-200"
+              className="flex items-center space-x-2 bg-red-100 text-red-700 px-4 py-2 rounded-full hover:bg-red-200"
             >
               <span>Tambah Pengguna</span>
               <FaPlus />
@@ -182,8 +186,9 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
           </div>
           <table className="w-full">
             <thead>
-              <tr className="text-left bg-blue-200">
+              <tr className="text-left bg-gray-200">
                 <th className="p-3">Pengguna Mitra</th>
+                <th className="p-3">Status</th>
                 <th className="p-3">Action</th>
               </tr>
             </thead>
@@ -192,20 +197,19 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                 users.map((user) => (
                   <tr key={user.id} className="border-b">
                     <td className="p-3">
-                      <div className="flex items-center">
-                        <FaUserFriends className="text-blue-500 mr-2" />
-                        <div>
-                          <p className="font-semibold">{user.name}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
-                        <span
-                          className={`ml-2 text-sm ${
-                            user.status === "active" ? "text-green-500" : "text-red-500"
-                          }`}
-                        >
-                          {user.status === "active" ? "Active" : "Blocked"}
-                        </span>
+                      <div>
+                        <p className="font-semibold">{user.name}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
+                    </td>
+                    <td className="p-3">
+                      <span
+                        className={`text-sm font-semibold ${
+                          user.status === "active" ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {user.status === "active" ? "Active" : "Blocked"}
+                      </span>
                     </td>
                     <td className="p-3">
                       <div className="flex gap-2">
@@ -225,7 +229,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                 ))
               ) : (
                 <tr>
-                  <td colSpan={2} className="p-3 text-center text-gray-500">
+                  <td colSpan={3} className="p-3 text-center text-gray-500">
                     Tidak ada pengguna mitra.
                   </td>
                 </tr>

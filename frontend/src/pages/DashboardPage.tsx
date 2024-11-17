@@ -89,7 +89,7 @@ const DashboardPage = () => {
 
   return (
     <div className="py-8 lg:p-8">
-      <h1 className="text-2xl font-semibold text-black mb-6">Dashboard</h1>
+      {!selectedMitra && <h1 className="text-2xl font-semibold text-black mb-6">Dashboard</h1>}
 
       {!selectedMitra ? (
         <>
