@@ -46,9 +46,15 @@ async function loginUser (req: Request, res: Response) {
                 const [permissionsArray] = await pool.execute<RowDataPacket[]>("SELECT nama FROM permissions WHERE role_id = ?", [user[0].role_id])
                 const permissions: string[] = permissionsArray.map((permission) => permission.nama)
                 
+                // Checking user's mitra
+                const [mitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.id = ?', [user_id])
+                let nama_mitra: string | undefined
+                if (mitra.length > 0) {
+                    nama_mitra = mitra[0].nama
+                }
                 // Generate access and refresh token
-                const accessToken = generateAccessToken({user_id, permissions})
-                const refreshToken = generateRefreshToken({user_id, permissions})
+                const accessToken = generateAccessToken({user_id, permissions, nama_mitra})
+                const refreshToken = generateRefreshToken({user_id, permissions, nama_mitra})
 
                 // Hash the refresh token and set its expiry
                 const hashed_refresh_token = await bcrypt.hash(refreshToken, 10)
