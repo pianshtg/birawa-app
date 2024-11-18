@@ -14,9 +14,9 @@ const upload = multer({
 })
 
 router.post('/', upload.array('files'), validateLaporanRequest, validateNumberOfFiles, LaporanController.createLaporan)
-router.get('/:laporanId', LaporanController.getLaporan)
 router.get('/all', LaporanController.getLaporans)
 router.get('/laporan-pekerjaan', LaporanController.getPekerjaanLaporans)
+router.get('/:laporanId', LaporanController.getLaporan)
 router.patch('/', LaporanController.updateLaporan)
 router.delete('/', LaporanController.deleteLaporan)
 
