@@ -262,6 +262,46 @@ async function getMitras(req: Request, res: Response) {
     }
 }
 
+async function updateMitra (req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+
+        
+        if (permissions.includes('update_mitra')) {
+            // Get request parameters.
+            const {nama_mitra, alamat, nomor_telepon} = req.body
+            
+            const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [nama_mitra])
+            if (existingMitra.length > 0) {
+                
+                await pool.execute('UPDATE mitra SET alamat = ?, nomor_telepon = ? WHERE nama = ?', [alamat, nomor_telepon, nama_mitra])
+                
+                res.status(200).json({
+                    message: "Mitra successfully updated."
+                })
+                return
+            } else {
+                res.status(409).json({message: "Failed to find mitra."})
+                return
+            }
+            
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+    } catch (error) {
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error updating mitra."})
+        return
+    }
+}
+
 async function deleteMitra (req: Request, res: Response) {}
 
 export default {
