@@ -233,7 +233,34 @@ async function getMitraKontraks(req: Request, res: Response) {
     }
 }
 
-async function updateMitra (req: Request, res: Response) {}
+async function getMitras(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+
+        if (permissions.includes('view_all_mitra')) {
+            const [mitras] = await pool.execute<RowDataPacket[]>('SELECT nama, alamat, nomor_telepon FROM mitra WHERE is_active = 1')
+            res.status(200).json({
+                message: "Successfully retrieved all mitra.",
+                mitras,
+                newAccessToken
+            })
+            return
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+    } catch (error) {
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error getting mitras."})
+        return
+    }
+}
 
 async function deleteMitra (req: Request, res: Response) {}
 
