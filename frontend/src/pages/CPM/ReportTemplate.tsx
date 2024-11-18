@@ -1,8 +1,16 @@
-// ReportTemplate.tsx
-import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import type { FC } from 'react';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
-// Define your styles
+// Define interfaces for our data structures
+interface Worker {
+  role: string;
+  count: string;
+}
+
+interface WorkDescriptions {
+  [key: number]: string;
+}
+
 const styles = StyleSheet.create({
   page: {
     padding: 20,
@@ -12,251 +20,307 @@ const styles = StyleSheet.create({
     border: '1px solid black',
     marginBottom: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 5,
   },
   leftSection: {
-    width: '20%',
-    textAlign: 'center',
-    padding: 5,
-    borderRight: '1px solid black',
-  },
-  logoSection: {
     width: '30%',
-    textAlign: 'center',
     padding: 5,
     borderRight: '1px solid black',
-    justifyContent: 'center',
   },
-  titleSection: {
-    width: '25%',
-    textAlign: 'center',
+  middleSection: {
+    width: '40%',
     padding: 5,
+    alignItems: 'center',
     borderRight: '1px solid black',
-    justifyContent: 'center',
   },
   rightSection: {
-    width: '25%',
-    textAlign: 'center',
+    width: '30%',
     padding: 5,
   },
-  logo: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 5,
-  },
-  cellBold: {
-    fontWeight: 'bold',
-  },
-  detailsRow: {
+  dateRow: {
     flexDirection: 'row',
-    borderTop: '1px solid black',
-    paddingTop: 5,
+    borderLeft: '1px solid black',
+    borderRight: '1px solid black',
+    borderBottom: '1px solid black',
   },
-  detailsCell: {
-    flex: 1,
+  dateCell: {
     padding: 5,
-    fontSize: 10,
+    flex: 1,
   },
   table: {
     marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#000',
-    marginBottom: 10,
+    border: '1px solid black',
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderColor: '#000',
+    borderBottom: '1px solid black',
+    minHeight: 20,
   },
   tableCell: {
     padding: 5,
-    borderRightWidth: 1,
-    borderColor: '#000',
     flex: 1,
-    fontSize: 9,
+    borderRight: '1px solid black',
   },
-  tableCellBold: {
+  tableCellNoBorder: {
+    padding: 5,
+    flex: 1,
+  },
+  workItemCell: {
+    padding: 5,
+    flex: 2,
+    borderRight: '1px solid black',
+  },
+  numberCell: {
+    padding: 5,
+    width: '10%',
+    borderRight: '1px solid black',
+  },
+  boldText: {
     fontWeight: 'bold',
-    fontSize: 10,
   },
-  lastRow: {
-    borderBottomWidth: 0,
+  weatherTable: {
+    marginTop: 10,
+    border: '1px solid black',
   },
-  footerSection: {
+  materialSection: {
+    marginTop: 10,
+    border: '1px solid black',
+  },
+  issuesSection: {
+    marginTop: 10,
+    border: '1px solid black',
+    minHeight: 100,
+  },
+  footer: {
     marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  footerCell: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 10,
+  footerColumn: {
+    width: '30%',
+    alignItems: 'center',
   },
 });
 
-const ReportTemplate = () => (
+const getWorkDescription = (index: number): string => {
+  const descriptions: WorkDescriptions = {
+    1: "Pekerjaan pemasangan brickwall walltreatment WT.06",
+    2: "Pekerjaan penarikan instalasi listrik",
+    3: "Pekerjaan piping & wiring instalasi listrik lampu",
+    4: "Pekerjaan compound single sided gypsum partition P.1",
+    5: "Pekerjaan pemasangan pintu D.1",
+    6: "Pekerjaan pemasangan kaca tempered GL.01 ruang meeting 1",
+    7: "Pekerjaan pemasangan list pertemuan lantai",
+    8: "Pekerjaan pemasangan pintu ruang lab D.2",
+    9: "Pekerjaan pabrikasi decorative ceiling",
+    10: "Pekerjaan pemasangan rangka plafond pantry",
+    11: "Pekerjaan pembongkaran keramik existing koridor",
+    12: "Pekerjaan pengecatan cover kolom PT.04",
+    13: "Pekerjaan pengecatan PT.04",
+    14: "Pekerjaan instalasi pipa ac"
+  };
+  return descriptions[index] || "";
+};
+
+const ReportTemplate: FC = () => (
   <Document>
-    <Page size="A4" style={styles.page}>
-      {/* Header Section */}
+    <Page size="LEGAL" style={styles.page}>
+      {/* Header */}
       <View style={styles.header}>
-        {/* Left Section: Nomor and Kontraktor */}
         <View style={styles.leftSection}>
-          <Text style={styles.cellBold}>Nomor</Text>
-          <Text>116</Text>
-          <Text style={[styles.cellBold, { marginTop: 10 }]}>Kontraktor:</Text>
+          <Text>Nomor: 116</Text>
+          <Text>Kontraktor:</Text>
           <Text>PT. Graha Sarana Duta</Text>
         </View>
-
-        {/* Center Logo Section */}
-        <View style={styles.logoSection}>
-          {/* Placeholder for logos */}
-          <Text>[Logo Placeholder]</Text>
-          <Text>[Logo Placeholder]</Text>
-          <Text>[Logo Placeholder]</Text>
+        <View style={styles.middleSection}>
+          <Text style={styles.boldText}>LAPORAN HARIAN</Text>
         </View>
-
-        {/* Title Section */}
-        <View style={styles.titleSection}>
-          <Text style={[styles.cellBold, { fontSize: 12 }]}>LAPORAN HARIAN</Text>
-        </View>
-
-        {/* Right Section: Project Name */}
         <View style={styles.rightSection}>
-          <Text style={styles.cellBold}>Telkom DTV ADMEDIKA,</Text>
-          <Text style={styles.cellBold}>IPTV (ex. Pins), KAP & AVATAR</Text>
+          <Text>Telkom DTV ADMEDIKA,</Text>
+          <Text>IPTV (ex. Pins), KAP &</Text>
+          <Text>AVATAR</Text>
         </View>
       </View>
 
-      {/* Second Row for Date and Attachment */}
-      <View style={styles.detailsRow}>
-        <View style={[styles.detailsCell, { borderRight: '1px solid black' }]}>
+      {/* Date Row */}
+      <View style={styles.dateRow}>
+        <View style={[styles.dateCell, { borderRight: '1px solid black' }]}>
           <Text>Tanggal: 02/09/2024</Text>
         </View>
-        <View style={styles.detailsCell}>
+        <View style={styles.dateCell}>
           <Text>Lampiran: Dokumentasi</Text>
         </View>
       </View>
 
-      {/* Table Section: Tenaga Kerja */}
+      {/* Work Items Table */}
       <View style={styles.table}>
         <View style={styles.tableRow}>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Tenaga Kerja</Text>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Jumlah</Text>
+          <View style={styles.tableCell}>
+            <Text style={styles.boldText}>Tenaga Kerja</Text>
+          </View>
+          <View style={styles.numberCell}>
+            <Text style={styles.boldText}>No.</Text>
+          </View>
+          <View style={styles.workItemCell}>
+            <Text style={styles.boldText}>Pekerjaan Hari Ini</Text>
+          </View>
         </View>
+        
+        {/* Management Section */}
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>1. Project Manager</Text>
-          <Text style={styles.tableCell}>1 org</Text>
+          <View style={styles.tableCell}>
+            <Text>I. Manajemen</Text>
+          </View>
+          <View style={styles.numberCell}>
+            <Text>1</Text>
+          </View>
+          <View style={styles.workItemCell}>
+            <Text>Pekerjaan pemasangan brickwall walltreatment WT.06</Text>
+          </View>
         </View>
+
+        {/* Work Items */}
+        {["Project Manager", "Site Manager", "Site Engineer", "Admin Project", "Drafter"].map((item: string, index: number) => (
+          <View key={index} style={styles.tableRow}>
+            <View style={styles.tableCell}>
+              <Text>{`${index + 1}. ${item}`}</Text>
+            </View>
+            <View style={styles.numberCell}>
+              <Text>{index + 2}</Text>
+            </View>
+            <View style={styles.workItemCell}>
+              <Text>{getWorkDescription(index + 2)}</Text>
+            </View>
+          </View>
+        ))}
+
+        {/* Field Workers Section */}
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>2. Site Manager</Text>
-          <Text style={styles.tableCell}>1 org</Text>
+          <View style={styles.tableCell}>
+            <Text>II. Lapangan</Text>
+          </View>
+          <View style={styles.numberCell}>
+            <Text>10</Text>
+          </View>
+          <View style={styles.workItemCell}>
+            <Text>Pekerjaan pemasangan rangka plafond pantry</Text>
+          </View>
         </View>
+
+        {/* Field Workers Items */}
+        {[
+          { role: "Pekerja Sipil", count: "10 org" },
+          { role: "Pekerja Arsitektur", count: "8 org" },
+          { role: "Pekerja Mekanikal Elektrikal", count: "4 org" },
+          { role: "Pekerja Furnitur", count: "3 org" },
+        ].map((worker: Worker, index: number) => (
+          <View key={index} style={styles.tableRow}>
+            <View style={styles.tableCell}>
+              <Text>{`${index + 1}. ${worker.role}`}</Text>
+              <Text>{worker.count}</Text>
+            </View>
+            <View style={styles.numberCell}>
+              <Text>{index + 11}</Text>
+            </View>
+            <View style={styles.workItemCell}>
+              <Text>{getWorkDescription(index + 11)}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Weather Table */}
+      <View style={styles.weatherTable}>
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>3. Site Engineer</Text>
-          <Text style={styles.tableCell}>1 org</Text>
+          <View style={styles.tableCell}>
+            <Text>Cuaca</Text>
+          </View>
+          <View style={styles.tableCell}>
+            <Text>Cerah</Text>
+          </View>
+          <View style={styles.tableCell}>
+            <Text>Gerimis (Waktu)</Text>
+          </View>
+          <View style={styles.tableCellNoBorder}>
+            <Text>Hujan (Waktu)</Text>
+          </View>
         </View>
+        {['Pagi', 'Siang', 'Sore', 'Malam'].map((time: string) => (
+          <View key={time} style={styles.tableRow}>
+            <View style={styles.tableCell}>
+              <Text>{time}</Text>
+            </View>
+            <View style={styles.tableCell}>
+              <Text>✓</Text>
+            </View>
+            <View style={styles.tableCell}>
+              <Text>s/d</Text>
+            </View>
+            <View style={styles.tableCellNoBorder}>
+              <Text>s/d</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Materials Section */}
+      <View style={styles.materialSection}>
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>4. Admin Project</Text>
-          <Text style={styles.tableCell}>1 org</Text>
+          <View style={styles.tableCell}>
+            <Text>Material Diterima</Text>
+          </View>
+          <View style={styles.tableCell}>
+            <Text>Volume</Text>
+          </View>
+          <View style={styles.tableCell}>
+            <Text>Material Ditolak</Text>
+          </View>
+          <View style={styles.tableCellNoBorder}>
+            <Text>Volume</Text>
+          </View>
         </View>
+        {[1, 2, 3, 4, 5].map((i: number) => (
+          <View key={i} style={styles.tableRow}>
+            <View style={styles.tableCell}>
+              <Text></Text>
+            </View>
+            <View style={styles.tableCell}>
+              <Text></Text>
+            </View>
+            <View style={styles.tableCell}>
+              <Text></Text>
+            </View>
+            <View style={styles.tableCellNoBorder}>
+              <Text></Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Issues Section */}
+      <View style={styles.issuesSection}>
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>5. Drafter</Text>
-          <Text style={styles.tableCell}>1 org</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Sub Jumlah I</Text>
-          <Text style={styles.tableCell}>2 org</Text>
+          <View style={[styles.tableCell, { flex: 1 }]}>
+            <Text>Permasalahan yang timbul</Text>
+          </View>
+          <View style={[styles.tableCellNoBorder, { flex: 1 }]}>
+            <Text>Penyelesaian</Text>
+          </View>
         </View>
       </View>
 
-      {/* Table Section: Lapangan */}
-      <View style={styles.table}>
-        <View style={styles.tableRow}>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Lapangan</Text>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Jumlah</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>1. Pekerja Sipil</Text>
-          <Text style={styles.tableCell}>10 org</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>2. Pekerja Arsitektur</Text>
-          <Text style={styles.tableCell}>8 org</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>3. Pekerja Mekanikal Elektrikal</Text>
-          <Text style={styles.tableCell}>4 org</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>4. Pekerja Furniture</Text>
-          <Text style={styles.tableCell}>3 org</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Sub Jumlah II</Text>
-          <Text style={styles.tableCell}>25 org</Text>
-        </View>
-      </View>
-
-      {/* Table Section: Cuaca */}
-      <View style={styles.table}>
-        <View style={styles.tableRow}>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Cuaca</Text>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Cerah</Text>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Gerimis (Waktu)</Text>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Hujan (Waktu)</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>Pagi</Text>
-          <Text style={styles.tableCell}>✓</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>Siang</Text>
-          <Text style={styles.tableCell}>✓</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>Sore</Text>
-          <Text style={styles.tableCell}>✓</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>Malam</Text>
-          <Text style={styles.tableCell}>✓</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-          <Text style={styles.tableCell}>s/d</Text>
-        </View>
-      </View>
-
-      {/* Bottom Table Section */}
-      <View style={styles.table}>
-        <View style={styles.tableRow}>
-          <Text style={[styles.tableCell, styles.tableCellBold]}>Jumlah Tenaga Kerja</Text>
-          <Text style={styles.tableCell}>27 org</Text>
-        </View>
-      </View>
-
-      {/* Footer Section with Signatures */}
-      <View style={styles.footerSection}>
-        <View style={styles.footerCell}>
+      {/* Footer */}
+      <View style={styles.footer}>
+        <View style={styles.footerColumn}>
           <Text>Dilaporkan Oleh,</Text>
           <Text>Kontraktor Pelaksana</Text>
           <Text>PT Graha Sarana Duta</Text>
+          <Text style={{ marginTop: 40 }}>Site Manager</Text>
         </View>
-
-        <View style={styles.footerCell}>
+        <View style={styles.footerColumn}>
           <Text>Konsultan Pengawas</Text>
           <Text>PT Multi Reka Indonesia</Text>
-        </View>
-
-        <View style={styles.footerCell}>
-          <Text style={styles.cellBold}>Adam Rivansyah</Text>
-          <Text>Site Manager</Text>
+          <Text style={{ marginTop: 40 }}>Adam Rivansyah</Text>
+          <Text>Site Supervisor</Text>
         </View>
       </View>
     </Page>
