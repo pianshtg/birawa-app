@@ -5,6 +5,11 @@ import SummaryCard from "@/components/custom/moleculs/CustomCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import DetailMitraPage from "./DetailMitraPage";
+import {z} from "zod";
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import {
   Dialog,
   DialogContent,
@@ -56,6 +61,13 @@ const dataMitra: Mitra[] = [
   },
 ];
 
+const formEditMitraSchema = z.object({
+  namaPerusahaan: z.string().min(1, "Nama perusahaan wajib diisi").max(3, "Nama perusahaan terlalu panjang"),
+  alamatPerusahaan: z.string().min(1, "Alamat perusahaan wajib diisi").max(3, "Alamat perusahaan terlalu panjang"),
+  nomorTelpPerusahaan: z.string().min(1, "Nomor telepon perusahaan wajib diisi").max(20, "Nomor telepon perusahaan terlalu panjang"),
+})
+export type EditMitraSchema = z.infer<typeof formEditMitraSchema>
+
 const DashboardPage = () => {
   const [selectedMitra, setSelectedMitra] = useState<Mitra | null>(null); // Untuk navigasi detail mitra
   const [mitraToEdit, setMitraToEdit] = useState<Mitra | null>(null); // Untuk dialog edit mitra
@@ -64,6 +76,10 @@ const DashboardPage = () => {
   const handleMitraClick = (mitra: Mitra) => {
     setSelectedMitra(mitra); // Navigasi ke DetailMitraPage
   };
+
+  const formEditMitra = useForm<EditMitraSchema>({
+    resolver: zodResolver(formEditMitraSchema)
+  })
 
   const handleBackToDashboard = () => {
     setSelectedMitra(null);
@@ -75,16 +91,13 @@ const DashboardPage = () => {
     setIsDialogOpen(true); // Buka dialog
   };
 
+  const handleditSubmit = () => {
+
+  };
+
   const handleDelete = (e: React.MouseEvent, mitra: Mitra) => {
     e.stopPropagation();
     console.log("Data dihapus:", mitra);
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Data disimpan:", mitraToEdit);
-    setIsDialogOpen(false);
-    setMitraToEdit(null); // Reset setelah menyimpan
   };
 
   return (
@@ -121,9 +134,9 @@ const DashboardPage = () => {
               </thead>
               <tbody>
                 {dataMitra.map((mitra, index) => (
-                  <tr key={mitra.id} className="border-b hover:bg-gray-50 duration-100 ease-in-out cursor-pointer">
+                  <tr key={mitra.id} onClick={() => handleMitraClick(mitra)} className="border-b hover:bg-gray-50 duration-100 ease-in-out cursor-pointer">
                     <td className="p-3 text-sm font-normal text-gray-600">{index + 1}</td>
-                    <td className="p-3 text-sm font-normal text-gray-600" onClick={() => handleMitraClick(mitra)}>
+                    <td className="p-3 text-sm font-normal text-gray-600" >
                       {mitra.nama}
                     </td>
                     <td className="p-3 text-sm font-normal text-gray-600">{mitra.alamat}</td>
@@ -162,49 +175,64 @@ const DashboardPage = () => {
               <DialogTitle>Edit Informasi Mitra</DialogTitle>
             </DialogHeader>
             <DialogDescription>
-              <form onSubmit={handleSave}>
-                <div className="grid grid-cols-2 gap-4 py-4">
-                  <div>
-                    <label className="block text-sm font-medium">Nama Perusahaan</label>
-                    <input
-                      type="text"
-                      value={mitraToEdit.nama}
-                      onChange={(e) => setMitraToEdit({ ...mitraToEdit, nama: e.target.value })}
-                      className="mt-1 p-2 w-full border rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium">Alamat Perusahaan</label>
-                    <input
-                      type="text"
-                      value={mitraToEdit.alamat}
-                      onChange={(e) => setMitraToEdit({ ...mitraToEdit, alamat: e.target.value })}
-                      className="mt-1 p-2 w-full border rounded"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium">Nomor Telepon</label>
-                    <input
-                      type="text"
-                      value={mitraToEdit.telepon}
-                      onChange={(e) => setMitraToEdit({ ...mitraToEdit, telepon: e.target.value })}
-                      className="mt-1 p-2 w-full border rounded"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsDialogOpen(false)}
-                    className="w-1/2 py-2 border rounded text-gray-700"
+              <Form {...formEditMitra}>
+                  <form 
+                    onSubmit={formEditMitra.handleSubmit(handleditSubmit)}
+                    className="space-y-3"
                   >
-                    Batal
-                  </button>
-                  <button type="submit" className="w-1/2 py-2 bg-red-500 text-white rounded">
-                    Simpan
-                  </button>
-                </div>
-              </form>
+                    <FormField
+                      control={formEditMitra.control}
+                      name='namaPerusahaan'
+                      render={({field}) => (
+                        <FormItem>
+                          <FormLabel>Nama Perusahaan</FormLabel>
+                          <FormControl className="relative top-[-4px] mb-7">
+                            <Input 
+                              type="text"  {...field} 
+                              defaultValue={mitraToEdit?.nama} 
+                              disabled/>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={formEditMitra.control}
+                      name='alamatPerusahaan'
+                      render={({field}) => (
+                        <FormItem>
+                          <FormLabel>Alamat Perusahaan</FormLabel>
+                          <FormControl className="relative top-[-4px] mb-7">
+                            <Input
+                              type="text"  {...field} 
+                              defaultValue={mitraToEdit?.alamat} 
+                              required/>
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                    />
+
+                      <FormField
+                        control={formEditMitra.control}
+                        name='nomorTelpPerusahaan'
+                        render={({field}) => (
+                          <FormItem>
+                            <FormLabel>Nomor Telephone Perusahaan</FormLabel>
+                            <FormControl className="relative top-[-4px] mb-7">
+                            <Input
+                              type="text"  {...field} 
+                              defaultValue={mitraToEdit?.telepon} 
+                              required/>
+                            </FormControl>
+                            <FormMessage/>
+                          </FormItem>
+                        )}
+                      />
+
+                        <Button type="submit"> Edit</Button>
+                  </form>
+              </Form>
             </DialogDescription>
           </DialogContent>
         </Dialog>
