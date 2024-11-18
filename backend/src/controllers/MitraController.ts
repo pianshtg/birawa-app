@@ -125,9 +125,7 @@ async function createMitra (req: Request, res: Response) {
     }
 }
 
-async function getMitra(req: Request, res: Response) {}
-
-async function getMitras(req: Request, res: Response) {
+async function getMitra(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
         // console.log("Access token received:", accessToken) // Debug.
@@ -135,13 +133,19 @@ async function getMitras(req: Request, res: Response) {
         // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
         // console.log(metaData) // Debug.
+        const userId = metaData.user_id
         const permissions = metaData.permissions
 
-        if (permissions.includes('view_all_mitra')) {
-            const [mitras] = await pool.execute<RowDataPacket[]>('SELECT id, nama, alamat, nomor_telepon FROM mitra WHERE is_active = 1')
+        if (permissions.includes('get_mitra')) {
+            const [mitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.id = ?', [userId])
+            if (mitra.length === 0) {
+                res.status(409).json({message: "Failed to find user's mitra."})
+                return
+            }
+            const nama_mitra = mitra[0].nama
             res.status(200).json({
-                message: "Successfully retrieved all mitra.",
-                mitras,
+                message: "Successfully retrieved user's mitra.",
+                nama_mitra,
                 newAccessToken
             })
             return
