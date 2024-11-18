@@ -17,13 +17,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+
 interface Country {
   code: CountryCode;
   dialCode: string;
   name: string;
 }
-
-
 
 const formTambahMitraSchema = z.object({
   // Informasi Mitra
@@ -34,9 +33,15 @@ const formTambahMitraSchema = z.object({
   // Detail Kontrak
   namaKontrak: z.string().min(1, "Nama kontrak wajib diisi").max(40, "Nama kontrak terlalu panjang"),
   nomorKontrak: z.string().min(1, "Nomor kontrak wajib diisi").max(20, "Nomor kontrak terlalu panjang"),
-  nilaiKontrak: z.number().min(1, "Nilai kontrak wajib diisi").max(14, "Nilai kontrak terlalu panjang"),
+  nilaiKontrak: z.preprocess(
+    (value) => parseFloat(value as string), // Ubah string menjadi angka
+    z.number().min(1, "Nilai kontrak wajib diisi").max(14, "Nilai kontrak terlalu panjang")
+  ),
   tanggalKontrak: z.string().min(1, "Tanggal kontrak wajib diisi").max(10, "Format tanggal tidak valid"), // Asumsi format YYYY-MM-DD
-  jangkaWaktu: z.number().min(1, "Jangka waktu wajib diisi").max(5, "Jangka waktu terlalu panjang"),
+  jangkaWaktu: z.preprocess(
+    (value) => parseFloat(value as string),
+    z.number().min(1, "Jangka waktu wajib diisi").max(5, "Jangka waktu terlalu panjang")
+  ),
 
   // Akun Mitra
   namaLengkapUser: z.string().min(1, "Nama lengkap wajib diisi").max(40, "Nama lengkap terlalu panjang"),
@@ -58,6 +63,7 @@ export default function TambahMitraPage() {
   const [companyPhoneNumber, setCompanyPhoneNumber] = useState<string>('');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isCompanyPhoneOpen, setIsCompanyPhoneOpen] = useState<boolean>(false);
+  const [pekerjaanList, setPekerjaanList] = useState<{ namaPekerjaan: string; lokasiPekerjaan: string }[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const formTambahMitra = useForm<TambahMitraSchema>({
@@ -66,14 +72,17 @@ export default function TambahMitraPage() {
   const formTambahPekerjaan = useForm<TambahPekerjaanSchema>({
     resolver: zodResolver(formTambahPekerjaanSchema)
   })
+  const handleDialogSubmit = (data: TambahPekerjaanSchema) => {
+    setPekerjaanList((prev) => [...prev, data]);
+    setIsDialogOpen(false);
+    formTambahPekerjaan.reset();
+  };
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
   };
 
-  
 
-  // Get all countries and their calling codes
   const countries: Country[] = getCountries().map(country => ({
     code: country,
     dialCode: `+${getCountryCallingCode(country)}`,
@@ -241,7 +250,7 @@ export default function TambahMitraPage() {
                     name='jangkaWaktu'
                     render={({field}) => (
                       <FormItem>
-                        <FormLabel>Nilai Kontrak</FormLabel>
+                        <FormLabel>Jangka Waktu</FormLabel>
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Jangka Waktu Kontrak " type="number"  {...field} required/>
                         </FormControl>
@@ -267,7 +276,7 @@ export default function TambahMitraPage() {
                         <Form {...formTambahPekerjaan}>
 
                           <form 
-                          onSubmit={formTambahPekerjaan.handleSubmit(onSubmit)}
+                          onSubmit={formTambahPekerjaan.handleSubmit(handleDialogSubmit)}
                           className='flex flex-col gap-y-4'
                           >
                             <FormField
@@ -290,7 +299,7 @@ export default function TambahMitraPage() {
                                 <FormItem>
                                   <FormLabel>Lokasi Pekerjaan</FormLabel>
                                   <FormControl className="relative top-[-4px] mb-7">
-                                    <Input placeholder="Ketik di sini" type="text"  {...field} required/>
+                                     <Input placeholder="Ketik di sini" type="text" {...field} required />
                                   </FormControl>
                                   <FormMessage/>
                                 </FormItem>
@@ -316,10 +325,20 @@ export default function TambahMitraPage() {
                         </tr>
                       </thead>
                       <tbody>
+                      {pekerjaanList.length === 0 ? (
                         <tr>
-                          <td className="p-4">Belum ada pekerjaan yang ditambah</td>
-                          <td>Batam Century aman</td>
+                          <td className="p-4" colSpan={2}>
+                            Belum ada pekerjaan yang ditambah
+                          </td>
                         </tr>
+                      ) : (
+                        pekerjaanList.map((pekerjaan, index) => (
+                          <tr key={index}>
+                            <td className="p-4">{pekerjaan.namaPekerjaan}</td>
+                            <td className="p-4">{pekerjaan.lokasiPekerjaan}</td>
+                          </tr>
+                        ))
+                      )}
                       </tbody>
                     </table>
                   </div>
