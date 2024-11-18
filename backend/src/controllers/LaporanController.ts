@@ -263,8 +263,6 @@ async function getLaporan(req: Request, res: Response) {
     }
 }
 
-async function getLaporans(req: Request, res: Response) {}
-
 async function getPekerjaanLaporans(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
@@ -297,6 +295,39 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
     } catch (error) {
         console.error(error) // Debug.
         res.status(500).json({message: "Error retrieving pekerjaan's laporans."})
+        return
+    }
+}
+
+async function getLaporans(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('view_all_laporan')) {
+            const [laporan] = await pool.execute<RowDataPacket[]>('SELECT id, kontrak_ss_pekerjaan_id FROM laporan')
+            if (laporan.length > 0) {
+                res.status(409).json({
+                    message: "Successfully retrieved all laporan.",
+                    laporan
+                })
+                return
+            } else {
+                res.status(409).json({message: "Failed to find laporan."})
+                return
+            }
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+    } catch (error) {
+        console.error(error) // Debug.
+        res.status(500).json({message: "Error retrieving all laporan."})
         return
     }
 }
