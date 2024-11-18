@@ -26,7 +26,7 @@ export function generateRefreshToken (data: any) {
 
 export async function clientType(req: Request, res:Response, next: NextFunction) {
     
-    console.log("Checking the client type...") // Debug.
+    console.log("\nChecking the client type...") // Debug.
     
     try {
         const clientType = req.headers['x-client-type']
@@ -69,8 +69,8 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
         req.accessToken = accessToken
         req.refreshToken = refreshToken
         
-        console.log("Client type:", clientType)
-        console.log("Proceeding to check jwt...\n")
+        console.log("Client type:", clientType) //Debug.
+        console.log("Proceeding to check jwt...\n") //Debug.
         next()
     } catch (error) {
         console.error("Error fetching client type:", error)
@@ -79,13 +79,14 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
 }
 
 export async function jwtCheck(req: Request, res: Response, next: NextFunction) {
-    console.log("Jwt checking...")
+    console.log("Jwt checking...") //Debug.
     try {
         // console.log('Received cookies (jwtCheck):', req.cookies) // Debug.
         const accessToken = req.accessToken
         // console.log(token) (debuggin)
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
             // console.log(token) // Debug.
+            console.log('Successfully authenticating jwt. Proceeding to the controller...') //Debug.
             next()
         } else {
             // console.log("there's no access token") // Debug.
