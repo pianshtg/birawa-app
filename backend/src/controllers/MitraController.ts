@@ -110,7 +110,7 @@ async function createMitra (req: Request, res: Response) {
             })
             return
         } else {
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
@@ -146,7 +146,7 @@ async function getMitras(req: Request, res: Response) {
             })
             return
         } else {
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
@@ -182,7 +182,7 @@ async function getMitraUsers(req: Request, res: Response) {
                 return
             }
         } else {
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
@@ -219,7 +219,7 @@ async function getMitraKontraks(req: Request, res: Response) {
             }
         } else {
             console.log(permissions) //Debug.
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {

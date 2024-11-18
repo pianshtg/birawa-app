@@ -93,7 +93,7 @@ async function createUser(req: Request, res: Response) {
 
         } else {
         // User doesn't have the permissions.
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
 
@@ -115,7 +115,7 @@ async function getUser(req: Request, res: Response) {
         // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
         // console.log("New access token received:", newAccessToken) // Debug.
-        const metaData = accessToken ? jwt.decode(accessToken!) as jwt.JwtPayload : jwt.decode(newAccessToken!) as jwt.JwtPayload
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
         // console.log(metaData) // Debug.
         const permissions = metaData.permissions
 
@@ -135,7 +135,7 @@ async function getUser(req: Request, res: Response) {
                 return
             }
         } else {
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
         
@@ -171,7 +171,7 @@ async function getUsers(req: Request, res: Response) {
             }
         } else {
             console.log(permissions) //Debug.
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {

@@ -202,7 +202,7 @@ async function createLaporan(req: Request, res: Response) {
             return
         } else {
         // User doesn't have the permissions.
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
@@ -253,7 +253,7 @@ async function getLaporan(req: Request, res: Response) {
             }
         } else {
             console.log(permissions) //Debug.
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
@@ -280,7 +280,7 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
             const [existingPekerjaanLaporans] = await pool.execute<RowDataPacket[]>('SELECT laporan.id, kontrak_ss_pekerjaan.nama, laporan.tanggal FROM laporan INNER JOIN kontrak_ss_pekerjaan ON kontrak_ss_pekerjaan.id = laporan.kontrak_ss_pekerjaan_id INNER JOIN kontrak ON kontrak_ss_pekerjaan.kontrak_id = kontrak.id INNER JOIN mitra ON kontrak.mitra_id = mitra.id WHERE mitra.nama = ? AND kontrak.nomor = ? AND kontrak_ss_pekerjaan.nama = ?', [nama_mitra, nomor_kontrak, nama_pekerjaan])
             if (existingPekerjaanLaporans.length > 0) {
                 res.status(200).json({
-                    message: "Successfully retrieved mitra's kontraks.",
+                    message: "Successfully retrieved pekerjaan's laporan(s).",
                     pekerjaan_laporans: existingPekerjaanLaporans,
                     newAccessToken
                 })
@@ -291,7 +291,7 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
             }
         } else {
             console.log(permissions) //Debug.
-            res.status(401).json({message: "Unauthorised."})
+            res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {

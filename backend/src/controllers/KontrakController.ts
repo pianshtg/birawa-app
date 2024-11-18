@@ -52,7 +52,7 @@ async function createKontrak(req: Request, res: Response) {
             res.status(401).json({message: "Unauthorized."})
             return
         }
-
+        
     } catch (error) {
         console.error(error) // Debug.
         res.status(500).json({message: "Error creating Kontrak."})
