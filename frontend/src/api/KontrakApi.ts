@@ -55,3 +55,33 @@ export function useCreateKontrak() {
 
     return {createKontrak, isLoading}
 }
+
+type GetKontrakPekerjaansRequest = {
+    nama_mitra: string,
+    nomor_kontrak: string
+}
+
+export function useGetKontrakPekerjaans(detailKontrak: GetKontrakPekerjaansRequest) {
+    async function useGetKontrakPekerjaansRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/kontrak/pekerjaans`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(detailKontrak),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error("Failed to get kontrak's pekerjaan(s).")
+        }
+        return response.json()
+    }
+    
+    const { data: kontrakPekerjaans, isLoading } = useQuery( "fetchKontrakPekerjaans", useGetKontrakPekerjaansRequest )
+    
+    return { kontrakPekerjaans, isLoading }
+}
+
