@@ -145,3 +145,48 @@ export function useGetMitras() {
     
     return { allMitra, isLoading }
 }
+
+type UpdateMitraRequest = {
+    nama_mitra: string,
+    alamat: string,
+    nomor_telepon: string
+}
+
+export function useUpdateMitra() {
+    async function useUpdateMitraRequest(mitra: UpdateMitraRequest) {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/mitra`, {
+            method: 'PATCH',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(mitra),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to update mitra.')
+        }
+        return response.json()
+    }
+    
+    const {
+        mutateAsync: updateMitra,
+        isLoading,
+        isSuccess,
+        error,
+        reset
+    } = useMutation(useUpdateMitraRequest)
+    
+    if (isSuccess) {
+        toast.success("Update Mitra Berhasil!")
+    }
+
+    if (error) {
+        // toast.error(error.toString()) .debug
+        reset()
+    }
+    
+    return { updateMitra, isLoading }
+}
