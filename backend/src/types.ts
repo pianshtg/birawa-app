@@ -10,6 +10,7 @@ export type TenagaKerja = {
 }
 
 export type Dokumentasi = {
+    url?: string,
     deskripsi: string
 }
 
@@ -24,4 +25,14 @@ export type Cuaca = {
     waktu: string,
     waktu_mulai: string,
     waktu_berakhir: string,
+}
+
+export type laporanAktivitas = {
+    mitra_nama: string,
+    kontrak_nomor: string,
+    kontrak_ss_pekerjaan_nama: string,
+    laporan_tanggal: string,
+    tipe_aktivitas_nama: string,
+    aktivitas_nama: string,
+    dokumentasi_arr: Dokumentasi[]
 }
