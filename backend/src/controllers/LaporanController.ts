@@ -343,7 +343,7 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
                 })
                 return
             } else {
-                res.status(409).json({message: "Failed to find Pekerjaan."})
+                res.status(409).json({message: "Failed to find pekerjaan."})
                 return
             }
         } else {
@@ -373,7 +373,8 @@ async function getLaporans(req: Request, res: Response) {
             if (laporan.length > 0) {
                 res.status(409).json({
                     message: "Successfully retrieved all laporan.",
-                    laporan
+                    laporan,
+                    newAccessToken
                 })
                 return
             } else {
