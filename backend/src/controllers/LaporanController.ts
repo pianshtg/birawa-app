@@ -3,7 +3,7 @@ import { pool } from "../database";
 import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
 import jwt from 'jsonwebtoken'
-import { Aktivitas, Cuaca, Dokumentasi, TenagaKerja } from "../types";
+import { Aktivitas, Cuaca, Dokumentasi, laporanAktivitas, TenagaKerja } from "../types";
 import { uploadImages } from "../lib/utils";
 
 async function createLaporan(req: Request, res: Response) {
@@ -239,16 +239,75 @@ async function getLaporan(req: Request, res: Response) {
             
             if (existingLaporan.length > 0) {
                 const [laporanTenagaKerja] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, s.nama AS shift_nama, s.waktu_mulai AS shift_waktu_mulai, s.waktu_berakhir AS shift_waktu_berakhir, ptk.nama AS peran_tenaga_kerja_nama, tk.jumlah AS tenaga_kerja_jumlah FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN tenaga_kerja tk ON ksp.id = tk.kontrak_ss_pekerjaan_id AND l.tanggal = tk.tanggal JOIN shift s ON tk.shift_id = s.id JOIN peran_tenaga_kerja ptk ON tk.peran_tenaga_kerja_id = ptk.id WHERE l.id = ? AND l.deleted_at IS NULL', [laporanId])
-                const [laporanAktivitas] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, ta.nama AS tipe_aktivitas_nama, a.nama AS aktivitas_nama FROM  laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN  mitra m ON k.mitra_id = m.id JOIN aktivitas a ON ksp.id = a.kontrak_ss_pekerjaan_id AND l.tanggal = a.tanggal JOIN  tipe_aktivitas ta ON a.tipe_aktivitas_id = ta.id WHERE  l.id = ? AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND k.deleted_at IS NULL AND ksp.deleted_at IS NULL AND a.deleted_at IS NULL AND ta.deleted_at IS NULL', [laporanId])
+                const [laporanAktivitasRaw] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, ta.nama AS tipe_aktivitas_nama, a.nama AS aktivitas_nama, d.link AS url, d.deskripsi AS deskripsi FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN aktivitas a ON ksp.id = a.kontrak_ss_pekerjaan_id AND l.tanggal = a.tanggal JOIN tipe_aktivitas ta ON a.tipe_aktivitas_id = ta.id LEFT JOIN dokumentasi d ON a.id = d.aktivitas_id WHERE  l.id = ? AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND k.deleted_at IS NULL AND ksp.deleted_at IS NULL AND a.deleted_at IS NULL AND ta.deleted_at IS NULL', [laporanId])
+                
+                // Group the laporanTenagaKerja by shift_nama and peran_tenaga_kerja_nama
+                const groupedLaporanTenagaKerja = laporanTenagaKerja.reduce((acc: any, row: any) => {
+                    const shiftKey = row.shift_nama;
+                
+                    if (!acc[shiftKey]) {
+                        acc[shiftKey] = {
+                            shift_nama: row.shift_nama,
+                            shift_waktu_mulai: row.shift_waktu_mulai,
+                            shift_waktu_berakhir: row.shift_waktu_berakhir,
+                            peran_tenaga_kerja_arr: []
+                        };
+                    }
+                
+                    const peranTenagaKerja = acc[shiftKey].peran_tenaga_kerja_arr.find((ptk: any) => ptk.nama === row.peran_tenaga_kerja_nama);
+                    if (!peranTenagaKerja) {
+                        acc[shiftKey].peran_tenaga_kerja_arr.push({
+                            nama: row.peran_tenaga_kerja_nama,
+                            jumlah: row.tenaga_kerja_jumlah,
+                            aktivitas_arr: []
+                        });
+                    }
+                
+                    return acc;
+                }, {});
+                
+                // Map laporanAktivitasRaw to aktivitas_arr within the corresponding peran_tenaga_kerja
+                laporanAktivitasRaw.forEach((row: any) => {
+                    const tipeAktivitas = row.tipe_aktivitas_nama.split(' ').slice(1).join(' '); // Extract other than the first word
+                    const aktivitasNama = row.aktivitas_nama;
+                
+                    Object.values(groupedLaporanTenagaKerja).forEach((shift: any) => {
+                        shift.peran_tenaga_kerja_arr.forEach((ptk: any) => {
+                            const peranTenagaKerja = ptk.nama.split(' ').slice(1).join(' '); // Extract other than the first word
+                            if (tipeAktivitas === peranTenagaKerja) {
+                                // Find or add the aktivitas
+                                let aktivitas = ptk.aktivitas_arr.find((a: any) => a.nama === aktivitasNama);
+                                if (!aktivitas) {
+                                    aktivitas = {
+                                        nama: aktivitasNama,
+                                        dokumentasi_arr: []
+                                    };
+                                    ptk.aktivitas_arr.push(aktivitas);
+                                }
+                
+                                // Add dokumentasi
+                                if (row.deskripsi || row.url) {
+                                    aktivitas.dokumentasi_arr.push({
+                                        deskripsi: row.deskripsi,
+                                        url: row.url
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                // Convert the grouped object into an array
+                const laporan = Object.values(groupedLaporanTenagaKerja);
+                
                 res.status(200).json({
-                    message: "Successfully retrieved mitra's kontraks.",
-                    laporanTenagaKerja,
-                    laporanAktivitas,
+                    message: "Successfully retrieved laporan.",
+                    laporan,
                     newAccessToken
                 })
                 return
             } else {
-                res.status(409).json({message: "Failed to find Pekerjaan."})
+                res.status(409).json({message: "Failed to find laporan."})
                 return
             }
         } else {
