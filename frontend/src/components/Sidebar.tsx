@@ -78,6 +78,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       isActive ? 'bg-primary text-white' : 'text-primary bg-transparent hover:bg-opacitynav/85'
                     }`
                   }
+                  reloadDocument
                 >
                   <span className="flex items-center justify-center">
                     {item.icon}
