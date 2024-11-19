@@ -29,8 +29,7 @@ async function createMitra (req: Request, res: Response) {
                 // Checking if mitra already exists.
             const [existingMitra]= await connection.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [mitra.nama])
             if (existingMitra.length > 0) {
-                res.status(409).json({message: 'Mitra already exists.'})
-                return
+                throw new Error("Mitra already exists.")
             }
                 // Generate mitra id and insert mitra into the database
             const mitraId = uuidv4()
@@ -59,8 +58,7 @@ async function createMitra (req: Request, res: Response) {
                 //Checking if the user is already exists.
             const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [user.email])
             if (existingUser.length > 0) {
-                res.status(409).json({message: "User already exists."})
-                return
+                throw new Error("User already exists.")
             }
                 
                 // Assign id to user and insert it into the database.
