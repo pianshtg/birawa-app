@@ -85,3 +85,25 @@ export function useGetKontrakPekerjaans(detailKontrak: GetKontrakPekerjaansReque
     return { kontrakPekerjaans, isLoading }
 }
 
+export function getKontraks() {
+    async function useGetKontraksRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/kontrak/all`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to get all user.')
+        }
+        return response.json()
+    }
+    
+    const { data: allKontrak, isLoading } = useQuery( "fetchMitra", useGetKontraksRequest )
+    
+    return { allKontrak, isLoading }
+}
