@@ -7,18 +7,24 @@ import { ChevronDown } from 'lucide-react';
 import {z} from "zod";
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
 interface Country {
   code: CountryCode;
   dialCode: string;
   name: string;
 }
 
-
-
-const formSchema = z.object({
+const formTambahMitraSchema = z.object({
   // Informasi Mitra
   namaPerusahaan: z.string().min(1, "Nama perusahaan wajib diisi").max(3, "Nama perusahaan terlalu panjang"),
   alamatPerusahaan: z.string().min(1, "Alamat perusahaan wajib diisi").max(3, "Alamat perusahaan terlalu panjang"),
@@ -27,16 +33,28 @@ const formSchema = z.object({
   // Detail Kontrak
   namaKontrak: z.string().min(1, "Nama kontrak wajib diisi").max(40, "Nama kontrak terlalu panjang"),
   nomorKontrak: z.string().min(1, "Nomor kontrak wajib diisi").max(20, "Nomor kontrak terlalu panjang"),
-  nilaiKontrak: z.number().min(1, "Nilai kontrak wajib diisi").max(14, "Nilai kontrak terlalu panjang"),
+  nilaiKontrak: z.preprocess(
+    (value) => parseFloat(value as string), // Ubah string menjadi angka
+    z.number().min(1, "Nilai kontrak wajib diisi").max(14, "Nilai kontrak terlalu panjang")
+  ),
   tanggalKontrak: z.string().min(1, "Tanggal kontrak wajib diisi").max(10, "Format tanggal tidak valid"), // Asumsi format YYYY-MM-DD
-  jangkaWaktu: z.number().min(1, "Jangka waktu wajib diisi").max(5, "Jangka waktu terlalu panjang"),
+  jangkaWaktu: z.preprocess(
+    (value) => parseFloat(value as string),
+    z.number().min(1, "Jangka waktu wajib diisi").max(5, "Jangka waktu terlalu panjang")
+  ),
 
   // Akun Mitra
   namaLengkapUser: z.string().min(1, "Nama lengkap wajib diisi").max(40, "Nama lengkap terlalu panjang"),
   nomorTeleponUser: z.string().min(1, "Nomor telepon wajib diisi").max(20, "Nomor telepon terlalu panjang"),
   emailUser: z.string().email("Email tidak valid").max(55, "Email terlalu panjang")
 });
-export type TambahMitraSchema = z.infer<typeof formSchema>
+
+const formTambahPekerjaanSchema =  z.object({
+  namaPekerjaan: z.string().min(1,"Nama Pekerjaan wajib diisi").max(2,"Nama pekerjaan terlalu panjang"),
+  lokasiPekerjaan: z.string().min(1,"lokasi Pekerjaan wajib diisi").max(2,"Lokasi pekerjaan terlalu panjang")
+});
+export type TambahMitraSchema = z.infer<typeof formTambahMitraSchema>
+export type TambahPekerjaanSchema = z.infer<typeof formTambahPekerjaanSchema>
 
 export default function TambahMitraPage() {
   // Phone input states
@@ -45,12 +63,26 @@ export default function TambahMitraPage() {
   const [companyPhoneNumber, setCompanyPhoneNumber] = useState<string>('');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isCompanyPhoneOpen, setIsCompanyPhoneOpen] = useState<boolean>(false);
+  const [pekerjaanList, setPekerjaanList] = useState<{ namaPekerjaan: string; lokasiPekerjaan: string }[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const form = useForm<TambahMitraSchema>({
-    resolver: zodResolver(formSchema)
+  const formTambahMitra = useForm<TambahMitraSchema>({
+    resolver: zodResolver(formTambahMitraSchema)
   })
+  const formTambahPekerjaan = useForm<TambahPekerjaanSchema>({
+    resolver: zodResolver(formTambahPekerjaanSchema)
+  })
+  const handleDialogSubmit = (data: TambahPekerjaanSchema) => {
+    setPekerjaanList((prev) => [...prev, data]);
+    setIsDialogOpen(false);
+    formTambahPekerjaan.reset();
+  };
 
-  // Get all countries and their calling codes
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+
   const countries: Country[] = getCountries().map(country => ({
     code: country,
     dialCode: `+${getCountryCallingCode(country)}`,
@@ -75,9 +107,9 @@ export default function TambahMitraPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold mb-6">Tambah Mitra</h1>
-      <Form {...form} >
+      <Form {...formTambahMitra} >
         <form 
-          onSubmit={onSubmit}
+          onSubmit={formTambahMitra.handleSubmit(onSubmit)}
         >
           <Accordion title='Informasi Mitra'>
             <ShadowContainer 
@@ -86,7 +118,7 @@ export default function TambahMitraPage() {
               <div className="mb-6">
                 <div className="grid grid-cols-2 gap-4"> 
                   <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='namaPerusahaan'
                     render={({field}) => (
                       <FormItem>
@@ -94,11 +126,12 @@ export default function TambahMitraPage() {
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Nama Perusahaan disini" type="text"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='alamatPerusahaan'
                     render={({field}) => (
                       <FormItem>
@@ -106,6 +139,7 @@ export default function TambahMitraPage() {
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Alamat Perusahaan disini" type="text"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
@@ -160,7 +194,7 @@ export default function TambahMitraPage() {
               <div className="mb-6">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='namaKontrak'
                     render={({field}) => (
                       <FormItem>
@@ -168,11 +202,12 @@ export default function TambahMitraPage() {
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Nama Kontrak disini" type="text"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='nomorKontrak'
                     render={({field}) => (
                       <FormItem>
@@ -180,11 +215,12 @@ export default function TambahMitraPage() {
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Nomor Kontrak disini" type="text"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='nilaiKontrak'
                     render={({field}) => (
                       <FormItem>
@@ -192,11 +228,12 @@ export default function TambahMitraPage() {
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Nilai Kontrak " type="number"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
                    <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='tanggalKontrak'
                     render={({field}) => (
                       <FormItem>
@@ -204,28 +241,79 @@ export default function TambahMitraPage() {
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input type="date"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
                    <FormField
-                    control={form.control}
+                    control={formTambahMitra.control}
                     name='jangkaWaktu'
                     render={({field}) => (
                       <FormItem>
-                        <FormLabel>Nilai Kontrak</FormLabel>
+                        <FormLabel>Jangka Waktu</FormLabel>
                         <FormControl className="relative top-[-4px] mb-7">
                           <Input placeholder="Masukan Jangka Waktu Kontrak " type="number"  {...field} required/>
                         </FormControl>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
                 </div>
 
                 <div className="w-full flex justify-end mt-4">
-                  <Button className="bg-red-600 text-white p-2 rounded w-40">
+                  <Button className="bg-red-600 text-white p-2 rounded w-40" type='button' onClick={handleOpenDialog}>
                     Tambah Pekerjaan
                   </Button>
                 </div>
+
+                {isDialogOpen && (
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Tambah Pekerjaan</DialogTitle>
+                        <DialogDescription>
+
+                        <Form {...formTambahPekerjaan}>
+
+                          <form 
+                          onSubmit={formTambahPekerjaan.handleSubmit(handleDialogSubmit)}
+                          className='flex flex-col gap-y-4'
+                          >
+                            <FormField
+                              control={formTambahPekerjaan.control}
+                              name='namaPekerjaan'
+                              render={({field}) => (
+                                <FormItem>
+                                  <FormLabel>Nama Pekerjaan</FormLabel>
+                                  <FormControl className="relative top-[-4px] mb-7">
+                                    <Input placeholder="Ketik di sini" type="text"  {...field} required/>
+                                  </FormControl>
+                                  <FormMessage/>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={formTambahPekerjaan.control}
+                              name='lokasiPekerjaan'
+                              render={({field}) => (
+                                <FormItem>
+                                  <FormLabel>Lokasi Pekerjaan</FormLabel>
+                                  <FormControl className="relative top-[-4px] mb-7">
+                                     <Input placeholder="Ketik di sini" type="text" {...field} required />
+                                  </FormControl>
+                                  <FormMessage/>
+                                </FormItem>
+                              )}
+                            />
+                            <Button type='submit'> Simpan</Button>
+                          </form>
+                        </Form>
+                         
+                        </DialogDescription>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                )}
 
                 <div className="w-full mt-4 ">
                   <div className="w-full">
@@ -237,10 +325,20 @@ export default function TambahMitraPage() {
                         </tr>
                       </thead>
                       <tbody>
+                      {pekerjaanList.length === 0 ? (
                         <tr>
-                          <td className="p-4">Belum ada pekerjaan yang ditambah</td>
-                          <td>Batam Century aman</td>
+                          <td className="p-4" colSpan={2}>
+                            Belum ada pekerjaan yang ditambah
+                          </td>
                         </tr>
+                      ) : (
+                        pekerjaanList.map((pekerjaan, index) => (
+                          <tr key={index}>
+                            <td className="p-4">{pekerjaan.namaPekerjaan}</td>
+                            <td className="p-4">{pekerjaan.lokasiPekerjaan}</td>
+                          </tr>
+                        ))
+                      )}
                       </tbody>
                     </table>
                   </div>
@@ -256,7 +354,7 @@ export default function TambahMitraPage() {
               <div className="mb-6">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
-                      control={form.control}
+                      control={formTambahMitra.control}
                       name='namaLengkapUser'
                       render={({field}) => (
                         <FormItem>
@@ -264,11 +362,12 @@ export default function TambahMitraPage() {
                           <FormControl className="relative top-[-4px] mb-7">
                             <Input placeholder="Masukan Nama User disini" type="text"  {...field} required/>
                           </FormControl>
+                          <FormMessage/>
                         </FormItem>
                       )}
                     />
                     <FormField
-                      control={form.control}
+                      control={formTambahMitra.control}
                       name='emailUser'
                       render={({field}) => (
                         <FormItem>
@@ -276,6 +375,7 @@ export default function TambahMitraPage() {
                           <FormControl className="relative top-[-4px] mb-7">
                             <Input placeholder="Masukan Email User disini" type="email"  {...field} required/>
                           </FormControl>
+                          <FormMessage/>
                         </FormItem>
                       )}
                     />
