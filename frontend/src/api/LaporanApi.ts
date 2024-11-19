@@ -59,3 +59,26 @@ export function useCreateLaporan() {
 
     return {createLaporan, isLoading}
 }
+
+export function useGetLaporan(id: string) {
+    async function useGetLaporanRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/laporan/${id}`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to get laporan.')
+        }
+        return response.json()
+    }
+    
+    const { data: laporan, isLoading } = useQuery( "fetchLaporan", useGetLaporanRequest )
+    
+    return { laporan, isLoading }
+}
