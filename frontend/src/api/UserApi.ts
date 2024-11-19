@@ -51,3 +51,26 @@ export function useCreateUser() {
 
     return {createUser, isLoading}
 }
+
+export function useGetUser() {
+    async function useGetUserRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/user`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to get user.')
+        }
+        return response.json()
+    }
+    
+    const { data: user, isLoading } = useQuery( "fetchMitra", useGetUserRequest )
+    
+    return { user, isLoading }
+}
