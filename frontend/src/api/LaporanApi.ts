@@ -82,3 +82,33 @@ export function useGetLaporan(id: string) {
     
     return { laporan, isLoading }
 }
+
+type GetPekerjaanLaporansRequest = {
+    nama_mitra: string,
+    nomor_kontrak: string,
+    nama_pekerjaan: string
+}
+
+export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest) {
+    async function useGetPekerjaanLaporansRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/laporan/laporan-pekerjaan`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(pekerjaan),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error("Failed to get pekerjaan's laporan(s).")
+        }
+        return response.json()
+    }
+    
+    const { data: pekerjaanLaporans, isLoading } = useQuery( "fetchPekerjaanLaporans", useGetPekerjaanLaporansRequest )
+    
+    return { pekerjaanLaporans, isLoading }
+}
