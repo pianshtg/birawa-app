@@ -3,7 +3,7 @@ import {QueryClient, QueryClientProvider} from 'react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import AppRoutes from './AppRoutes.tsx'
-import './index.css'
+import './global.css'
 import { Toaster } from 'sonner'
 
 const queryClient = new QueryClient({

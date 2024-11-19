@@ -117,3 +117,15 @@
   scrollbar-width: thin; /* Makes the scrollbar thinner */
   scrollbar-color: #797979; /* thumb color track color */
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.flex::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+/* .flex {
+  /* -ms-overflow-style: none;  IE and Edge */
+  /* scrollbar-width: none;  Firefox */
+  /* scroll-behavior: smooth; Enables smooth scrolling */
+
