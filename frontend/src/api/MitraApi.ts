@@ -74,3 +74,28 @@ export function useGetMitra(nama_mitra: string) {
     
     return { mitra, isLoading }
 }
+
+export function useGetMitraUsers(nama_mitra: string) {
+    async function useGetMitraUsersRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/mitra/users`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(nama_mitra),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error("Failed to get mitra's users.")
+        }
+        return response.json()
+    }
+    
+    const { data: mitraUsers, isLoading } = useQuery( "fetchMitraUsers", useGetMitraUsersRequest )
+    
+    return { mitraUsers, isLoading }
+}
+
