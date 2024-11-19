@@ -299,15 +299,23 @@ JOIN (
     UNION ALL
     SELECT 'admin', 'get_mitra_kontraks'
     UNION ALL
+    SELECT 'admin', 'create_kontrak'
+    UNION ALL
     SELECT 'admin', 'get_kontrak_pekerjaans'
     UNION ALL
     SELECT 'admin', 'view_all_kontrak'
     UNION ALL
     SELECT 'admin', 'get_laporan'
     UNION ALL
+    SELECT 'admin', 'get_pekerjaan_laporans'
+    UNION ALL
     SELECT 'admin', 'view_all_laporan'
     UNION ALL
     SELECT 'mitra', 'get_user'
+    UNION ALL
+    SELECT 'admin', 'update_user'
+    UNION ALL
+    SELECT 'mitra', 'get_mitra'
     UNION ALL
     SELECT 'mitra', 'get_mitra_kontraks'
     UNION ALL
