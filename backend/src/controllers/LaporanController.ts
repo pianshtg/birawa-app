@@ -333,7 +333,14 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
         const permissions = metaData.permissions
         
         if (permissions.includes('get_pekerjaan_laporans')) {
-            const {nama_mitra, nomor_kontrak, nama_pekerjaan} = req.body
+            const nama_mitra = metaData.nama_mitra || req.body.nama_mitra
+            
+            if (!nama_mitra) {
+                res.status(400).json({message: "Nama mitra is required."})
+                return
+            }
+
+            const {nomor_kontrak, nama_pekerjaan} = req.body
             const [existingPekerjaanLaporans] = await pool.execute<RowDataPacket[]>('SELECT laporan.id, kontrak_ss_pekerjaan.nama, laporan.tanggal FROM laporan INNER JOIN kontrak_ss_pekerjaan ON kontrak_ss_pekerjaan.id = laporan.kontrak_ss_pekerjaan_id INNER JOIN kontrak ON kontrak_ss_pekerjaan.kontrak_id = kontrak.id INNER JOIN mitra ON kontrak.mitra_id = mitra.id WHERE mitra.nama = ? AND kontrak.nomor = ? AND kontrak_ss_pekerjaan.nama = ?', [nama_mitra, nomor_kontrak, nama_pekerjaan])
             if (existingPekerjaanLaporans.length > 0) {
                 res.status(200).json({

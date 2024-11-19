@@ -207,7 +207,12 @@ async function getMitraKontraks(req: Request, res: Response) {
         const permissions = metaData.permissions
         
         if (permissions.includes('get_mitra_kontraks')) {
-            const {nama_mitra} = req.body
+            const nama_mitra = metaData.nama_mitra || req.body.nama_mitra
+            
+            if (!nama_mitra) {
+                res.status(400).json({message: "Nama mitra is required."})
+                return
+            }
             
             const [existingMitraKontraks] = await pool.execute<RowDataPacket[]>('SELECT kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu FROM kontrak INNER JOIN mitra ON kontrak.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])
             if (existingMitraKontraks.length > 0) {
@@ -271,11 +276,17 @@ async function updateMitra (req: Request, res: Response) {
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
         // console.log(metaData) // Debug.
         const permissions = metaData.permissions
-
         
         if (permissions.includes('update_mitra')) {
+            const nama_mitra = metaData.nama_mitra || req.body.nama_mitra
+            
+            if (!nama_mitra) {
+                res.status(400).json({message: "Nama mitra is required."})
+                return
+            }
+            
             // Get request parameters.
-            const {nama_mitra, alamat, nomor_telepon} = req.body
+            const {alamat, nomor_telepon} = req.body
             
             const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT * FROM mitra WHERE nama = ?', [nama_mitra])
             if (existingMitra.length > 0) {
