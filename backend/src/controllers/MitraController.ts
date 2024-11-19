@@ -287,7 +287,10 @@ async function updateMitra (req: Request, res: Response) {
                 })
                 return
             } else {
-                res.status(409).json({message: "Failed to find mitra."})
+                res.status(409).json({
+                    message: "Failed to find mitra.",
+                    newAccessToken
+                })
                 return
             }
             
