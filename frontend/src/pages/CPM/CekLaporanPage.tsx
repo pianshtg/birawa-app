@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
-import { FaCalendarAlt, FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaChevronDown } from 'react-icons/fa';
 import { Combobox } from '@headlessui/react';
-import { id as idLocale } from 'date-fns/locale';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { PDFViewer } from '@react-pdf/renderer';
 import ReportTemplate from './ReportTemplate';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
-//option dropdown
+// Options dropdown
 const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C'];
 
 const CekLaporan: React.FC = () => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedMitra, setSelectedMitra] = useState<string>('');
   const [selectedKontrak, setSelectedKontrak] = useState<string>('');
   const [selectedPekerjaan, setSelectedPekerjaan] = useState<string>('');
   const [showPDF, setShowPDF] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-  const prevMonth = () => setCurrentMonth(addMonths(currentMonth, -1));
-
+  // Generate all dates in the current month
   const getDaysInMonth = (month: Date) => {
     const start = startOfMonth(month);
     const end = endOfMonth(month);
@@ -32,58 +37,87 @@ const CekLaporan: React.FC = () => {
     setShowPDF(true);
   };
 
+  // Navigation for previous and next month
+  const prevMonth = () => setCurrentMonth(addMonths(currentMonth, -1));
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+
   return (
     <div className="p-6">
-      <div className="text-sm text-gray-500 mb-2">Daftar Mitra / Cek Laporan</div>
       <h1 className="text-2xl font-semibold text-black mb-6">Cek Laporan</h1>
 
-      <div className="bg-white p-4 mb-6 border rounded-md " >
+      <div className="bg-white p-4 mb-6 border rounded-md">
         <div className="flex items-center justify-between">
+          {/* Pop-up Calendar */}
           <div className="flex items-center text-red-600 font-semibold mb-2">
-            <FaCalendarAlt className="mr-2" />
-            <span>{format(currentMonth, 'MMMM yyyy', { locale: idLocale })}</span>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date: Date | null) => setSelectedDate(date)}
+              dateFormat="dd/MM/yyyy"
+              popperPlacement="bottom-start"
+              popperClassName="react-datepicker-popper"
+              customInput={
+                <button className="flex items-center space-x-2 text-red-600 font-semibold">
+                  <FaCalendarAlt className="mr-2" />
+                  <span>{format(currentMonth, 'MMMM yyyy')}</span>
+                </button>
+              }
+            />
           </div>
+          {/* Navigation Buttons */}
           <div className="flex space-x-2">
-            <button onClick={prevMonth} className="px-1 py-1 text-xl text-red-600 hover:text-red-700">
-              <FaChevronLeft className="h-3 w-3" />
-            </button>
-            <button onClick={nextMonth} className="px-1 py-1 text-xl text-red-600 hover:text-red-700">
-              <FaChevronRight className="h-3 w-3" />
-            </button>
+            <TooltipProvider>
+              {/* Button for Previous Month */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button onClick={prevMonth} className="px-2 py-2 text-xl text-red-600 hover:text-red-700">
+                    <FaChevronLeft className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Bulan Sebelumnya</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Button for Next Month */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button onClick={nextMonth} className="px-2 py-2 text-xl text-red-600 hover:text-red-700">
+                    <FaChevronRight className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Bulan Selanjutnya</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 
-        
+        {/* Horizontal Date Navigation */}
         <div className="flex overflow-x-auto gap-x-4 pt-4">
           {daysInMonth.map((day) => {
-            const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+            const isSelected =
+              format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
             return (
               <div
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={`p-2 rounded-lg cursor-pointer text-center duration-200 ease-in-out mb-2 ${
                   isSelected
-                    ? 'bg-red-200 text-primary font-semibold -translate-y-1'
+                    ? 'bg-red-200 text-red-600 font-semibold -translate-y-1'
                     : 'text-gray-500 hover:bg-gray-200 font-medium'
                 }`}
                 style={{ minWidth: '40px' }}
               >
                 <div>{format(day, 'd')}</div>
-                <div className={`text-xs ${isSelected ? 'text-primary font-semibold' : 'text-gray-500 font-medium'}`}>
-                  {format(day, 'EEE', { locale: idLocale }).slice(0, 3)}
+                <div className={`text-xs ${isSelected ? 'text-red-600 font-semibold' : 'text-gray-500 font-medium'}`}>
+                  {format(day, 'EEE').slice(0, 3)}
                 </div>
-                { isSelected ?  
-                <p>.</p>
-                : 
-                <> </>
-                }
               </div>
             );
           })}
         </div>
       </div>
-
-      
 
       {/* Form dengan Dropdown */}
       <div className="bg-white p-6 rounded-md border">
@@ -112,7 +146,10 @@ const CekLaporan: React.FC = () => {
         </div>
 
         <div className="text-right">
-          <button onClick={handleShowPDF} className="bg-red-600 text-white py-2 px-6 rounded-md font-semibold hover:bg-red-700 transition">
+          <button
+            onClick={handleShowPDF}
+            className="bg-red-600 text-white py-2 px-6 rounded-md font-semibold hover:bg-red-700 transition"
+          >
             Tampilkan Laporan
           </button>
         </div>
@@ -158,14 +195,12 @@ const ComboboxComponent: React.FC<{
               placeholder={placeholder}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <FaChevronDown className="h-4 w-4 text-gray-500" /> 
+              <FaChevronDown className="h-4 w-4 text-gray-500" />
             </Combobox.Button>
           </div>
           <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
             {filteredOptions.length === 0 ? (
-              <div className="cursor-default select-none py-2 px-4 text-gray-700">
-                No results found.
-              </div>
+              <div className="cursor-default select-none py-2 px-4 text-gray-700">No results found.</div>
             ) : (
               filteredOptions.map((option) => (
                 <Combobox.Option
