@@ -50,3 +50,27 @@ export function useCreateMitra () {
 
     return {createMitra, isLoading}
 }
+
+export function useGetMitra(nama_mitra: string) {
+    async function useGetMitraRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/mitra`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(nama_mitra),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to get mitra.')
+        }
+        return response.json()
+    }
+    
+    const { data: mitra, isLoading } = useQuery( "fetchMitra", useGetMitraRequest )
+    
+    return { mitra, isLoading }
+}
