@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export async function getCsrfToken() {
     const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token`, {
@@ -54,7 +54,7 @@ export function useSignInUser () {
     }
 
     if (error) {
-        // toast.error(error.toString()) .debug
+        // toast.error(error.toString()) //Debug.
         reset()
     }
 
@@ -63,18 +63,19 @@ export function useSignInUser () {
 
 export function useAuth () {
     async function useAuthRequest() {
-        const csrfToken = await getCsrfToken()
+        // const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/auth`, {
             method: 'POST',
             headers: {
-                "X-CSRF-TOKEN": csrfToken
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken
             },
             credentials: 'include',
         })
 
         if (!response.ok) {
-            // const errorDetails = await response.text();
-            // console.error('Authentication failed:', response.status, errorDetails);
+            const errorDetails = await response.text();
+            console.error('Authentication failed:', response.status, errorDetails);
             throw new Error("Authentication failed!");
         }
         
