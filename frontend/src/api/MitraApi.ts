@@ -99,3 +99,27 @@ export function useGetMitraUsers(nama_mitra: string) {
     return { mitraUsers, isLoading }
 }
 
+export function useGetMitraKontraks(nama_mitra: string) {
+    async function useGetMitraKontraksRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/mitra/kontraks`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(nama_mitra),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to get mitra.')
+        }
+        return response.json()
+    }
+    
+    const { data: mitraKontraks, isLoading } = useQuery( "fetchMitraKontraks", useGetMitraKontraksRequest )
+    
+    return { mitraKontraks, isLoading }
+}
+
