@@ -74,3 +74,26 @@ export function useGetUser() {
     
     return { user, isLoading }
 }
+
+export function useGetUsers() {
+    async function useGetUsersRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/user/all`, {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to get all user.')
+        }
+        return response.json()
+    }
+    
+    const { data: allUser, isLoading } = useQuery( "fetchMitra", useGetUsersRequest )
+    
+    return { allUser, isLoading }
+}
