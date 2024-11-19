@@ -97,3 +97,47 @@ export function useGetUsers() {
     
     return { allUser, isLoading }
 }
+
+type UpdateUserRequest = {
+    nama_lengkap: string,
+    nomor_telepon: string
+}
+
+export function useUpdateUser() {
+    async function useUpdateUserRequest(user: UpdateUserRequest) {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/user`, {
+            method: 'PATCH',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify(user),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error('Failed to update user.')
+        }
+        return response.json()
+    }
+    
+    const {
+        mutateAsync: updateUser,
+        isLoading,
+        isSuccess,
+        error,
+        reset
+    } = useMutation(useUpdateUserRequest)
+    
+    if (isSuccess) {
+        toast.success("Update User Berhasil!")
+    }
+
+    if (error) {
+        // toast.error(error.toString()) .debug
+        reset()
+    }
+    
+    return { updateUser, isLoading }
+}
