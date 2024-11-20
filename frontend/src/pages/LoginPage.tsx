@@ -1,24 +1,27 @@
 import { useSignInUser } from "@/api/AuthApi"
 import LoadingButton from "@/components/LoadingButton"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 import { z } from "zod"
+import { Eye, EyeOff } from 'lucide-react';
 // import LoginForm from "@/components/custom/organism/LoginForm"
 import LogoTelkom from "@/assets/BirawaLogo.png"
+import { useState } from "react"
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1)
-})
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required")
+});
 
 export type SignInSchema = z.infer<typeof formSchema>
 
 const Login = () => {
   const {signInUser, isLoading } = useSignInUser()
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<SignInSchema>({
     resolver: zodResolver(formSchema)
@@ -57,6 +60,7 @@ const Login = () => {
                   <FormControl className="relative top-[-4px] mb-7">
                     <Input placeholder="Masukan  Email Anda" type="email"  {...field} required/>
                   </FormControl>
+                  <FormMessage/>
                 </FormItem>
               )}
             />
@@ -65,10 +69,29 @@ const Login = () => {
               name='password'
               render={({field}) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl className="relative top-[-4px]">
-                    <Input placeholder="Masukan Password Anda" type='password' className="font-sans" {...field} required />
-                  </FormControl>
+                  <FormLabel className="text-gray-700">Password</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        className="w-full pr-10"
+                        {...field}
+                      />
+                    </FormControl>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? (
+                        <EyeOff size={21}/>
+                      ) : (
+                        <Eye size={21} />
+                      )}
+                    </button>
+                  </div>
+                  <FormMessage/>
                 </FormItem>
               )}
             />
