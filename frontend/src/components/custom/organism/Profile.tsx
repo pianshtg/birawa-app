@@ -37,18 +37,17 @@ export type CompanyProfileSchema = z.infer<typeof formCompanySchema>
 
 
 const Profile = () => {
-    const [isEditingPersonal, setIsEditingPersonal] = useState<boolean>(false);
-    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [activeEditMode, setActiveEditMode] = useState<'none' | 'personal' | 'company'>('none');
     const { toast } = useToast()
 
 
-  const formEditProfile = useForm<UserProfileSchema>({
-    resolver: zodResolver(formUserProfileSchema),
-    defaultValues:{
-        fullName:"aa",
-        personalEmail:"aa@gmail.com",
-        personalPhone:"0785656756",
-    }
+    const formEditProfile = useForm<UserProfileSchema>({
+      resolver: zodResolver(formUserProfileSchema),
+      defaultValues:{
+          fullName:"aa",
+          personalEmail:"aa@gmail.com",
+          personalPhone:"0785656756",
+      }
     })
 
     const formEditCompany = useForm<CompanyProfileSchema>({
@@ -58,25 +57,63 @@ const Profile = () => {
           companyAddress:"aa",
           companyPhone:"ad",
       }
-      })
+    })
 
     const handleEditCompany = () => {
-      if (!isEditing) {
-        formEditCompany.reset();
-      }
-      setIsEditing((prev) => !prev);
-      };
+        if (activeEditMode === 'company') {
+            // Canceling edit mode
+            formEditCompany.reset({
+                companyName:"aa",
+                companyAddress:"aa",
+                companyPhone:"ad",
+            });
+            setActiveEditMode('none');
+            toast({
+                title: "Edit Mode Dibatalkan",
+                description: "Perubahan dibatalkan",
+                variant: "information"
+            });
+        } else if (activeEditMode === 'none') {
+            // Entering company edit mode
+            formEditCompany.reset();
+            setActiveEditMode('company');
+            toast({
+                title: "Edit Mode Diaktifikan",
+                description: "Anda Bisa Mengubah data di Perusahaan anda",
+                variant: "warning"
+            });
+        }
+    };
 
     const handleEditPersonal = () => {
-      if (!isEditingPersonal) {
-        formEditProfile.reset();
-      }
-      setIsEditingPersonal((prev) => !prev);
-      };
+        if (activeEditMode === 'personal') {
+            // Canceling edit mode
+            formEditProfile.reset({
+                fullName:"aa",
+                personalEmail:"aa@gmail.com",
+                personalPhone:"0785656756",
+            });
+            setActiveEditMode('none');
+            toast({
+                title: "Edit Mode Dibatalkan",
+                description: "Perubahan dibatalkan",
+                variant: "information"
+            });
+        } else if (activeEditMode === 'none') {
+            // Entering personal edit mode
+            formEditProfile.reset();
+            setActiveEditMode('personal');
+            toast({
+                title: "Edit Mode Diaktifikan",
+                description: "Anda Bisa Mengubah data Pribadi anda",
+                variant: "warning"
+            });
+        }
+    };
 
     const handleSubmitUserPersonal = (data:UserProfileSchema ) => {
       console.log("adalah",data);
-      setIsEditingPersonal(false);
+      setActiveEditMode('none');
       toast({
         title: "Data diri Anda telah diubah",
         description: "Pastikan data diri anda sudah benar",
@@ -85,7 +122,7 @@ const Profile = () => {
 
     const handleSubmitCompanyProfile = (data:CompanyProfileSchema ) => {
       console.log("adalah",data);
-      setIsEditing(false);
+      setActiveEditMode('none');
       toast({
         title: "Data Perusahaan Anda telah diubah",
         description: "Pastikan data diri anda sudah benar",
@@ -97,7 +134,7 @@ const Profile = () => {
       {/* Profil Anda */}
       <div className='border-b-2 flex justify-between border-gray-200 py-3'>
         <div>
-          {isEditingPersonal ? (
+          {activeEditMode === 'personal' ? (
             <>
               <h1 className="text-2xl font-semibold mb-2">Edit Profil Anda</h1>
               <p className='text-sm font-medium text-gray-500'>Perbarui data pribadi anda disini</p>
@@ -110,8 +147,12 @@ const Profile = () => {
           )}
         </div>
         <div className='w-fit flex items-center'>
-          <Button type='button' onClick={handleEditPersonal}>
-            {isEditingPersonal ? "Batal" : "Edit"}
+          <Button 
+            type='button' 
+            onClick={handleEditPersonal} 
+            disabled={activeEditMode === 'company'}
+            >
+              {activeEditMode === 'personal' ? "Batal" : "Edit"}
           </Button>
         </div>
       </div>
@@ -128,7 +169,7 @@ const Profile = () => {
                                 <Input
                                 placeholder="Masukkan Nama Lengkap Anda"
                                 className="w-full pr-10 mb-0"
-                                disabled={!isEditingPersonal}
+                                disabled={activeEditMode !== 'personal'}
                                 {...field} />
                             </FormControl>
                         <FormMessage/>
@@ -145,7 +186,7 @@ const Profile = () => {
                                 <Input
                                 placeholder="Masukkan Email Anda"
                                 className="w-full pr-10 mb-0"
-                                disabled={!isEditingPersonal}
+                                disabled={activeEditMode !== 'personal'}
                                 {...field} />
                             </FormControl>
                         <FormMessage/>
@@ -162,7 +203,7 @@ const Profile = () => {
                                 <Input
                                 placeholder="Masukkan Nomor Telepon Anda"
                                 className="w-full pr-10 mb-0"
-                                disabled={!isEditingPersonal}
+                                disabled={activeEditMode !== 'personal'}
                                 {...field} />
                             </FormControl>
                         <FormMessage/>
@@ -173,8 +214,9 @@ const Profile = () => {
           <div className='flex justify-end py-3 w-fit'>
             <Button 
               type='submit'
-              disabled={!isEditingPersonal}
-              >Simpan
+              disabled={activeEditMode !== 'personal'}
+              >
+                Simpan
             </Button>
           </div>
         </form>
@@ -184,22 +226,26 @@ const Profile = () => {
       {/* Profil Perusahaan */}
       <div className='border-b-2 flex justify-between border-gray-200 py-3'>
         <div>
-          {isEditing ? (
-            <>
-              <h1 className="text-2xl font-semibold mb-2">Edit Profil Perusahaan</h1>
-              <p className='text-sm font-medium text-gray-500'>Perbarui data perusahaan anda disini</p>
-            </>
-          ) : (
-            <>
-              <h1 className="text-2xl font-semibold mb-2">Profil Perusahaan</h1>
-              <p className='text-sm font-medium text-gray-500'>Data perusahaan anda</p>
-            </>
-          )}
+            {activeEditMode === 'company' ? (
+              <>
+                <h1 className="text-2xl font-semibold mb-2">Edit Profil Anda</h1>
+                <p className='text-sm font-medium text-gray-500'>Perbarui data pribadi anda disini</p>
+               </>
+              ) : (
+              <>
+                <h1 className="text-2xl font-semibold mb-2">Profil Anda</h1>
+                <p className='text-sm font-medium text-gray-500'>Data pribadi anda</p>
+              </>
+            )}
         </div>
         <div className='w-fit flex items-center'>
-          <Button type='button' onClick={handleEditCompany}>
-            {isEditing ? "Batal" : "Edit"}
-          </Button>
+          <Button 
+             type='button' 
+             onClick={handleEditCompany} 
+             disabled={activeEditMode === 'personal'}
+            >
+              {activeEditMode === 'company' ? "Batal" : "Edit"}
+            </Button>
         </div>
       </div>
       <Form {...formEditCompany}>
@@ -215,7 +261,7 @@ const Profile = () => {
                                 <Input
                                 placeholder="Masukkan Nama Perusahaan Anda"
                                 className="w-full pr-10 mb-0"
-                                disabled={!isEditing}
+                                disabled={activeEditMode !== 'company'}
                                 {...field} />
                             </FormControl>
                         <FormMessage/>
@@ -233,7 +279,7 @@ const Profile = () => {
                                 <Input
                                 placeholder="Masukkan Alamat Perusahaan Anda"
                                 className="w-full pr-10 mb-0"
-                                disabled={!isEditing}
+                                disabled={activeEditMode !== 'company'}
                                 {...field} />
                             </FormControl>
                         <FormMessage/>
@@ -251,7 +297,7 @@ const Profile = () => {
                                 <Input
                                 placeholder="Masukkan Nomor Telepon Perusahaan Anda"
                                 className="w-full pr-10 mb-0"
-                                disabled={!isEditing}
+                                disabled={activeEditMode !== 'company'}
                                 {...field} />
                             </FormControl>
                         <FormMessage/>
@@ -262,7 +308,10 @@ const Profile = () => {
           <div className='flex justify-end p-3 w-fit'>
             <Button 
               type='submit'
-              disabled={!isEditing}>Simpan</Button>
+              disabled={activeEditMode !== 'company'}
+              >
+                Simpan
+              </Button>
           </div>
         </form>
       </Form>
