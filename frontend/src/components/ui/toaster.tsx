@@ -13,7 +13,7 @@ export function Toaster() {
 
   return (
     // Durasi Toast 4detik
-    <ToastProvider duration={4000}>  
+    <ToastProvider duration={2000}>  
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>

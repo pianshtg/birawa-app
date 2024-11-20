@@ -3,6 +3,12 @@ import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Cross2Icon } from "@radix-ui/react-icons"
+import { 
+  CheckCircle2, 
+  Info, 
+  AlertTriangle, 
+  XCircle 
+} from "lucide-react"
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -13,7 +19,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-0 sm:right-0  sm:flex-col md:max-w-[420px]",
+      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-2 sm:right-6  sm:flex-col md:max-w-[420px]",
       className
     )}
     {...props}
@@ -27,6 +33,10 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "border bg-background text-foreground",
+        success: "bg-green-50 text-green-900 shadow-green-100 ",
+        information: "bg-blue-50 text-blue-900 shadow-blue-100 ",
+        danger: "bg-red-50 text-red-900 shadow-red-100",
+        warning: "bg-yellow-50 text-yellow-900 shadow-yellow-100",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
@@ -37,17 +47,36 @@ const toastVariants = cva(
   }
 )
 
+const toastIconMap = {
+  success: <CheckCircle2 className="mr-2 h-8 w-8 text-green-600" />,
+  information: <Info className="mr-2 h-8 w-8 text-blue-600" />,
+  danger: <XCircle className="mr-2 h-8 w-8 text-red-600" />,
+  warning: <AlertTriangle className="mr-2 h-8 w-8 text-yellow-600" />,
+  default: null,
+  destructive: <XCircle className="mr-2 h-8 w-8 text-destructive" />
+}
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+    VariantProps<typeof toastVariants> & {
+      icon? : boolean
+    }
+>(({ className, variant = "default", icon = true, children,  ...props }, ref) => {
+  const iconKey = (variant && variant in toastIconMap) ? variant : "default";
   return (
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
       {...props}
-    />
+    >
+     <div className="flex items-center w-full">
+       {icon && toastIconMap[iconKey as keyof typeof toastIconMap ] }
+        <div className="flex-1">
+          {children}
+        </div>
+      </div>
+    </ToastPrimitives.Root>
   )
 })
 Toast.displayName = ToastPrimitives.Root.displayName
