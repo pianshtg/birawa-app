@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { FaFileAlt} from "react-icons/fa";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {z} from "zod";
@@ -14,13 +13,13 @@ interface Mitra {
   nama: string;
   alamat: string;
   telepon: string;
-  contracts?: Contract[];
-  users?: User[];
+  contracts: Contract[];
+  users: User[];
 }
 
 interface Contract {
   id: number;
-  description?: string;
+  title: string;
   code?: string;
   nilaiKontrak?: number;
   tanggalKontrak?: string;
@@ -31,16 +30,23 @@ interface User {
   id: number;
   name: string;
   email: string;
-  status: string; // "active" or "blocked"
+  nomor: string;  // Menambahkan field nomor
+  status?: string;
 }
 
 //Tambah Kontrak
 const formAddContractSchema = z.object({
   namaKontrak: z.string().min(1, "Nama kontrak wajib diisi").max(40, "Nama kontrak terlalu panjang"),
   nomorKontrak: z.string().min(1, "Nomor kontrak wajib diisi").max(20, "Nomor kontrak terlalu panjang"),
-  nilaiKontrak: z.number().min(1, "Nilai kontrak wajib diisi").max(14, "Nilai kontrak terlalu panjang"),
+  nilaiKontrak: z.preprocess(
+    (value) => parseFloat(value as string),
+    z.number().min(1, "Nilai Kontrak harus lebih dari 1").max(1000000000000, "Nilai Kontrak Melebihi yang 1 Trilliun"),
+  ),
   tanggalKontrak: z.string().min(1, "Tanggal kontrak wajib diisi").max(10, "Format tanggal tidak valid"), // Asumsi format YYYY-MM-DD
-  jangkaWaktu: z.number().min(1, "Jangka waktu wajib diisi").max(5, "Jangka waktu terlalu panjang"),
+  jangkaWaktu: z.preprocess(
+    (value) => parseFloat(value as string),
+    z.number().min(1, "Jangka Waktu harus lebih dari 1").max(5475, "Jangka waktu terlalu panjang"),
+  ),
 })
 export type AddContractSchema = z.infer<typeof formAddContractSchema>;
 
@@ -48,7 +54,7 @@ export type AddContractSchema = z.infer<typeof formAddContractSchema>;
 const formAddUserSchema = z.object({
   namaPengguna: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang"),
   emailPengguna: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi"),
-  statusPengguna: z.enum(["active", "blocked"] as const),  // Ensure the enum is inferred as a literal type
+  nomorPengguna: z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
 })
 export type AddUserSchema = z.infer<typeof formAddUserSchema>;
 
@@ -56,9 +62,15 @@ export type AddUserSchema = z.infer<typeof formAddUserSchema>;
 const formEditContractSchema = z.object({
   namaKontrak: z.string().min(1, "Nama kontrak wajib diisi").max(40, "Nama kontrak terlalu panjang"),
   nomorKontrak: z.string().min(1, "Nomor kontrak wajib diisi").max(20, "Nomor kontrak terlalu panjang"),
-  nilaiKontrak: z.number().min(1, "Nilai kontrak wajib diisi").max(14, "Nilai kontrak terlalu panjang"),
+  nilaiKontrak:  z.preprocess(
+    (value) => parseFloat(value as string),
+    z.number().min(1, "Nilai Kontrak harus lebih dari 1").max(1000000000000, "Nilai Kontrak Melebihi yang 1 Trilliun"),
+  ),
   tanggalKontrak: z.string().min(1, "Tanggal kontrak wajib diisi").max(10, "Format tanggal tidak valid"), // Asumsi format YYYY-MM-DD
-  jangkaWaktu: z.number().min(1, "Jangka waktu wajib diisi").max(5, "Jangka waktu terlalu panjang"),
+  jangkaWaktu: z.preprocess(
+    (value) => parseFloat(value as string),
+    z.number().min(1, "Jangka Waktu harus lebih dari 1").max(5475, "Jangka waktu terlalu panjang"),
+  ),
 })
 export type EditContractSchema = z.infer<typeof formEditContractSchema>;
 
@@ -66,28 +78,128 @@ export type EditContractSchema = z.infer<typeof formEditContractSchema>;
 const formEditUserSchema = z.object({
   namaPengguna: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang"),
   emailPengguna: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi"),
-  statusPengguna: z.enum(["active", "blocked"] as const),
+  nomorPengguna: z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
+  statusPengguna: z.enum(["Aktif", "Belum Aktif"] as const),
 })
 export type EditUserSchema = z.infer<typeof formEditUserSchema>;
 
 
 const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra, onBack }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [contracts, setContracts] = useState<Contract[]>(mitra.contracts || []);
   const [users, setUsers] = useState<User[]>(mitra.users || []);
-  const [contractToEdit, setContractToEdit] = useState<Contract | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isEditContractDialogOpen, setIsEditContractDialogOpen] = useState(false);
+  const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
+  const [contractToEdit, setContractToEdit] = useState<Contract | null>(null);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
+  const [isDeleteContractDialogOpen, setIsDeleteContractDialogOpen] = useState(false);
+  const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
+  const [contractToDelete, setContractToDelete] = useState<Contract | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const formAddContract = useForm<AddContractSchema>({
     resolver: zodResolver(formAddContractSchema),
+    defaultValues:{
+      namaKontrak:"",
+      nomorKontrak:"",
+      nilaiKontrak:0,
+      tanggalKontrak:"",
+      jangkaWaktu:0,
+    }
   });
+
+  const formEditContract = useForm<EditContractSchema>({
+    resolver: zodResolver(formEditContractSchema),
+    defaultValues:{
+      namaKontrak:"",
+      nomorKontrak:"",
+      nilaiKontrak:0,
+      tanggalKontrak:"",
+      jangkaWaktu:0,
+    }
+  });
+
+  const formAddUser = useForm<AddUserSchema>({
+    resolver: zodResolver(formAddUserSchema),
+    defaultValues:{
+      namaPengguna:"",
+      emailPengguna:"",
+      nomorPengguna:"",
+    }
+  });
+
+  const formEditUser = useForm<EditUserSchema>({
+    resolver: zodResolver(formEditUserSchema),
+    defaultValues: {
+      namaPengguna: "",
+      emailPengguna: "",
+      nomorPengguna: "",
+      statusPengguna: "Belum Aktif",
+    }
+  });
+
+  // Controll all Edit Click
+  const handleEditContractClick = (e: React.MouseEvent, contract: Contract) => {
+    e.stopPropagation();
+    setContractToEdit(contract); // Set the contract to edit
+    setIsEditContractDialogOpen(true); // Open the edit contract dialog
+
+    formEditContract.reset({
+      namaKontrak: contract.title || "",
+      nomorKontrak: contract.code || "",
+      nilaiKontrak: contract.nilaiKontrak || 0,
+      tanggalKontrak: contract.tanggalKontrak || "",
+      jangkaWaktu: contract.jangkaWaktu || 0,
+    });
+  };  
+
+  const handleEditUserClick = (e: React.MouseEvent, user: User) => {
+    e.stopPropagation();
+    setUserToEdit(user);
+    setIsEditUserDialogOpen(true);
+
+    formEditUser.reset({
+      namaPengguna: user.name || "",
+      emailPengguna: user.email || "",
+      nomorPengguna: user.nomor || "",
+      statusPengguna: user.status as "Aktif" | "Belum Aktif" || "Belum Aktif",
+    });
+  };
+
+  const handleDeleteContractClick = (e: React.MouseEvent, contract: Contract) => {
+    e.stopPropagation();
+    setContractToDelete(contract);
+    setIsDeleteContractDialogOpen(true);
+  };
+
+  const handleDeleteUserClick = (e: React.MouseEvent, user: User) => {
+    e.stopPropagation();
+    setUserToDelete(user);
+    setIsDeleteUserDialogOpen(true);
+  };
+
+
+  // Controll all Submit (First)
+  const handleAddUserSubmit = (data: AddUserSchema) => {
+    const newUser: User = {
+      id: users.length + 1,
+      name: data.namaPengguna,
+      email: data.emailPengguna,
+      nomor: data.nomorPengguna,
+      
+    };
+  
+    setUsers([...users, newUser]);
+    setIsUserDialogOpen(false);
+    formAddUser.reset();
+  };
 
   const handleAddContractSubmit = (data: AddContractSchema) => {
     const newContract: Contract = {
       id: contracts.length + 1,
-      description: data.namaKontrak,
+      title: data.namaKontrak,
       code: data.nomorKontrak,
       nilaiKontrak: data.nilaiKontrak,
       tanggalKontrak: data.tanggalKontrak,
@@ -99,16 +211,14 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
     formAddContract.reset();
   };
 
-  const formEditContract = useForm<EditContractSchema>({
-    resolver: zodResolver(formEditContractSchema),
-  });
-  
+
+  // Controll all Submit (Edit Mode)
   const handleEditContractSubmit = (data: EditContractSchema) => {
     if (!contractToEdit) return; 
 
     const updatedContract: Contract = {
       ...contractToEdit,
-      description: data.namaKontrak,
+      title: data.namaKontrak,
       code: data.nomorKontrak,
       nilaiKontrak: data.nilaiKontrak,
       tanggalKontrak: data.tanggalKontrak,
@@ -127,32 +237,50 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
     formEditContract.reset();
   };
 
-  // Open edit dialog when the user clicks the edit button
-  const handleEditClick = (e: React.MouseEvent, contract: Contract) => {
-    e.stopPropagation();
-    setContractToEdit(contract); // Set the contract to edit
-    setIsEditContractDialogOpen(true); // Open the edit contract dialog
-  };  
+  const handleEditUserSubmit = (data: EditUserSchema) => {
+    if (!userToEdit) return;
 
-  const formAddUser = useForm<AddUserSchema>({
-    resolver: zodResolver(formAddUserSchema),
-  });
-  
-  const handleAddUserSubmit = (data: AddUserSchema) => {
-    const newUser: User = {
-      id: users.length + 1,
+    const updatedUser: User = {
+      ...userToEdit,
       name: data.namaPengguna,
       email: data.emailPengguna,
+      nomor: data.nomorPengguna,
       status: data.statusPengguna,
     };
-  
-    setUsers([...users, newUser]);
-    setIsUserDialogOpen(false);
-    formAddUser.reset();
+
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.id === updatedUser.id ? updatedUser : user
+      )
+    );
+
+    setIsEditUserDialogOpen(false);
+    formEditUser.reset();
+  };
+
+  // Control All Delete
+
+  const handleDeleteContract = () => {
+    if (!contractToDelete) return;
+    setContracts((prevContracts) =>
+      prevContracts.filter((contract) => contract.id !== contractToDelete.id)
+    );
+    setIsDeleteContractDialogOpen(false);
+    setContractToDelete(null);
+  };
+
+  const handleDeleteUser = () => {
+    if (!userToDelete) return;
+    setUsers((prevUsers) =>
+      prevUsers.filter((user) => user.id !== userToDelete.id)
+    );
+    setIsDeleteUserDialogOpen(false);
+    setUserToDelete(null);
   };
 
   return (
     <div className="p-6">
+      
       <div className="mb-6">
         <button
           onClick={onBack}
@@ -164,18 +292,19 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
       </div>
       <h2 className="text-2xl font-semibold mb-4">Detail Mitra {mitra.nama}</h2>
 
-
       <div className="grid grid-cols-2 gap-6">
         {/* Daftar Kontrak Kerja */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-black">Daftar Kontrak Kerja</h3>
-            <Button
-              onClick={() => setIsDialogOpen(true)}
-              className="flex items-center bg-red-100 text-red-700 px-2 py-1 rounded-full hover:bg-red-200 w-auto max-w-fit"
-            >
-              <span>Tambah Kontrak</span>
-            </Button>
+            <div className="w-fit">
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+              
+              >
+                <span>Tambah Kontrak</span>
+              </Button>
+            </div>
           </div>
           <table className="w-full">
             <thead>
@@ -190,9 +319,9 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                   <tr key={contract.id} className="border-b">
                     <td className="p-3">
                       <div className="flex items-center">
-                        <FaFileAlt className="text-blue-500 mr-2" />
+                        
                         <div>
-                          <p>{contract.description}</p>
+                          <p>{contract.title}</p>
                           <p className="text-sm text-gray-500">Kode: {contract.code}</p>
                           <p className="text-sm text-gray-500">
                             Nilai: Rp {contract.nilaiKontrak?.toLocaleString()}
@@ -210,12 +339,13 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                       <div className="flex gap-2">
                         <button
                           className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-50"
-                          onClick={(e) => handleEditClick(e, contract)} // Trigger edit dialog
+                          onClick={(e) => handleEditContractClick(e, contract)} // Trigger edit dialog
                         >
                           <MdEdit color="blue" size={18} />
                         </button>
                         <button
                           className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-50"
+                          onClick={(e) => handleDeleteContractClick(e, contract)}
                         >
                           <MdDelete color="red" size={18} />
                         </button>
@@ -238,12 +368,13 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-black">Daftar Pengguna Mitra</h3>
-            <Button
-              onClick={() => setIsUserDialogOpen(true)}
-              className="flex items-center bg-red-100 text-red-700 px-2 py-1 rounded-full hover:bg-red-200 w-auto max-w-fit"
-            >
-              <span>Tambah Pengguna</span>
-            </Button>
+            <div className="w-fit">
+              <Button
+                onClick={() => setIsUserDialogOpen(true)}
+              >
+                <span>Tambah Pengguna</span>
+              </Button>
+            </div>
           </div>
 
           <table className="w-full">
@@ -267,21 +398,23 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                     <td className="p-3">
                       <span
                         className={`text-sm font-semibold ${
-                          user.status === "active" ? "text-green-500" : "text-red-500"
+                          user.status === "Aktif" ? "text-green-500" : "text-red-500"
                         }`}
                       >
-                        {user.status === "active" ? "Active" : "Blocked"}
+                        {user.status === "Aktif" ? "Aktif" : "Belum Aktif"}
                       </span>
                     </td>
                     <td className="p-3">
                       <div className="flex gap-2">
-                        <button
+                      <button
                           className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-50"
+                          onClick={(e) => handleEditUserClick(e, user)}
                         >
                           <MdEdit color="blue" size={18} />
                         </button>
                         <button
                           className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-50"
+                          onClick={(e) => handleDeleteUserClick(e, user)}
                         >
                           <MdDelete color="red" size={18} />
                         </button>
@@ -427,8 +560,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                                 <Input
                                   type="text"
                                   placeholder="Masukkan Nama Kontrak"
-                                  {...field}
-                                  defaultValue={contractToEdit.description} // Prepopulate value
+                                  {...field}// Prepopulate value
                                   required
                                 />
                               </FormControl>
@@ -447,8 +579,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                                 <Input
                                   type="text"
                                   placeholder="Masukkan Nomor Kontrak"
-                                  {...field}
-                                  defaultValue={contractToEdit.code} // Prepopulate value
+                                  {...field} // Prepopulate value
                                   required
                                 />
                               </FormControl>
@@ -468,7 +599,6 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                                   type="number"
                                   placeholder="Masukkan Nilai Kontrak"
                                   {...field}
-                                  defaultValue={contractToEdit.nilaiKontrak}
                                   required
                                 />
                               </FormControl>
@@ -488,7 +618,6 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                                   type="date"
                                   placeholder="dd/mm/yyyy"
                                   {...field}
-                                  defaultValue={contractToEdit.tanggalKontrak}
                                   required
                                 />
                               </FormControl>
@@ -508,7 +637,6 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                                   type="number"
                                   placeholder="Masukkan Jangka Waktu"
                                   {...field}
-                                  defaultValue={contractToEdit.jangkaWaktu}
                                   required
                                 />
                               </FormControl>
@@ -547,7 +675,7 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
               <Form {...formAddUser}>
                 <form
                   onSubmit={formAddUser.handleSubmit(handleAddUserSubmit)}
-                  className="grid grid-cols-2 gap-4" // Two-column grid layout
+                  className="space-y-3 " // Two-column grid layout
                 >
                   <FormField
                     control={formAddUser.control}
@@ -589,26 +717,24 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
 
                   <FormField
                     control={formAddUser.control}
-                    name="statusPengguna"
+                    name="nomorPengguna"
                     render={({ field }) => (
                       <FormItem className="col-span-2">
-                        <FormLabel>Status Pengguna</FormLabel>
+                        <FormLabel>Nomor Telephone Pengguna</FormLabel>
                         <FormControl className="relative top-[-4px]">
-                          <select
-                            className="w-full border rounded px-3 py-2 h-[40px]"
-                            {...field}
-                            required
-                          >
-                            <option value="active">Active</option>
-                            <option value="blocked">Blocked</option>
-                          </select>
+                          <Input
+                              type="text"
+                              placeholder="Masukkan Nomor Telephone Pengguna"
+                              {...field}
+                              required
+                            />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
   
-                  <div className="col-span-2 flex justify-end gap-4">
+                  <div className="col-span-2 flex justify-end gap-4 ">
                     <Button
                       type="button"
                       variant="outline"
@@ -622,6 +748,185 @@ const DetailMitraPage: React.FC<{ mitra: Mitra; onBack: () => void }> = ({ mitra
                   </div>
                 </form>
               </Form>
+            </DialogDescription>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Add Edit User Dialog */}
+      {isEditUserDialogOpen && userToEdit && (
+        <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Pengguna</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              <Form {...formEditUser}>
+                <form
+                  onSubmit={formEditUser.handleSubmit(handleEditUserSubmit)}
+                  className="space-y-3"
+                >
+                  <FormField
+                    control={formEditUser.control}
+                    name="emailPengguna"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Pengguna</FormLabel>
+                        <FormControl className="relative top-[-4px]">
+                          <Input
+                            type="email"
+                            placeholder="Masukkan Email Pengguna"
+                            {...field}
+                            disabled
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={formEditUser.control}
+                    name="namaPengguna"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Pengguna</FormLabel>
+                        <FormControl className="relative top-[-4px]">
+                          <Input
+                            type="text"
+                            placeholder="Masukkan Nama Pengguna"
+                            {...field}
+                            required
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={formEditUser.control}
+                    name="nomorPengguna"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nomor Telephone Pengguna</FormLabel>
+                        <FormControl className="relative top-[-4px]">
+                          <Input
+                            type="text"
+                            placeholder="Masukkan Nomor Telephone Pengguna"
+                            {...field}
+                            required
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                    <FormField
+                    control={formEditUser.control}
+                    name="statusPengguna"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status Pengguna</FormLabel>
+                        <FormControl className="relative top-[-4px]">
+                          <select
+                            className="w-full px-3 py-2 border rounded-md"
+                            {...field}
+                            required
+                          >
+                            <option value="Aktif">Aktif</option>
+                            <option value="Belum Aktif">Belum Aktif</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-end gap-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsEditUserDialogOpen(false)}
+                    >
+                      Batal
+                    </Button>
+                    <Button type="submit" className="bg-red-500 text-white">
+                      Simpan
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogDescription>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Dialog Delete Kontrak */}
+      {isDeleteContractDialogOpen && contractToDelete && (
+        <Dialog open={isDeleteContractDialogOpen} onOpenChange={setIsDeleteContractDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Hapus Kontrak</DialogTitle>
+            </DialogHeader>
+            <DialogDescription className="py-5">
+              <div className="space-y-6">
+                  <p className="text-center">
+                    Apakah Anda yakin ingin menghapus kontrak "{contractToDelete.title}"? 
+                    Tindakan ini tidak dapat dibatalkan.
+                  </p>
+
+                  <div className="flex gap-x-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDeleteContractDialogOpen(false)}
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      type="button"
+                      className="bg-red-500 text-white hover:bg-red-600"
+                      onClick={handleDeleteContract}
+                    >
+                      Hapus
+                    </Button>
+                  </div>
+              </div>
+            </DialogDescription>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Dialog Delete Pengguna */}
+      {isDeleteUserDialogOpen && userToDelete && (
+        <Dialog open={isDeleteUserDialogOpen} onOpenChange={setIsDeleteUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Hapus Pengguna</DialogTitle>
+            </DialogHeader>
+            <DialogDescription className="py-5">
+              <div className="space-y-6">
+                  <p className="text-center">Apakah Anda yakin ingin menghapus pengguna "{userToDelete.name}"?</p>
+
+                <div className="flex gap-x-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDeleteUserDialogOpen(false)}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="button"
+                    className="bg-red-500 text-white hover:bg-red-600"
+                    onClick={handleDeleteUser}
+                  >
+                    Hapus
+                  </Button>
+                </div>
+              </div>
             </DialogDescription>
           </DialogContent>
         </Dialog>

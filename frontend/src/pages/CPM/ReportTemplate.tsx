@@ -2,10 +2,6 @@ import type { FC } from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
 // Define interfaces for our data structures
-interface Worker {
-  role: string;
-  count: string;
-}
 
 interface WorkDescriptions {
   [key: number]: string;
@@ -20,6 +16,7 @@ const styles = StyleSheet.create({
     border: '1px solid black',
     marginBottom: 10,
     flexDirection: 'row',
+    display:'flex',
   },
   leftSection: {
     width: '30%',
@@ -38,14 +35,118 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
-    borderLeft: '1px solid black',
-    borderRight: '1px solid black',
-    borderBottom: '1px solid black',
+    border : '1px solid black',
   },
   dateCell: {
     padding: 5,
     flex: 1,
   },
+   // New styles for workforce table
+   workforceTable: {
+    marginTop: 10,
+    border: '1px solid black',
+  },
+  shiftRow: {
+    flexDirection: 'row',
+    borderBottom: '1px solid black',
+  },
+  shiftCell: {
+    flex: 1,
+    padding: 5,
+    borderRight: '1px solid black',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  workforceHeaderRow: {
+    flexDirection: 'row',
+    borderBottom: '1px solid black',
+  },
+  workforceHeaderCell: {
+    flex: 3,
+    padding: 5,
+    borderRight: '1px solid black',
+    fontWeight: 'bold',
+  },
+  workforceCountCell: {
+    flex: 1,
+    padding: 5,
+    borderRight: '1px solid black',
+    fontWeight: 'bold',
+  },
+  workforceRow: {
+    flexDirection: 'row',
+    minHeight: 20,
+  },
+  workforceCell: {
+    flex: 3,
+    padding: 5,
+    borderRight: '1px solid black',
+  },
+  workforceNumberCell: {
+    flex: 1,
+    padding: 5,
+    borderRight: '1px solid black',
+    textAlign: 'center',
+  },
+  subtotalRow: {
+    flexDirection: 'row',
+    borderTop: '1px solid black',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    borderTop: '1px solid black',
+  },
+
+  // Styles for daily activities table
+  activitiesTable: {
+    marginTop: 20,
+    border: '1px solid black',
+  },
+  activityHeaderRow: {
+    flexDirection: 'row',
+    borderBottom: '1px solid black',
+    backgroundColor: '#f0f0f0',
+  },
+  activityRow: {
+    flexDirection: 'row',
+    borderBottom: '1px solid black',
+    minHeight: 25,
+  },
+  numberCell: {
+    width: '10%',
+    padding: 5,
+    borderRight: '1px solid black',
+    textAlign: 'center',
+  },
+  activityCell: {
+    flex: 1,
+    padding: 5,
+    borderRight: '1px solid black',
+  },
+
+  categoryRow: {
+    flexDirection: 'row',
+    minHeight: 20,
+    backgroundColor: '#ffffff',
+  },
+  categoryCell: {
+    flex: 3,
+    padding: 5,
+    borderRight: '1px solid black',
+    fontWeight: 'bold',
+  },
+  categoryNumberCell: {
+    flex: 1,
+    padding: 5,
+    borderRight: '1px solid black',
+    textAlign: 'center',
+  },
+  indentedCell: {
+    flex: 3,
+    paddingLeft: 10, // Added indentation
+    borderRight: '1px solid black',
+  },
+
   table: {
     marginTop: 10,
     border: '1px solid black',
@@ -56,22 +157,19 @@ const styles = StyleSheet.create({
     minHeight: 20,
   },
   tableCell: {
-    padding: 5,
     flex: 1,
+    padding: 5,
     borderRight: '1px solid black',
+    textAlign: 'center',
   },
   tableCellNoBorder: {
     padding: 5,
     flex: 1,
+    textAlign: 'center'
   },
   workItemCell: {
     padding: 5,
     flex: 2,
-    borderRight: '1px solid black',
-  },
-  numberCell: {
-    padding: 5,
-    width: '10%',
     borderRight: '1px solid black',
   },
   boldText: {
@@ -86,7 +184,7 @@ const styles = StyleSheet.create({
     border: '1px solid black',
   },
   issuesSection: {
-    marginTop: 10,
+    marginTop: 80,
     border: '1px solid black',
     minHeight: 100,
   },
@@ -123,7 +221,7 @@ const getWorkDescription = (index: number): string => {
 
 const ReportTemplate: FC = () => (
   <Document>
-    <Page size="LEGAL" style={styles.page}>
+    <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.leftSection}>
@@ -151,82 +249,178 @@ const ReportTemplate: FC = () => (
         </View>
       </View>
 
-      {/* Work Items Table */}
-      <View style={styles.table}>
-        <View style={styles.tableRow}>
-          <View style={styles.tableCell}>
-            <Text style={styles.boldText}>Tenaga Kerja</Text>
+     
+      {/* Workforce Table */}
+      <View style={styles.workforceTable}>
+        <View style={styles.shiftRow}>
+          <View style={styles.shiftCell}>
+            <Text>SHIFT 1</Text>
           </View>
-          <View style={styles.numberCell}>
-            <Text style={styles.boldText}>No.</Text>
-          </View>
-          <View style={styles.workItemCell}>
-            <Text style={styles.boldText}>Pekerjaan Hari Ini</Text>
+          <View style={styles.shiftCell}>
+            <Text>SHIFT 2</Text>
           </View>
         </View>
         
-        {/* Management Section */}
-        <View style={styles.tableRow}>
-          <View style={styles.tableCell}>
+        {/* Column Headers */}
+        <View style={styles.workforceHeaderRow}>
+          <View style={styles.workforceHeaderCell}>
+            <Text>Jenis Tenaga Kerja</Text>
+          </View>
+          <View style={styles.workforceCountCell}>
+            <Text>Jumlah</Text>
+          </View>
+          <View style={styles.workforceHeaderCell}>
+            <Text>Jenis Tenaga Kerja</Text>
+          </View>
+          <View style={styles.workforceCountCell}>
+            <Text>Jumlah</Text>
+          </View>
+        </View>
+
+        {/* Workforce Rows - Management */}
+        <View style={styles.workforceRow}>
+          <View style={styles.categoryCell}>
             <Text>I. Manajemen</Text>
           </View>
-          <View style={styles.numberCell}>
+          <View style={styles.categoryNumberCell}>
+            <Text></Text>
+          </View>
+          <View style={styles.categoryCell}>
+            <Text>I. Manajemen</Text>
+          </View>
+          <View style={styles.categoryNumberCell}>
+            <Text></Text>
+          </View>
+        </View>
+
+
+        {/*  */}
+        <View style={styles.workforceRow}>
+          <View style={styles.indentedCell}>
+            <Text>1. Project Manager Shift 1</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
             <Text>1</Text>
           </View>
-          <View style={styles.workItemCell}>
-            <Text>Pekerjaan pemasangan brickwall walltreatment WT.06</Text>
+          <View style={styles.indentedCell}>
+            <Text>1. Project Manager Shift 2</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>1</Text>
           </View>
         </View>
 
-        {/* Work Items */}
-        {["Project Manager", "Site Manager", "Site Engineer", "Admin Project", "Drafter"].map((item: string, index: number) => (
-          <View key={index} style={styles.tableRow}>
-            <View style={styles.tableCell}>
-              <Text>{`${index + 1}. ${item}`}</Text>
-            </View>
-            <View style={styles.numberCell}>
-              <Text>{index + 2}</Text>
-            </View>
-            <View style={styles.workItemCell}>
-              <Text>{getWorkDescription(index + 2)}</Text>
-            </View>
+        <View style={styles.workforceRow}>
+          <View style={styles.indentedCell}>
+            <Text>2. Site Manager</Text>
           </View>
-        ))}
+          <View style={styles.workforceNumberCell}>
+            <Text>2</Text>
+          </View>
+          <View style={styles.indentedCell}>
+            <Text></Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>2</Text>
+          </View>
+        </View>
 
-        {/* Field Workers Section */}
-        <View style={styles.tableRow}>
-          <View style={styles.tableCell}>
+        <View style={styles.workforceRow}>
+          <View style={styles.categoryCell}>
             <Text>II. Lapangan</Text>
           </View>
-          <View style={styles.numberCell}>
-            <Text>10</Text>
+          <View style={styles.categoryNumberCell}>
+            <Text></Text>
           </View>
-          <View style={styles.workItemCell}>
-            <Text>Pekerjaan pemasangan rangka plafond pantry</Text>
+          <View style={styles.categoryCell}>
+            <Text>II. Lapangan</Text>
+          </View>
+          <View style={styles.categoryNumberCell}>
+            <Text></Text>
           </View>
         </View>
 
-        {/* Field Workers Items */}
-        {[
-          { role: "Pekerja Sipil", count: "10 org" },
-          { role: "Pekerja Arsitektur", count: "8 org" },
-          { role: "Pekerja Mekanikal Elektrikal", count: "4 org" },
-          { role: "Pekerja Furnitur", count: "3 org" },
-        ].map((worker: Worker, index: number) => (
-          <View key={index} style={styles.tableRow}>
-            <View style={styles.tableCell}>
-              <Text>{`${index + 1}. ${worker.role}`}</Text>
-              <Text>{worker.count}</Text>
-            </View>
+        <View style={styles.workforceRow}>
+          <View style={styles.indentedCell}>
+            <Text>1. Pekerja Sipil</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>3</Text>
+          </View>
+          <View style={styles.indentedCell}>
+            <Text>1. Pekerja Sipil</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>4</Text>
+          </View>
+        </View>
+
+        <View style={styles.workforceRow}>
+          <View style={styles.indentedCell}>
+            <Text>2. Pekerja Arsitektur</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>5</Text>
+          </View>
+          <View style={styles.indentedCell}>
+            <Text></Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text></Text>
+          </View>
+        </View>
+        {/* Add more workforce rows as needed */}
+
+        {/* Subtotals */}
+        <View style={styles.subtotalRow}>
+          <View style={styles.workforceCell}>
+            <Text style={styles.boldText}>Sub Total 1</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>11</Text>
+          </View>
+          <View style={styles.workforceCell}>
+            <Text style={styles.boldText}>Sub Total 2</Text>
+          </View>
+          <View style={styles.workforceNumberCell}>
+            <Text>7</Text>
+          </View>
+        </View>
+
+        {/* Total */}
+        <View style={styles.totalRow}>
+          <View style={[styles.workforceCell, { flex: 14.7 }]}>
+            <Text style={styles.boldText}>Total Pekerjaan Hari ini</Text>
+          </View>
+          <View style={[styles.workforceNumberCell, { flex: 2 }]}>
+            <Text>18</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Daily Activities Table */}
+      <View style={styles.activitiesTable}>
+        <View style={styles.activityHeaderRow}>
+          <View style={styles.numberCell}>
+            <Text style={styles.boldText}>No.</Text>
+          </View>
+          <View style={styles.activityCell}>
+            <Text style={styles.boldText}>Pekerjaan Hari Ini</Text>
+          </View>
+        </View>
+        {/* Activity rows */}
+        {[1, 2, 3, 4, 5].map((i) => (
+          <View key={i} style={styles.activityRow}>
             <View style={styles.numberCell}>
-              <Text>{index + 11}</Text>
+              <Text>{i}</Text>
             </View>
-            <View style={styles.workItemCell}>
-              <Text>{getWorkDescription(index + 11)}</Text>
+            <View style={styles.activityCell}>
+              <Text>{getWorkDescription(i)}</Text>
             </View>
           </View>
         ))}
       </View>
+
 
       {/* Weather Table */}
       <View style={styles.weatherTable}>
