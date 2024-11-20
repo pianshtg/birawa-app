@@ -24,7 +24,7 @@ const SettingsLayout: React.FC<SettingsProp> = ({ children }) => {
           </button>
 
           <div className='mt-14 ml-6'>
-            <h2 className="text-2xl font-semibold mb-6">Settings</h2>
+            <h2 className="text-2xl font-semibold mb-6">Pengaturan</h2>
             <nav>
               <ul className="space-y-4">
                 <li>
@@ -34,7 +34,7 @@ const SettingsLayout: React.FC<SettingsProp> = ({ children }) => {
                       location.pathname === '/settings/profile' ? 'bg-primary text-white' : 'text-primary hover:bg-opacitynav'
                     }`}
                   >
-                    Profile
+                    Profil
                   </Link>
                 </li>
                 <li>
@@ -45,6 +45,16 @@ const SettingsLayout: React.FC<SettingsProp> = ({ children }) => {
                     }`}
                   >
                     Logging
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/settings/resetpassword"
+                    className={`w-full block text-left rounded-md py-2 px-4 font-medium ${
+                      location.pathname === '/settings/resetpassword' ? 'bg-primary text-white' : 'text-primary hover:bg-opacitynav'
+                    }`}
+                  >
+                    Ganti Sandi
                   </Link>
                 </li>
               </ul>
