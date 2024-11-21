@@ -8,12 +8,13 @@ import NotFound from "@/pages/NotFoundPage";
 import Forgotpassword from "@/pages/ForgotPasswordPage";
 import Layout from "@/components/custom/layout/Layout";
 import SettingsPage from "@/pages/SettingsPage";
-import MobilePage from "./pages/MobilePage";
+import MobilePage from "./pages/mobilepage";
 import useDetection from "@/hooks/useDetection"; // Import custom hook
 import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage";
-import TambahMitraPage from "@/pages/CPM/TambahMitraPage";
-import ProtectedRoute from "@/auth/ProtectedRoute";
+import TambahMitraPage from "./pages/Mitra/tambahmitra/TambahMitraPage";
+// import ProtectedRoute from "./auth/ProtectedRoute";
 import DaftarMitraPage from "./pages/Mitra/tambahmitra/DaftarMitraPage";
+import BuatLaporanPages from "./pages/Mitra/buatlaporan-jeki/BuatLaporanPages";
 
 function AppRoutes() {
   const isMobile = useDetection(620); // Tentukan ukuran maksimum untuk dianggap sebagai mobile
@@ -45,6 +46,15 @@ function AppRoutes() {
           element={
             <Layout>
               <DaftarMitraPage />
+            </Layout>
+          } 
+        />
+
+        {/* Tempat Testing BUAT LAPORAN */}
+        <Route path="/buatlaporans" 
+          element={
+            <Layout>
+              <BuatLaporanPages />
             </Layout>
           } 
         />

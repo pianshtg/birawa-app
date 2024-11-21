@@ -1,5 +1,4 @@
 import React from 'react';
-import { IoAdd } from "react-icons/io5";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +27,7 @@ export const ShadowContainer: React.FC<ShadowProps> = ({ title, children, button
         <h3 className="text-lg font-semibold">{title}</h3>
          {buttonNeeded ? 
            <Dialog>
-           <DialogTrigger className="hover:text-primary duration-200 ease-in-out flex items-center gap-x-2 text-xs font-semibold">{buttonName} <IoAdd size={18} /></DialogTrigger>
+           <DialogTrigger className="hover:text-primary duration-200 ease-in-out flex items-center gap-x-2 text-xs font-semibold">{buttonName} </DialogTrigger>
            <DialogContent>
              <DialogHeader>
                <DialogTitle>{Dialogtitle}</DialogTitle>
