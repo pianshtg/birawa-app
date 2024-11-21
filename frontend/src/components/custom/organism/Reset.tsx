@@ -73,6 +73,7 @@ const Reset = () => {
     toast({
         title: "Sandi Anda telah diubah",
         description: "Cek kembali dengan login ulang",
+        variant: "success",
       })
     };
 
