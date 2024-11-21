@@ -1,11 +1,12 @@
 import type { FC } from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import BirawaLogo from "@/assets/BirawaLogo.png";
 
 // Define interfaces for our data structures
 
-interface WorkDescriptions {
-  [key: number]: string;
-}
+// interface WorkDescriptions {
+//   [key: number]: string;
+// }
 
 const styles = StyleSheet.create({
   page: {
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
   shiftRow: {
     flexDirection: 'row',
     borderBottom: '1px solid black',
+    marginBottom: 5,
   },
   shiftCell: {
     flex: 1,
@@ -123,7 +125,9 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRight: '1px solid black',
   },
-
+  boldText: {
+    fontWeight:'bold',
+  },
   categoryRow: {
     flexDirection: 'row',
     minHeight: 20,
@@ -172,19 +176,17 @@ const styles = StyleSheet.create({
     flex: 2,
     borderRight: '1px solid black',
   },
-  boldText: {
-    fontWeight: 'bold',
-  },
   weatherTable: {
-    marginTop: 10,
+    marginTop: 20,
     border: '1px solid black',
   },
   materialSection: {
-    marginTop: 10,
+    marginTop: 20,
     border: '1px solid black',
+    break: 'before',
   },
   issuesSection: {
-    marginTop: 80,
+    marginTop: 50,
     border: '1px solid black',
     minHeight: 100,
   },
@@ -197,27 +199,59 @@ const styles = StyleSheet.create({
     width: '30%',
     alignItems: 'center',
   },
+
+  //style for image
+  imagePage: {
+    padding: 20,
+    fontSize: 10,
+  },
+  imageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20, // Jarak antar baris
+  },
+  imageCell: {
+    width: '48%', // Lebar setiap gambar (dua kolom)
+    alignItems: 'center', // Tengah secara horizontal
+  },
+  image: {
+    width: 150,
+    height: 100, // Atur tinggi gambar
+    marginBottom: 5, // Jarak antara gambar dan teks
+  },
+  imageText: {
+    textAlign: 'center',
+  },  
+  pageWithBorder: {
+    padding: 20,
+    fontSize: 10,
+    border: '1px solid black', // Border di sekeliling halaman
+  },
+  contentWithBorder: {
+    border: '1px solid black', // Border di sekitar konten
+    padding: 10, // Memberikan jarak antara border dan konten
+  },
 });
 
-const getWorkDescription = (index: number): string => {
-  const descriptions: WorkDescriptions = {
-    1: "Pekerjaan pemasangan brickwall walltreatment WT.06",
-    2: "Pekerjaan penarikan instalasi listrik",
-    3: "Pekerjaan piping & wiring instalasi listrik lampu",
-    4: "Pekerjaan compound single sided gypsum partition P.1",
-    5: "Pekerjaan pemasangan pintu D.1",
-    6: "Pekerjaan pemasangan kaca tempered GL.01 ruang meeting 1",
-    7: "Pekerjaan pemasangan list pertemuan lantai",
-    8: "Pekerjaan pemasangan pintu ruang lab D.2",
-    9: "Pekerjaan pabrikasi decorative ceiling",
-    10: "Pekerjaan pemasangan rangka plafond pantry",
-    11: "Pekerjaan pembongkaran keramik existing koridor",
-    12: "Pekerjaan pengecatan cover kolom PT.04",
-    13: "Pekerjaan pengecatan PT.04",
-    14: "Pekerjaan instalasi pipa ac"
-  };
-  return descriptions[index] || "";
-};
+// const getWorkDescription = (index: number): string => {
+//   const descriptions: WorkDescriptions = {
+//     1: "Pekerjaan pemasangan brickwall walltreatment WT.06",
+//     2: "Pekerjaan penarikan instalasi listrik",
+//     3: "Pekerjaan piping & wiring instalasi listrik lampu",
+//     4: "Pekerjaan compound single sided gypsum partition P.1",
+//     5: "Pekerjaan pemasangan pintu D.1",
+//     6: "Pekerjaan pemasangan kaca tempered GL.01 ruang meeting 1",
+//     7: "Pekerjaan pemasangan list pertemuan lantai",
+//     8: "Pekerjaan pemasangan pintu ruang lab D.2",
+//     9: "Pekerjaan pabrikasi decorative ceiling",
+//     10: "Pekerjaan pemasangan rangka plafond pantry",
+//     11: "Pekerjaan pembongkaran keramik existing koridor",
+//     12: "Pekerjaan pengecatan cover kolom PT.04",
+//     13: "Pekerjaan pengecatan PT.04",
+//     14: "Pekerjaan instalasi pipa ac"
+//   };
+//   return descriptions[index] || "";
+// };
 
 const ReportTemplate: FC = () => (
   <Document>
@@ -400,22 +434,39 @@ const ReportTemplate: FC = () => (
 
       {/* Daily Activities Table */}
       <View style={styles.activitiesTable}>
+        {/* Header Row*/}
         <View style={styles.activityHeaderRow}>
           <View style={styles.numberCell}>
             <Text style={styles.boldText}>No.</Text>
           </View>
           <View style={styles.activityCell}>
-            <Text style={styles.boldText}>Pekerjaan Hari Ini</Text>
+            <Text style={styles.boldText}>Tipe Pekerjaan</Text>
+          </View>
+          <View style={styles.activityCell}>
+            <Text style={styles.boldText}>Detail Aktivitas Pekerjaan</Text>
           </View>
         </View>
         {/* Activity rows */}
-        {[1, 2, 3, 4, 5].map((i) => (
-          <View key={i} style={styles.activityRow}>
+        {[
+          { type: 'Sipil', activities: ['Pengukuran topografi, analisis tanah dan pengambilan data lapangan'] },
+          { type: 'Arsitektur', activities: ['Membuat konsep awal desain bangunan, termasuk sketsa'] },
+          { type: 'Furniture', activities: ['Mengikuti tren desain interior dan gaya furniture terkini'] },
+          { type: 'Mekanikal', activities: ['Merancang mesin, alat atau komponen mekanik dengan menggunakan sofware'] },
+        ].map((item, index) => (
+          <View key={index} style={styles.activityRow}>
+            {/* Number Column */}
             <View style={styles.numberCell}>
-              <Text>{i}</Text>
+              <Text>{index + 1}.</Text>
             </View>
+            {/* Tipe Pekerjaan Column */}
             <View style={styles.activityCell}>
-              <Text>{getWorkDescription(i)}</Text>
+              <Text>{item.type}</Text>
+            </View>
+            {/* Detail Aktivitas Pekerjaan Column */}
+            <View style={[styles.activityCell, { flexDirection: 'column' }]}>
+              {item.activities.map((activity, i) => (
+                <Text key={i}>{activity}</Text>
+              ))}
             </View>
           </View>
         ))}
@@ -457,37 +508,39 @@ const ReportTemplate: FC = () => (
       </View>
 
       {/* Materials Section */}
-      <View style={styles.materialSection}>
-        <View style={styles.tableRow}>
-          <View style={styles.tableCell}>
-            <Text>Material Diterima</Text>
-          </View>
-          <View style={styles.tableCell}>
-            <Text>Volume</Text>
-          </View>
-          <View style={styles.tableCell}>
-            <Text>Material Ditolak</Text>
-          </View>
-          <View style={styles.tableCellNoBorder}>
-            <Text>Volume</Text>
-          </View>
-        </View>
-        {[1, 2, 3, 4, 5].map((i: number) => (
-          <View key={i} style={styles.tableRow}>
+      <View wrap={false}>
+        <View style={styles.materialSection}>
+          <View style={styles.tableRow}>
             <View style={styles.tableCell}>
-              <Text></Text>
+              <Text>Material Diterima</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text></Text>
+              <Text>Volume</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text></Text>
+              <Text>Material Ditolak</Text>
             </View>
             <View style={styles.tableCellNoBorder}>
-              <Text></Text>
+              <Text>Volume</Text>
             </View>
           </View>
-        ))}
+          {[1, 2, 3, 4, 5].map((i: number) => (
+            <View key={i} style={styles.tableRow}>
+              <View style={styles.tableCell}>
+                <Text></Text>
+              </View>
+              <View style={styles.tableCell}>
+                <Text></Text>
+              </View>
+              <View style={styles.tableCell}>
+                <Text></Text>
+              </View>
+              <View style={styles.tableCellNoBorder}>
+                <Text></Text>
+              </View>
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* Issues Section */}
@@ -515,6 +568,50 @@ const ReportTemplate: FC = () => (
           <Text>PT Multi Reka Indonesia</Text>
           <Text style={{ marginTop: 40 }}>Adam Rivansyah</Text>
           <Text>Site Supervisor</Text>
+        </View>
+      </View>
+    </Page>
+
+    <Page size="A4" style={styles.page}>
+      <View style={styles.contentWithBorder}>
+        <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 20 }}>
+          Lampiran: Dokumentasi Lapangan
+        </Text>
+
+        {/* Baris pertama */}
+        <View style={styles.imageRow}>
+          <View style={styles.imageCell}>
+            <Image style={styles.image} src={BirawaLogo}  />
+            <Text style={styles.imageText}>Logo Birawa</Text>
+          </View>
+          <View style={styles.imageCell}>
+            <Image style={styles.image} src={BirawaLogo} />
+            <Text style={styles.imageText}>Logo Birawa</Text>
+          </View>
+        </View>
+
+        {/* Baris kedua */}
+        <View style={styles.imageRow}>
+          <View style={styles.imageCell}>
+            <Image style={styles.image} src={BirawaLogo} />
+            <Text style={styles.imageText}>Logo Telkom Property</Text>
+          </View>
+          <View style={styles.imageCell}>
+            <Image style={styles.image} src={BirawaLogo} />
+            <Text style={styles.imageText}>Logo Telkom Property</Text>
+          </View>
+        </View>
+
+        {/* Baris pertama */}
+        <View style={styles.imageRow}>
+          <View style={styles.imageCell}>
+            <Image style={styles.image} src={BirawaLogo} />
+            <Text style={styles.imageText}>Logo Telkom Property</Text>
+          </View>
+          <View style={styles.imageCell}>
+            <Image style={styles.image} src={BirawaLogo} />
+            <Text style={styles.imageText}>Logo Telkom Property</Text>
+          </View>
         </View>
       </View>
     </Page>

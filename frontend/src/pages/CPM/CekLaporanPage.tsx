@@ -94,7 +94,7 @@ const CekLaporan: React.FC = () => {
         </div>
 
         {/* Horizontal Date Navigation */}
-        <div className="flex overflow-x-auto gap-x-4 pt-4">
+        <div className="flex overflow-x-auto gap-x-4 pt-4 custom-scrollbar">
           {daysInMonth.map((day) => {
             const isSelected =
               format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
