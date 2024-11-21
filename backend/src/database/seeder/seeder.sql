@@ -306,15 +306,17 @@ JOIN (
     UNION ALL
     SELECT 'admin', 'view_all_kontrak'
     UNION ALL
-    SELECT 'admin', 'get_laporan'
-    UNION ALL
     SELECT 'admin', 'get_pekerjaan_laporans'
+    UNION ALL
+    SELECT 'admin', 'get_laporan'
     UNION ALL
     SELECT 'admin', 'view_all_laporan'
     UNION ALL
+    SELECT 'admin', 'create_inbox'
+    UNION ALL
     SELECT 'mitra', 'get_user'
     UNION ALL
-    SELECT 'admin', 'update_user'
+    SELECT 'mitra', 'update_user'
     UNION ALL
     SELECT 'mitra', 'get_mitra'
     UNION ALL
@@ -324,9 +326,11 @@ JOIN (
     UNION ALL
     SELECT 'mitra', 'get_pekerjaan_laporans'
     UNION ALL
+    SELECT 'mitra', 'create_laporan'
+    UNION ALL
     SELECT 'mitra', 'get_laporan'
     UNION ALL
-    SELECT 'mitra', 'create_laporan'
+    SELECT 'mitra', 'create_inbox'
 ) AS permission_name 
 ON roles.nama = permission_name.role_name;
 -- Insert data into users
