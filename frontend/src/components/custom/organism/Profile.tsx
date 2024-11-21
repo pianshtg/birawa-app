@@ -117,6 +117,7 @@ const Profile = () => {
       toast({
         title: "Data diri Anda telah diubah",
         description: "Pastikan data diri anda sudah benar",
+        variant: "success",
       })
     };
 
@@ -126,6 +127,7 @@ const Profile = () => {
       toast({
         title: "Data Perusahaan Anda telah diubah",
         description: "Pastikan data diri anda sudah benar",
+        variant: "success",
       })
     };
 
@@ -305,7 +307,7 @@ const Profile = () => {
                 )}
               />
 
-          <div className='flex justify-end p-3 w-fit'>
+          <div className='flex justify-end py-3 w-fit'>
             <Button 
               type='submit'
               disabled={activeEditMode !== 'company'}
