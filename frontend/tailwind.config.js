@@ -64,13 +64,31 @@ export default {
   				'5': 'hsl(var(--chart-5))'
   			}
   		},
-		  boxShadow: {
-			'custom-login': `
-			  10px 17px 30px rgba(128, 128, 128, 0.01), 
-			  12px 8px 40px rgba(128, 128, 128, 0.01), 
-			  1px 10px 22px rgba(128, 128, 128, 0.1)
-			`,
-		},
+  		boxShadow: {
+  			'custom-login': '`\r\n			  10px 17px 30px rgba(128, 128, 128, 0.01), \r\n			  12px 8px 40px rgba(128, 128, 128, 0.01), \r\n			  1px 10px 22px rgba(128, 128, 128, 0.1)\r\n			`'
+  		},
+  		keyframes: {
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
+  				}
+  			}
+  		},
+  		animation: {
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
+  		}
   	}
   },
   plugins: [require("tailwindcss-animate")],
