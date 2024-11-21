@@ -9,13 +9,15 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 2000 // Sesuaikan dengan durasi yang Anda inginkan
+const TOAST_COOLDOWN = 2000 // Waktu tunggu sebelum toast bisa muncul lagi
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  timestamp?: number // Tambahkan timestamp untuk tracking
 }
 
 const actionTypes = {
@@ -54,6 +56,7 @@ type Action =
 
 interface State {
   toasts: ToasterToast[]
+  lastToastTimestamp?: number
 }
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
@@ -76,11 +79,24 @@ const addToRemoveQueue = (toastId: string) => {
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "ADD_TOAST":
+    case "ADD_TOAST": {
+      const currentTime = Date.now()
+      
+      // Cek apakah sudah cukup waktu sejak toast terakhir
+      if (
+        state.lastToastTimestamp && 
+        currentTime - state.lastToastTimestamp < TOAST_COOLDOWN
+      ) {
+        return state // Tolak toast baru
+      }
+
+      // Jika tidak ada toast atau sudah cukup waktu, tambahkan toast baru
       return {
         ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+        toasts: [{ ...action.toast, timestamp: currentTime }, ...state.toasts].slice(0, TOAST_LIMIT),
+        lastToastTimestamp: currentTime
       }
+    }
 
     case "UPDATE_TOAST":
       return {
@@ -93,8 +109,7 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
+      // Side effects
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
