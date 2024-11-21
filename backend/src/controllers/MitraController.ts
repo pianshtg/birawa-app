@@ -171,7 +171,7 @@ async function getMitraUsers(req: Request, res: Response) {
         if (permissions.includes('get_mitra_users')) {
             const {nama_mitra} = req.body
             
-            const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT users.email, users.nama_lengkap, users.nomor_telepon FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE mitra.nama = ?', [nama_mitra])
+            const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT users.email, users.nama_lengkap, users.nomor_telepon, users.is_verified FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE mitra.nama = ?', [nama_mitra])
             if (existingMitraUsers.length > 0) {
                 res.status(200).json({
                     message: "Successfully retrieved mitra's users.",
