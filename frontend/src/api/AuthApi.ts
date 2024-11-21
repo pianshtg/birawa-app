@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "react-query";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -22,6 +23,7 @@ type SignInUserRequest = {
 }
 
 export function useSignInUser () {
+    const {toast} = useToast()
     async function useSignInUserRequest (user: SignInUserRequest) {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
@@ -36,7 +38,10 @@ export function useSignInUser () {
         })
         if (!response.ok) {
             const data = await response.json()
-            toast.error(data.message)
+            toast({
+                title: data.message,
+                variant: "danger"
+            })
             throw new Error(data.message)
         }
         return response.json()
@@ -48,58 +53,69 @@ export function useSignInUser () {
         error,
         reset
     } = useMutation(useSignInUserRequest)
-
+    
     if (isSuccess) {
         window.location.href = '/dashboard'
     }
-
+    
     if (error) {
-        // toast.error(error.toString()) //Debug.
+        toast({
+            title: error.toString().split(' ').slice(1).join(' '),
+            variant: "danger"
+        }) //Debug.
         reset()
     }
-
+    
     return {signInUser, isLoading}
 }
 
-export function useAuth () {
-    async function useAuthRequest() {
-        // const csrfToken = await getCsrfToken()
-        const response = await fetch(`${API_BASE_URL}/api/auth`, {
-            method: 'POST',
-            headers: {
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken
-            },
-            credentials: 'include'
-        })
+export function useAuth() {
+  const { toast } = useToast();
 
-        if (!response.ok) {
-            const errorDetails = await response.text();
-            console.error('Authentication failed:', response.status, errorDetails);
-            throw new Error("Authentication failed!");
-        }
-        
-        return (response.ok)
+  async function useAuthRequest() {
+    const response = await fetch(`${API_BASE_URL}/api/auth`, {
+      method: "POST",
+      headers: {
+        "X-Client-Type": "web",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error("Authentication failed:", response.status, errorDetails);
+      throw new Error("Authentication failed!");
     }
 
-    const {
-        data: isAuthenticated,
-        isLoading,
-        isSuccess,
-        error
-    } = useQuery('authenticateUser', useAuthRequest, {
-        retry: false
-    })
+    return response.ok;
+  }
 
+  const {
+    data: isAuthenticated,
+    isLoading,
+    isSuccess,
+    error,
+  } = useQuery("authenticateUser", useAuthRequest, {
+    retry: false,
+  });
+
+  // Trigger the toast in a side effect
+  useEffect(() => {
     if (isSuccess) {
-        console.log('user') //Debug.
-        toast.success('User authenticated') //Debug.
+      toast({
+        title: "User authenticated",
+        variant: "success",
+      });
     }
 
     if (error) {
-        // toast.error(error.toString())
+      toast({
+        title: "Authentication failed",
+        description: error.toString(),
+        variant: "danger",
+      });
     }
+  }, [isSuccess, error, toast]);
 
-    return {isAuthenticated, isLoading}
-
+  return { isAuthenticated, isLoading };
 }
