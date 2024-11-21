@@ -58,7 +58,7 @@ const Login = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl className="relative top-[-4px] mb-7">
-                    <Input placeholder="Masukan  Email Anda" type="email"  {...field} required/>
+                    <Input placeholder="Masukan  Email Anda" type="email"  {...field}/>
                   </FormControl>
                   <FormMessage/>
                 </FormItem>
@@ -71,7 +71,7 @@ const Login = () => {
                 <FormItem>
                   <FormLabel className="text-gray-700">Password</FormLabel>
                   <div className="relative">
-                    <FormControl>
+                    <FormControl className="font-sans">
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
