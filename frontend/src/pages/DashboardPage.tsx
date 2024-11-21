@@ -115,7 +115,7 @@ const DashboardPage = () => {
           <div className="w-full flex justify-end mb-2 ">
             <div>
               <Button asChild>
-                <Link to="/dashboard/tambahmitra">Tambah Mitra</Link>
+                <Link to="/daftarmitra/tambahmitra">Tambah Mitra</Link>
               </Button>
             </div>
           </div>
