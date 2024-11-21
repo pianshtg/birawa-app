@@ -32,7 +32,7 @@ function AppRoutes() {
       <Route path='/' element={<Home />} />
       <Route path='/forgotpassword' element={<Forgotpassword />} />
       
-      <Route element={<ProtectedRoute/>}>
+      {/* <Route element={<ProtectedRoute/>}> */}
         <Route path="/dashboard" 
           element={
             <Layout>
@@ -82,7 +82,7 @@ function AppRoutes() {
       
         <Route path='/settings/*' element={<SettingsPage />} />
         
-      </Route>
+      {/* </Route> */}
       {/* 404 Not Found Page */}
       <Route path='*' element={<NotFound />} />
     </Routes>

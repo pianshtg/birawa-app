@@ -85,7 +85,7 @@ const Profile = () => {
         }
     };
 
-    const handleEditPersonal = () => {
+    const handleEditPersonal = async () => {
         if (activeEditMode === 'personal') {
             // Canceling edit mode
             formEditProfile.reset({
@@ -111,12 +111,13 @@ const Profile = () => {
         }
     };
 
-    const handleSubmitUserPersonal = (data:UserProfileSchema ) => {
+    const handleSubmitUserPersonal = async (data:UserProfileSchema ) => {
       console.log("adalah",data);
       setActiveEditMode('none');
       toast({
         title: "Data diri Anda telah diubah",
         description: "Pastikan data diri anda sudah benar",
+        variant:"success"
       })
     };
 
@@ -126,12 +127,13 @@ const Profile = () => {
       toast({
         title: "Data Perusahaan Anda telah diubah",
         description: "Pastikan data diri anda sudah benar",
+        variant:"success"
       })
     };
 
   return (
     <div className='flex flex-col gap-y-7'>
-      {/* Profil Anda */}
+      {/* Profil Pribadi */}
       <div className='border-b-2 flex justify-between border-gray-200 py-3'>
         <div>
           {activeEditMode === 'personal' ? (
@@ -233,7 +235,7 @@ const Profile = () => {
                </>
               ) : (
               <>
-                <h1 className="text-2xl font-semibold mb-2">Profil Anda</h1>
+                <h1 className="text-2xl font-semibold mb-2">Profil Perusahaan Anda</h1>
                 <p className='text-sm font-medium text-gray-500'>Data pribadi anda</p>
               </>
             )}
