@@ -233,7 +233,6 @@ async function deleteUser(req: Request, res: Response) {
         // console.log(metaData) // Debug.
         const userId = metaData.user_id
         const permissions = metaData.permissions
-
         
         if (permissions.includes('delete_user')) {
             const {email} = req.body
@@ -241,7 +240,7 @@ async function deleteUser(req: Request, res: Response) {
             const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
             if (existingUser.length > 0) {
                 
-                await pool.execute("UPDATE users SET is_verified = ?, deleted_at = CURRENT_TIMESTAMP, updated_by = ? WHERE email = ?", [false, userId, email])
+                await pool.execute("UPDATE users SET is_active = ?, deleted_at = CURRENT_TIMESTAMP, updated_by = ? WHERE email = ?", [false, userId, email])
                 
                 res.status(201).json({
                     message: "Successfully deleted user.",
