@@ -171,6 +171,7 @@ async function authenticateUser(req: Request, res: Response) {
                             maxAge: 15 * 60 * 1000,
                             path: '/'
                         })
+                        res.status(201).json({message: "User successfully authenticated."})
                         return
                     } else {
                         // Passing the new access token to user
