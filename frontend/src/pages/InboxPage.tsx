@@ -1,6 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
-
+import {z} from "zod";
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Combobox, Transition } from "@headlessui/react";
 interface Message {
   id: number;
   company: string;
@@ -21,6 +27,26 @@ interface Message {
   }[];
 }
 
+
+interface Recipient {
+  value: string;
+  label: string;
+}
+
+const formPesanBaruSchema =  z.object({
+  recipient: z.string({
+    required_error: "Silakan pilih penerima"
+  }),
+  subject: z.string().min(1, "Subjek wajib diisi").max(42, "Subjek terlalu panjang"),
+  message: z.string().min(1, "Pesan wajib diisi").max(110, "Pesan Terlalu Panjang")
+});
+export type PesanBaruSchema = z.infer<typeof formPesanBaruSchema>
+
+const formPesanBalasanSchema =  z.object({
+  reply: z.string().min(1, "Pesan tidak bisa kosong").max(110, "Pesan Terlalu Panjang")
+});
+export type PesanBalasanSchema = z.infer<typeof formPesanBalasanSchema>
+
 const InboxComponent: React.FC = () => {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showReply, setShowReply] = useState<boolean>(false);
@@ -28,6 +54,23 @@ const InboxComponent: React.FC = () => {
   const [selectedRecipient, setSelectedRecipient] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>(""); 
+
+  const formPesanBaru = useForm<PesanBaruSchema>({
+    resolver: zodResolver(formPesanBaruSchema),
+    defaultValues: {
+      recipient: "",
+      subject: "",
+      message: ""
+    }
+  })
+
+  const formPesanBalasan = useForm<PesanBalasanSchema>({
+    resolver: zodResolver(formPesanBalasanSchema),
+    defaultValues: {
+      reply:""
+    }
+  })
 
   // Ref for the reply section
   const replyRef = useRef<HTMLDivElement>(null);
@@ -125,7 +168,20 @@ const InboxComponent: React.FC = () => {
     }
   ];
 
-  const recipients = ["PT. Bangun Negeri Selalu", "PT. Maju Jaya Sejahtera", "PT. Sukses Bersama"];
+  const recipients: Recipient[] = [
+    { value: "", label: "Pilih penerima" },
+    ...["PT. Bangun Negeri Selalu", "PT. Maju Jaya Sejahtera", "PT. Sukses Bersama"].map(name => ({
+      value: name,
+      label: name
+    }))
+  ];
+
+  const filteredRecipients =
+  query === ""
+    ? recipients
+    : recipients.filter((recipient) =>
+        recipient.label.toLowerCase().includes(query.toLowerCase())
+      );
 
   const handleReplyClick = () => {
     setShowReply(true);
@@ -135,6 +191,13 @@ const InboxComponent: React.FC = () => {
     }, 100);
   };
 
+  const onSubmitNewMessage = (data: PesanBaruSchema) => {
+    console.log("Data Pesan Baru:", data);
+  };
+  
+  const onSubmitReplyMessage = (data: PesanBalasanSchema) => {
+    console.log("Data Balasan:", data);
+  };
   return (
     <div className="flex min-h-screen ">
       <div className="w-1/3 border-r bg-white rounded-l-md">
@@ -231,16 +294,38 @@ const InboxComponent: React.FC = () => {
               {/* Reply Section at the end of the replies */}
               {showReply && (
                 <div ref={replyRef} className="bg-white p-4 rounded-lg border ml-12">
-                  <textarea
-                    className="w-full p-3 border rounded-lg text-sm mb-4"
-                    rows={4}
-                    placeholder="Tulis balasan..."
-                  />
-                  <div className="flex justify-end">
-                    <button className="px-6 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
-                      Kirim Balasan
-                    </button>
-                  </div>
+                  <Form {...formPesanBalasan}>
+                    <form
+                      onSubmit={formPesanBalasan.handleSubmit(onSubmitReplyMessage)}>
+                      <FormField
+                        control={formPesanBalasan.control}
+                        name="reply"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Pesan Balasan Anda</FormLabel>
+                            <FormControl>
+                              <textarea 
+                                {...field}
+                                placeholder="Tulis pesan..." 
+                                rows={6}
+                                className= "appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-red-400focus:ring-4 focus:ring-red-100 transition-all duration-200"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />  
+                      
+                      <div className="flex justify-end">
+                        <Button type="submit" variant="destructive" className='w-fit'>
+                          Kirim
+                        </Button>
+                      </div>
+
+                    </form>
+                  </Form>
+                  <div className="flex justify-end">     
+                </div>
                 </div>
               )}
             </div>
@@ -259,54 +344,111 @@ const InboxComponent: React.FC = () => {
               </button>
         </>}
 
+        {/* Form Pesan Baru */}
         {showNewMessage && (
-          <div className="bg-red-50 p-6 rounded-lg">
+          <div className=" shadow-md bg-slate-50/80 p-6 rounded-lg">
             <div className="mb-4">
-              <div className="flex items-center space-x-2 relative mb-4">
-                <p className="text-sm text-gray-600">Kepada:</p>
+            <Form {...formPesanBaru}>
+                  <form onSubmit={formPesanBaru.handleSubmit(onSubmitNewMessage)} className="space-y-4">
+                  <FormField
+                  control={formPesanBaru.control}
+                  name="recipient"
+                  render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kepada:</FormLabel>
+                    <Combobox
+                      value={field.value}
+                      onChange={field.onChange}
+                      as="div"
+                      className="relative"
+                    >
                 <div className="relative w-full">
-                  <div 
-                    className="w-full p-2 border rounded-lg text-sm bg-white cursor-pointer flex justify-between items-center"
-                    onClick={() => setShowDropdown(!showDropdown)}
-                  >
-                    <span>{selectedRecipient || "Pilih penerima"}</span>
-                    <ChevronDown size={16} className="text-gray-500" />
-                  </div>
-                  {showDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                      {recipients.map((recipient) => (
-                        <div
-                          key={recipient}
-                          className="p-2 hover:bg-red-50 cursor-pointer text-sm"
-                          onClick={() => {
-                            setSelectedRecipient(recipient);
-                            setShowDropdown(false);
-                          }}
-                        >
-                          {recipient}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <Combobox.Input
+                    className="w-full border rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setShowDropdown(true)}
+                    onBlur={() => setShowDropdown(false)}
+                    placeholder="Cari penerima..."
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  </Combobox.Button>
                 </div>
-              </div>
-              <input
-                type="text"
-                className="w-full p-2 border rounded-lg text-sm"
-                placeholder="Subjek"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-              />
-            </div>
-            <textarea
-              className="w-full p-3 border rounded-lg text-sm mb-4"
-              rows={6}
-              placeholder="Tulis pesan..."
-            />
-            <div className="flex justify-end">
-              <button className="px-6 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
-                Kirim
-              </button>
+
+                <Transition
+                  show={filteredRecipients.length > 0}
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 transform scale-95"
+                  enterTo="opacity-100 transform scale-100"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 transform scale-100"
+                  leaveTo="opacity-0 transform scale-95"
+                >
+                  <Combobox.Options 
+                    className="absolute z-10 mt-2 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto focus:outline-none"
+                    hidden={!showDropdown}
+                    >
+                    {filteredRecipients.map((recipient) => (
+                      <Combobox.Option
+                        key={recipient.value}
+                        value={recipient.value}
+                        className={({ active }) =>
+                          `cursor-pointer select-none relative py-2 px-4 ${
+                            active ? "bg-red-100 text-red-900" : "text-gray-900"
+                          }`
+                        }
+                      >
+                        {recipient.label}
+                      </Combobox.Option>
+                    ))}
+                  </Combobox.Options>
+                </Transition>
+              </Combobox>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+                    <FormField
+                      control={formPesanBaru.control}
+                      name="subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subjek</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Masukkan subjek" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={formPesanBaru.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pesan</FormLabel>
+                          <FormControl>
+                            <textarea 
+                              {...field}
+                              placeholder="Tulis pesan..." 
+                              rows={6}
+                              className= "appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-red-400focus:ring-4 focus:ring-red-100 transition-all duration-200"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-end">
+                      <Button type="submit" variant="destructive" className='w-fit'>
+                        Kirim
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
             </div>
           </div>
         )}
