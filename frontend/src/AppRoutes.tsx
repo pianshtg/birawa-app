@@ -62,14 +62,7 @@ function AppRoutes() {
               <Buatlaporan/>
             </Layout>
           } 
-        /> 
-        <Route path='/daftarpekerjaan/buatlaporan/ko' 
-          element={
-            <Layout>
-              <Buatlaporan/>
-            </Layout>
-          } 
-        /> 
+        />
 
         <Route path='/ceklaporan' 
           element={
