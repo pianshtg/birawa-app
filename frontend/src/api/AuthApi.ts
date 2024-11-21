@@ -70,7 +70,7 @@ export function useAuth () {
                 "X-Client-Type": "web"
                 // "X-CSRF-TOKEN": csrfToken
             },
-            credentials: 'include',
+            credentials: 'include'
         })
 
         if (!response.ok) {
@@ -79,7 +79,7 @@ export function useAuth () {
             throw new Error("Authentication failed!");
         }
         
-        return (response.status === 201)
+        return (response.ok)
     }
 
     const {
@@ -92,8 +92,8 @@ export function useAuth () {
     })
 
     if (isSuccess) {
-        // toast.success('User authenticated')
-        null;
+        console.log('user') //Debug.
+        toast.success('User authenticated') //Debug.
     }
 
     if (error) {
