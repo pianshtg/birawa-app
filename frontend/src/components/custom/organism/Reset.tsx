@@ -30,7 +30,7 @@ const Reset = () => {
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState<boolean>(false);
     const [isEditing,setIsEditing] = useState<boolean>(false);
-
+    
  
 
     const formResetPassword = useForm<ResetPasswordSchema>({
@@ -68,11 +68,13 @@ const Reset = () => {
     };
 
     const handleResetPassword = (data:ResetPasswordSchema) => {
-
+    
     console.log("data adalah :",data);
+    setIsEditing(false);
     toast({
         title: "Sandi Anda telah diubah",
         description: "Cek kembali dengan login ulang",
+        variant:"success"
       })
     };
 
@@ -104,7 +106,7 @@ const Reset = () => {
                                     placeholder="Masukkan Sandi Lama Anda"
                                     className="w-full pr-10 mb-0"
                                     disabled={!isEditing}
-                                    {...field} required/>
+                                    {...field} />
                                 </FormControl>
                                 <button
                                     type="button"
@@ -137,7 +139,7 @@ const Reset = () => {
                                     placeholder="Masukkan Sandi Baru Anda"
                                     className="w-full pr-10 mb-0"
                                     disabled={!isEditing}
-                                    {...field} required/>
+                                    {...field} />
                                 </FormControl>
                                 <button
                                     type="button"
@@ -170,7 +172,7 @@ const Reset = () => {
                                     placeholder="Masukkan Konfimasi Sandi Baru Anda"
                                     className="w-full pr-10 mb-0"
                                     disabled={!isEditing}
-                                    {...field} required/>
+                                    {...field} />
                                 </FormControl>
                                 <button
                                     type="button"
