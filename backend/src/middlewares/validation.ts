@@ -65,7 +65,7 @@ export const validateUserRequest = [
     body("nama_lengkap").isString().notEmpty().withMessage("Nama lengkap user must be a string."),
     body("email").trim().isEmail().notEmpty().withMessage("Email user must be valid."),
     body("nomor_telepon").isMobilePhone("any", {strictMode: true}).notEmpty().withMessage("Nomor telepon user must be a string."),
-    body("mitra_nama").isString().notEmpty().withMessage("Nama mitra  user must be a string."),
+    body("nama_mitra").isString().notEmpty().withMessage("Nama mitra  user must be a string."),
     handleValidationErrors
 ]
 
