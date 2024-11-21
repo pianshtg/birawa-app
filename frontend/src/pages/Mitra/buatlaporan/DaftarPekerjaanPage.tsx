@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Pagination, 
@@ -12,7 +12,11 @@ import {
 const DaftarPekerjaan: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
+    // Ambil nilai awal dari localStorage atau gunakan default 1
+    const savedItemsPerPage = localStorage.getItem('itemsPerPagePekerjaan');
+    return savedItemsPerPage ? parseInt(savedItemsPerPage, 10) : 1;
+  });
   const navigate = useNavigate();
 
   const jobData = [
@@ -22,6 +26,11 @@ const DaftarPekerjaan: React.FC = () => {
     { id: "P-004", name: "Pemasangan AC", location: "Bandung Kota", contract: "Pekerjaan HVAC", lastUpdate: "08/11/2024" },
     { id: "P-005", name: "Perbaikan Pipa", location: "Medan Barat", contract: "Pekerjaan Plumbing", lastUpdate: "20/08/2024" }
   ];
+
+  useEffect(() => {
+    // Simpan itemsPerPage ke localStorage setiap kali berubah
+    localStorage.setItem('itemsPerPagePekerjaan', itemsPerPage.toString());
+  }, [itemsPerPage])
 
   // Pagination logic
   const paginatedData = useMemo(() => {
