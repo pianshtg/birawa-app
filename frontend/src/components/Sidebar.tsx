@@ -5,6 +5,7 @@ import { TbReportMedical, TbReportSearch } from "react-icons/tb";
 import { HiOutlineInbox } from "react-icons/hi";
 import { FiLogOut } from "react-icons/fi";
 import { RiMenuUnfold4Line, RiMenuUnfold3Line } from "react-icons/ri";
+import { PiUsersThreeBold } from "react-icons/pi";
 import { IoSettingsOutline } from "react-icons/io5";
 import {
   Tooltip,
@@ -21,6 +22,7 @@ type SidebarProps = {
 export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const menuItems = [
     { label: "Dashboard", icon: <RxDashboard className="min-w-[24px] min-h-[24px]" />, path: "/dashboard" },
+    { label: "Manajemen Mitra", icon: <PiUsersThreeBold className="min-w-[24px] min-h-[24px]" />, path: "/daftarmitra" },
     { label: "Buat Laporan", icon: <TbReportMedical className="min-w-[24px] min-h-[24px]" />, path: "/daftarpekerjaan" },
     { label: "Cek Laporan", icon: <TbReportSearch className="min-w-[24px] min-h-[24px]" />, path: "/ceklaporan" },
     { label: "Kotak Masuk", icon: <HiOutlineInbox className="min-w-[24px] min-h-[24px]" />, path: "/inbox" }
