@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { FaUserFriends, FaFileAlt, FaInbox } from "react-icons/fa";
-import { MdEdit, MdDelete } from "react-icons/md";
 import SummaryCard from "@/components/custom/moleculs/CustomCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -17,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { EditIcon, TrashIcon } from "lucide-react";
 
 // Type Definitions
 interface Mitra {
@@ -134,7 +134,7 @@ const DashboardPage = () => {
               </thead>
               <tbody>
                 {dataMitra.map((mitra, index) => (
-                  <tr key={mitra.id} onClick={() => handleMitraClick(mitra)} className="border-b hover:bg-gray-50 duration-100 ease-in-out cursor-pointer">
+                  <tr key={mitra.id} onClick={() => handleMitraClick(mitra)} aria-label="mitra list" className="border-b hover:bg-gray-50 duration-100 ease-in-out cursor-pointer">
                     <td className="p-3 text-sm font-normal text-gray-600">{index + 1}</td>
                     <td className="p-3 text-sm font-normal text-gray-600" >
                       {mitra.nama}
@@ -145,15 +145,15 @@ const DashboardPage = () => {
                       <div className="flex gap-x-2">
                         <button
                           onClick={(e) => handleEditClick(e, mitra)}
-                          className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-50"
+                          className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                         >
-                          <MdEdit color="blue" size={18} />
+                          <EditIcon color="blue" size={18} />
                         </button>
                         <button
                           onClick={(e) => handleDelete(e, mitra)}
-                          className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-50"
+                          className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                         >
-                          <MdDelete color="red" size={18} />
+                          <TrashIcon color="red" size={18} />
                         </button>
                       </div>
                     </td>

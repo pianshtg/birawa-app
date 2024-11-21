@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
-import { MdEdit, MdDelete } from "react-icons/md";
+import { EditIcon, TrashIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -153,7 +153,7 @@ const DaftarPekerjaan: React.FC = () => {
                         }}
                         className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                       >
-                        <MdEdit color="blue" size={18} />
+                        <EditIcon color="blue" size={18} />
                       </button>
                       <button
                         onClick={() => {
@@ -162,7 +162,7 @@ const DaftarPekerjaan: React.FC = () => {
                         }}
                         className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                       >
-                        <MdDelete color="red" size={18} />
+                        <TrashIcon color="red" size={18} />
                       </button>
                     </div>
                   </td>
