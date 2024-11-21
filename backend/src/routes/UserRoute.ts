@@ -9,6 +9,6 @@ router.post('/', validateUserRequest, UserController.createUser)
 router.get('/', UserController.getUser)
 router.get('/all', UserController.getUsers)
 router.patch('/', UserController.updateUser)
-router.delete('/', UserController.deleteUser)
+router.post('/soft-delete', UserController.deleteUser)
 
 export default router

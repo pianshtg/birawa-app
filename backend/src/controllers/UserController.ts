@@ -199,7 +199,7 @@ async function updateUser(req: Request, res: Response) {
             const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [userId])
             if (existingUser.length > 0) {
                 
-                await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ? WHERE id = ?", [nama_lengkap, nomor_telepon, userId])
+                await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE id = ?", [nama_lengkap, nomor_telepon, userId, userId])
                 
                 res.status(200).json({
                     message: "Successfully updated user.",
@@ -223,7 +223,46 @@ async function updateUser(req: Request, res: Response) {
     }
 }
 
-async function deleteUser(req: Request, res: Response) {}
+async function deleteUser(req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const userId = metaData.user_id
+        const permissions = metaData.permissions
+
+        
+        if (permissions.includes('delete_user')) {
+            const {email} = req.body
+            
+            const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
+            if (existingUser.length > 0) {
+                
+                await pool.execute("UPDATE users SET is_verified = ?, deleted_at = CURRENT_TIMESTAMP, updated_by = ? WHERE email = ?", [false, userId, email])
+                
+                res.status(201).json({
+                    message: "Successfully deleted user.",
+                    newAccessToken
+                })
+                return
+                
+            } else {
+                res.status(409).json({message: "Failed to find user."})
+                return
+            }
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+    } catch (error) {
+        console.error(error) //Debug.
+        res.status(500).json({message: "Error deleting user."})
+        return
+    }
+}
 
 export default {
     createUser,
