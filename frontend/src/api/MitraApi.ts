@@ -1,10 +1,9 @@
 import { useMutation, useQuery } from "react-query";
-import { toast } from "sonner";
 import { Kontrak, Mitra, Pekerjaan, User } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-type CreateMitraRequest = {
+export type CreateMitraRequest = {
     mitra: Mitra,
     kontrak: Kontrak,
     pekerjaan_arr: Pekerjaan[],
@@ -26,7 +25,7 @@ export function useCreateMitra () {
         })
         if (!response.ok) {
             const data = await response.json()
-            toast.error(data.message)
+            // toast.error(data.message)
             throw new Error(data.message)
         }
         return response.json()
@@ -36,16 +35,16 @@ export function useCreateMitra () {
         isLoading,
         isSuccess,
         error,
-        reset
+        // reset
     } = useMutation(useCreateMitraRequest)
 
     if (isSuccess) {
-        toast.success("Mitra Berhasil dibuat!")
+        // toast.success("Mitra Berhasil dibuat!")
     }
 
     if (error) {
-        // toast.error(error.toString()) .debug
-        reset()
+        // toast.error(error.toString()) //Debug.
+        // reset()
     }
 
     return {createMitra, isLoading}
@@ -180,7 +179,7 @@ export function useUpdateMitra() {
     } = useMutation(useUpdateMitraRequest)
     
     if (isSuccess) {
-        toast.success("Update Mitra Berhasil!")
+        // toast.success("Update Mitra Berhasil!")
     }
 
     if (error) {
