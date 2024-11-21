@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')!).render(
     <Router>
       <QueryClientProvider client={queryClient}>
         <AppRoutes/>
-        <Toaster  />
+        <Toaster/>
         {/* <Sonner visibleToasts={1} position='top-right' richColors /> */}
       </QueryClientProvider>
     </Router>

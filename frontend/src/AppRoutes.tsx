@@ -8,7 +8,7 @@ import NotFound from "@/pages/NotFoundPage";
 import Forgotpassword from "@/pages/ForgotPasswordPage";
 import Layout from "@/components/custom/layout/Layout";
 import SettingsPage from "@/pages/SettingsPage";
-import MobilePage from "./pages/mobilepage";
+import MobilePage from "./pages/MobilePage";
 import useDetection from "@/hooks/useDetection"; // Import custom hook
 import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage";
 import TambahMitraPage from "@/pages/CPM/TambahMitraPage";

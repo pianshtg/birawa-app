@@ -59,7 +59,7 @@ const KontrakSection = () => {
   });
 
   return (
-    <Accordion title="Kontrak Mitra">
+    <Accordion title="Detail Kontrak">
       <ShadowContainer buttonNeeded={false} titleNeeded={false}>
         <div className="mb-1">
           <div className="grid grid-cols-2 gap-4">

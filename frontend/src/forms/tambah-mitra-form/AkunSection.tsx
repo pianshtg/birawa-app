@@ -21,7 +21,7 @@ const AkunSection = () => {
       })).sort((a, b) => a.name.localeCompare(b.name));    
     
   return (
-    <Accordion title="Kontrak Mitra">
+    <Accordion title="Akun Mitra">
       <ShadowContainer buttonNeeded={false} titleNeeded={false}>
             <div className="mb-6">
                 <div className="grid grid-cols-2 gap-4">

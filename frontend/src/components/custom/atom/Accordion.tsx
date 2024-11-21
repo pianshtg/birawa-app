@@ -30,7 +30,7 @@ export const Accordion: React.FC<AccordionProps> = ({ title, children }) => {
 
       <div
         ref={contentRef}
-        className="transition-all duration-300 ease-in-out overflow-hidden"
+        className="transition-all duration-300 ease-in-out overflow-auto"
         style={{
           maxHeight: isOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
         }}
