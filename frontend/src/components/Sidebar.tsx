@@ -24,7 +24,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     { label: "Dashboard", icon: <RxDashboard className="min-w-[24px] min-h-[24px]" />, path: "/dashboard" },
     { label: "Manajemen Mitra", icon: <PiUsersThreeBold className="min-w-[24px] min-h-[24px]" />, path: "/daftarmitra" },
     { label: "Buat Laporan", icon: <TbReportMedical className="min-w-[24px] min-h-[24px]" />, path: "/daftarpekerjaan" },
-    { label: "Cek Laporan", icon: <TbReportSearch className="min-w-[24px] min-h-[24px]" />, path: "/ceklaporan" },
+    { label: "Cetak Laporan", icon: <TbReportSearch className="min-w-[24px] min-h-[24px]" />, path: "/ceklaporan" },
     { label: "Kotak Masuk", icon: <HiOutlineInbox className="min-w-[24px] min-h-[24px]" />, path: "/inbox" }
   ];
 
