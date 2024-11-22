@@ -1,4 +1,5 @@
 export type Mitra = {
+    id?: string,
     nama: string,
     nomor_telepon: string,
     alamat: string
@@ -43,4 +44,9 @@ export type Aktivitas = {
     tipe: string,
     nama: string,
     dokumentasi: Dokumentasi[]
+}
+
+export type Laporan = {
+    id: string,
+    tanggal: string
 }
