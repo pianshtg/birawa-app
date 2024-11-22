@@ -107,7 +107,7 @@ const TambahMitraForm = ({onSubmit, isLoading}: Props) => {
                 <AkunSection/>
                 <div className='w-full flex items-center gap-x-3 '>
                     <Button type='reset' className='w-1/3' variant="outline" asChild >
-                        <Link to="/dashboard">Back</Link>
+                        <Link to="/daftarmitra">Back</Link>
                     </Button>
                     {isLoading ? <div className="w-1/3"><LoadingButton/></div> : <Button type='submit' className='w-2/3'>Submit</Button>}
                 </div>
