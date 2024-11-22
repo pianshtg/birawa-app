@@ -1,6 +1,5 @@
 import { Pekerjaan } from "@/types"
 import { useMutation, useQuery } from "react-query"
-import { toast } from "sonner"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -29,7 +28,7 @@ export function useCreateKontrak() {
         })
         if (!response.ok) {
             const data = await response.json()
-            toast.error(data.message)
+            // toast.error(data.message)
             throw new Error(data.message)
         }
         
@@ -45,7 +44,7 @@ export function useCreateKontrak() {
     } = useMutation(useCreateKontrakRequest)
 
     if (isSuccess) {
-        toast.success("Kontrak berhasil dibuat!")
+        // toast.success("Kontrak berhasil dibuat!")
     }
 
     if (error) {
@@ -57,15 +56,16 @@ export function useCreateKontrak() {
 }
 
 type GetKontrakPekerjaansRequest = {
-    nama_mitra: string,
-    nomor_kontrak: string
+    nama_mitra: string | null,
+    nomor_kontrak: string | null
 }
 
-export function useGetKontrakPekerjaans(detailKontrak: GetKontrakPekerjaansRequest) {
+export function useGetKontrakPekerjaans(detailKontrak: GetKontrakPekerjaansRequest | null, options: {enabled?: boolean} = {enabled: true}) {
+    const {enabled} = options
     async function useGetKontrakPekerjaansRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/kontrak/pekerjaans`, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 "Content-Type": "application/json",
                 "X-Client-Type": "web"
@@ -80,9 +80,9 @@ export function useGetKontrakPekerjaans(detailKontrak: GetKontrakPekerjaansReque
         return response.json()
     }
     
-    const { data: kontrakPekerjaans, isLoading } = useQuery( "fetchKontrakPekerjaans", useGetKontrakPekerjaansRequest )
+    const { data: kontrakPekerjaans, isLoading, refetch } = useQuery( ["fetchKontrakPekerjaans", detailKontrak], useGetKontrakPekerjaansRequest, { enabled: enabled && !!detailKontrak } )
     
-    return { kontrakPekerjaans, isLoading }
+    return { kontrakPekerjaans, isLoading, refetch }
 }
 
 export function getKontraks() {

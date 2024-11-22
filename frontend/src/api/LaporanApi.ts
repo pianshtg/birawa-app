@@ -1,10 +1,10 @@
+import { toast } from "@/hooks/use-toast";
 import { Aktivitas, Shift, TenagaKerja } from "@/types";
 import { useMutation, useQuery } from "react-query";
-import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-type CreateLaporanRequest = {
+export type CreateLaporanRequest = {
     nama_mitra: string,
     nomor_kontrak: string,
     nama_pekerjaan: string,
@@ -35,7 +35,7 @@ export function useCreateLaporan() {
         })
         if (!response.ok) {
             const data = await response.json()
-            toast.error(data.message)
+            // toast.error(data.message)
             throw new Error(data.message)
         }
         return response.json()
@@ -49,7 +49,7 @@ export function useCreateLaporan() {
     } = useMutation(({laporan, files}: {laporan: CreateLaporanRequest, files: File[]}) => useCreateLaporanRequest(laporan, files))
 
     if (isSuccess) {
-        toast.success("Laporan berhasil dibuat!")
+        // toast.success("Laporan berhasil dibuat!")
     }
 
     if (error) {
@@ -84,16 +84,16 @@ export function useGetLaporan(id: string) {
 }
 
 type GetPekerjaanLaporansRequest = {
-    nama_mitra: string,
-    nomor_kontrak: string,
-    nama_pekerjaan: string
+    nama_mitra: string | null ,
+    nomor_kontrak: string | null,
+    nama_pekerjaan: string | null
 }
 
-export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest) {
+export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest | null, options: {enabled: boolean}) {
     async function useGetPekerjaanLaporansRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/laporan/laporan-pekerjaan`, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 "Content-Type": "application/json",
                 "X-Client-Type": "web"
@@ -103,14 +103,18 @@ export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest) 
             credentials: 'include'
         })
         if (!response.ok) {
+            toast({
+                title: "There's no laporan found.",
+                variant: 'danger'
+            })
             throw new Error("Failed to get pekerjaan's laporan(s).")
         }
         return response.json()
     }
     
-    const { data: pekerjaanLaporans, isLoading } = useQuery( "fetchPekerjaanLaporans", useGetPekerjaanLaporansRequest )
+    const { data: pekerjaanLaporans, isLoading, refetch } = useQuery( ["fetchPekerjaanLaporans", pekerjaan], useGetPekerjaanLaporansRequest, { enabled: options.enabled && !!pekerjaan, retry: false } )
     
-    return { pekerjaanLaporans, isLoading }
+    return { pekerjaanLaporans, isLoading, refetch }
 }
 
 export function useGetLaporans() {

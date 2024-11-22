@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "react-query"
-import { toast } from "sonner"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -25,7 +24,7 @@ export function useCreateUser() {
         })
         if (!response.ok) {
             const data = await response.json()
-            toast.error(data.message)
+            // toast.error(data.message)
             throw new Error(data.message)
         }
         
@@ -41,7 +40,7 @@ export function useCreateUser() {
     } = useMutation(useCreateUserRequest)
 
     if (isSuccess) {
-        toast.success("User berhasil dibuat. Silahkan cek email untuk verifikasi akun.")
+        // toast.success("User berhasil dibuat. Silahkan cek email untuk verifikasi akun.")
     }
 
     if (error) {
@@ -131,7 +130,7 @@ export function useUpdateUser() {
     } = useMutation(useUpdateUserRequest)
     
     if (isSuccess) {
-        toast.success("Update User Berhasil!")
+        // toast.success("Update User Berhasil!")
     }
 
     if (error) {
