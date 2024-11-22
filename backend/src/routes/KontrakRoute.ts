@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.post('/', validateKontrakRequest, KontrakController.createKontrak)
 router.get('/', KontrakController.getKontrak)
-router.get('/pekerjaans', KontrakController.getKontrakPekerjaans)
+router.post('/pekerjaans', KontrakController.getKontrakPekerjaans)
 router.get('/all', KontrakController.getKontraks)
 router.patch('/', KontrakController.updateKontrak)
 router.delete('/', KontrakController.deleteKontrak)
