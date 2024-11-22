@@ -1,20 +1,20 @@
-import { Route, Routes } from "react-router-dom";
-import Home from "@/pages/LoginPage";
-import Dashboard from "@/pages/DashboardPage";
-import Ceklaporan from "@/pages/CPM/CekLaporanPage";
-import Inbox from "@/pages/InboxPage";
-import Buatlaporan from "@/pages/Mitra/buatlaporan/BuatLaporanPage";
-import NotFound from "@/pages/NotFoundPage";
-import Forgotpassword from "@/pages/ForgotPasswordPage";
-import Layout from "@/components/custom/layout/Layout";
-import SettingsPage from "@/pages/SettingsPage";
-import MobilePage from "./pages/mobilepage";
-import useDetection from "@/hooks/useDetection"; // Import custom hook
-import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage";
-import TambahMitraPage from "./pages/Mitra/tambahmitra/TambahMitraPage";
-// import ProtectedRoute from "./auth/ProtectedRoute";
-import DaftarMitraPage from "./pages/Mitra/tambahmitra/DaftarMitraPage";
-import BuatLaporanPages from "./pages/Mitra/buatlaporan-jeki/BuatLaporanPages";
+import { Route, Routes } from "react-router-dom"
+import Home from "@/pages/LoginPage"
+import Dashboard from "@/pages/DashboardPage"
+import Ceklaporan from "@/pages/CPM/CekLaporanPage"
+import Inbox from "@/pages/InboxPage"
+import Buatlaporan from "@/pages/Mitra/buatlaporan/BuatLaporanPage"
+import NotFound from "@/pages/NotFoundPage"
+import Forgotpassword from "@/pages/ForgotPasswordPage"
+import Layout from "@/components/custom/layout/Layout"
+import SettingsPage from "@/pages/SettingsPage"
+import MobilePage from "./pages/MobilePage"
+import useDetection from "@/hooks/useDetection"
+import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage"
+import TambahMitraPage from "@/pages/CPM/tambahmitra/TambahMitraPage"
+import ProtectedRoute from "@/auth/ProtectedRoute"
+import DaftarMitraPage from "@/pages/CPM/tambahmitra/DaftarMitraPage"
+// import BuatLaporanPage from "@/pages/Mitra/buatlaporan-jeki/BuatLaporanPage"
 
 function AppRoutes() {
   const isMobile = useDetection(620); // Tentukan ukuran maksimum untuk dianggap sebagai mobile
@@ -34,7 +34,7 @@ function AppRoutes() {
       <Route path='/' element={<Home />} />
       <Route path='/forgotpassword' element={<Forgotpassword />} />
       
-      {/* <Route element={<ProtectedRoute/>}> */}
+      <Route element={<ProtectedRoute/>}>
         <Route path="/dashboard" 
           element={
             <Layout>
@@ -98,10 +98,8 @@ function AppRoutes() {
             </Layout>
           } 
         />
-      
         <Route path='/settings/*' element={<SettingsPage />} />
-        
-      {/* </Route> */}
+      </Route>
       {/* 404 Not Found Page */}
       <Route path='*' element={<NotFound />} />
     </Routes>

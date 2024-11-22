@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
-import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaChevronDown } from 'react-icons/fa';
-import { Combobox } from '@headlessui/react';
+import { useEffect, useRef, useState } from 'react';
+import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { PDFViewer } from '@react-pdf/renderer';
@@ -12,29 +11,93 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useGetMitraKontraks, useGetMitras } from '@/api/MitraApi';
+import { useGetKontrakPekerjaans } from '@/api/KontrakApi';
+import { useGetPekerjaanLaporans } from '@/api/LaporanApi';
+import ComboboxComponent from '@/components/Combobox';
+import { Kontrak, Laporan, Mitra, Pekerjaan } from '@/types';
 
 // Options dropdown
-const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C'];
+// const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C', 'Perusahaan D'];
 
-const CekLaporan: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [selectedMitra, setSelectedMitra] = useState<string>('');
-  const [selectedKontrak, setSelectedKontrak] = useState<string>('');
-  const [selectedPekerjaan, setSelectedPekerjaan] = useState<string>('');
-  const [showPDF, setShowPDF] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+const CekLaporan = () => {
+  
+  const [selectedMitra, setSelectedMitra] = useState<string>('')
+  const [selectedKontrak, setSelectedKontrak] = useState<string>('')
+  const [selectedPekerjaan, setSelectedPekerjaan] = useState<string>('')
+  const [selectedLaporan, setSelectedLaporan] = useState<string>('')
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+  const [laporanDates, setLaporanDates] = useState<Date[]>([])
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [showPDF, setShowPDF] = useState(false)
+  
+  const {allMitra, isLoading: isMitraLoading} = useGetMitras()
+  const mitra_options = allMitra?.mitras?.map((mitra: Mitra) => ({value: mitra.nama, label: mitra.nama}))
+  
+  const {mitraKontraks, isLoading: isMitraKontraksLoading} = useGetMitraKontraks(selectedMitra, {enabled: !!selectedMitra})
+  const mitra_kontraks_options = mitraKontraks?.mitra_kontraks?.map((kontrak: Kontrak) => ({value: kontrak.nomor, label: kontrak.nomor}))
+  
+  const {kontrakPekerjaans, isLoading: isKontrakPekerjaansLoading} = useGetKontrakPekerjaans({
+    nama_mitra: selectedMitra, 
+    nomor_kontrak: selectedKontrak
+  }, {enabled: !!selectedMitra && !!selectedKontrak})
+  const kontrak_pekerjaans_options = kontrakPekerjaans?.kontrak_pekerjaans?.map((pekerjaan: Pekerjaan) => ({value: pekerjaan.nama, label: pekerjaan.nama}))
+  
+  const {pekerjaanLaporans, isLoading: isPekerjaanLaporansLoading} = useGetPekerjaanLaporans({
+    nama_mitra: selectedMitra, 
+    nomor_kontrak: selectedKontrak, 
+    nama_pekerjaan: selectedPekerjaan
+  }, {enabled: !!selectedMitra && !!selectedKontrak && !!selectedPekerjaan})
+  const pekerjaan_laporans_arr = pekerjaanLaporans?.pekerjaan_laporans
 
+  const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  
   // Generate all dates in the current month
   const getDaysInMonth = (month: Date) => {
     const start = startOfMonth(month);
     const end = endOfMonth(month);
     return eachDayOfInterval({ start, end });
   };
+  
+  useEffect(() => {
+    setSelectedKontrak('');
+    setSelectedPekerjaan('');
+    setLaporanDates([]);
+  }, [selectedMitra]);
+  
+  useEffect(() => {
+    setSelectedPekerjaan('');
+    setLaporanDates([]);
+  }, [selectedKontrak]);
+  
+  useEffect(() => {
+    setLaporanDates([]);
+  }, [selectedPekerjaan]);
+  
+  useEffect(() => {
+    if (pekerjaanLaporans) {
+      const laporanDates = pekerjaan_laporans_arr.map((laporan: Laporan) => new Date(laporan.tanggal));
+      setLaporanDates(laporanDates);
+    }
+  }, [pekerjaanLaporans]);
+  
+  useEffect(() => {
+    if (laporanDates.length > 0) {
+      const latestLaporanDate = laporanDates.sort((a, b) => b.getTime() - a.getTime())[0];
+      setSelectedDate(latestLaporanDate);
+
+      // Scroll to the latest laporan
+      const dateKey = format(latestLaporanDate, 'yyyy-MM-dd');
+      setTimeout(() => {
+        dateRefs.current[dateKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }, 200); // Delay to ensure the UI is rendered
+    }
+  }, [laporanDates]);
 
   const daysInMonth = getDaysInMonth(currentMonth);
 
   const handleShowPDF = () => {
-    setShowPDF(true);
+    setShowPDF(!showPDF);
   };
 
   // Navigation for previous and next month
@@ -94,23 +157,36 @@ const CekLaporan: React.FC = () => {
         </div>
 
         {/* Horizontal Date Navigation */}
-        <div className="flex overflow-x-auto gap-x-4 pt-4 custom-scrollbar">
+        <div className="flex overflow-x-auto gap-x-4 pt-4 custom-scrollbar pb-4">
           {daysInMonth.map((day) => {
-            const isSelected =
-              format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
+            const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
+            const hasLaporan = laporanDates.some((laporanDate) => isSameDay(day, laporanDate));
+            const dateKey = format(day, 'yyyy-MM-dd');
+
             return (
               <div
-                key={day.toISOString()}
+                key={dateKey}
+                ref={(el) => (dateRefs.current[dateKey] = el)} // Attach ref to each date
                 onClick={() => setSelectedDate(day)}
                 className={`p-2 rounded-lg cursor-pointer text-center duration-200 ease-in-out mb-2 ${
                   isSelected
                     ? 'bg-red-200 text-red-600 font-semibold -translate-y-1'
+                    : hasLaporan
+                    ? 'bg-green-200 text-green-600 font-semibold'
                     : 'text-gray-500 hover:bg-gray-200 font-medium'
                 }`}
-                style={{ minWidth: '40px' }}
+                style={{ minWidth: '45px' }}
               >
                 <div>{format(day, 'd')}</div>
-                <div className={`text-xs ${isSelected ? 'text-red-600 font-semibold' : 'text-gray-500 font-medium'}`}>
+                <div
+                  className={`text-xs ${
+                    isSelected
+                      ? 'text-red-600 font-semibold'
+                      : hasLaporan
+                      ? 'text-green-600 font-semibold'
+                      : 'text-gray-500 font-medium'
+                  }`}
+                >
                   {format(day, 'EEE').slice(0, 3)}
                 </div>
               </div>
@@ -125,23 +201,26 @@ const CekLaporan: React.FC = () => {
           <ComboboxComponent
             label="Pilih Mitra"
             placeholder="Nama perusahaan"
-            options={options}
+            options={mitra_options || []}
             selected={selectedMitra}
             setSelected={setSelectedMitra}
+            isLoading={isMitraLoading}
           />
           <ComboboxComponent
             label="Pilih Kontrak"
             placeholder="Nama kontrak"
-            options={options}
+            options={mitra_kontraks_options || []}
             selected={selectedKontrak}
             setSelected={setSelectedKontrak}
+            isLoading={isMitraKontraksLoading}
           />
           <ComboboxComponent
             label="Pilih Pekerjaan"
             placeholder="Nama pekerjaan"
-            options={options}
+            options={kontrak_pekerjaans_options || []}
             selected={selectedPekerjaan}
             setSelected={setSelectedPekerjaan}
+            isLoading={isKontrakPekerjaansLoading}
           />
         </div>
 
@@ -163,68 +242,6 @@ const CekLaporan: React.FC = () => {
           </PDFViewer>
         </div>
       )}
-    </div>
-  );
-};
-
-// Komponen untuk membuat Combobox dengan fitur pencarian/filter
-const ComboboxComponent: React.FC<{
-  label: string;
-  placeholder: string;
-  options: string[];
-  selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
-}> = ({ label, placeholder, options, selected, setSelected }) => {
-  const [query, setQuery] = useState('');
-
-  const filteredOptions =
-    query === ''
-      ? options
-      : options.filter((option) => option.toLowerCase().includes(query.toLowerCase()));
-
-  return (
-    <div>
-      <label className="block text-gray-700 text-sm font-medium mb-2">{label}</label>
-      <Combobox value={selected} onChange={(value) => value && setSelected(value)}>
-        <div className="relative">
-          <div className="relative w-full cursor-default overflow-hidden rounded-lg border border-gray-300 text-left shadow-sm focus:outline-none focus:ring-0 sm:text-sm">
-            <Combobox.Input
-              className="w-full border-none py-2 pl-3 pr-8 text-gray-900 leading-5 focus:ring-0 focus:outline-none"
-              displayValue={(option: string) => option}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={placeholder}
-            />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <FaChevronDown className="h-4 w-4 text-gray-500" />
-            </Combobox.Button>
-          </div>
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-            {filteredOptions.length === 0 ? (
-              <div className="cursor-default select-none py-2 px-4 text-gray-700">No results found.</div>
-            ) : (
-              filteredOptions.map((option) => (
-                <Combobox.Option
-                  key={option}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-red-600 text-white' : 'text-gray-900'
-                    }`
-                  }
-                  value={option}
-                >
-                  {({ selected }) => (
-                    <span
-                      className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}
-                    >
-                      {option}
-                    </span>
-                  )}
-                </Combobox.Option>
-              ))
-            )}
-          </Combobox.Options>
-        </div>
-      </Combobox>
     </div>
   );
 };
