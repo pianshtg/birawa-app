@@ -21,7 +21,9 @@ export type Pekerjaan = {
 export type User = {
     email: string,
     nama_lengkap: string,
-    nomor_telepon: string
+    nomor_telepon: string ,
+    is_verified:number,
+    is_active:number,
 }
 
 export type Shift = {

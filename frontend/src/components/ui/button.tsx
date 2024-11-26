@@ -17,8 +17,8 @@ const buttonVariants = cva(
           "w-full border border-input bg-background shadow-sm hover:bg-accent hover:text-black hover:border-gray-400",
         secondary:
           "w-full bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 ",
-        ghost: "w-full hover:bg-accent hover:text-accent-foreground ",
-        link: " w-full text-primary underline-offset-4 hover:underline ",
+        ghost: "w-full hover:bg-accent hover:text-accent-foreground rounded-full ",
+        link: " w-full text-primary underline-offset-4 hover:underline  ",
       },
       size: {
         default: "h-9 px-4 py-2",
