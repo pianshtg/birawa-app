@@ -116,13 +116,20 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                         // Transferring the data from refresh token to the new access token
                     const user_id = decodedRefreshToken.user_id
                     const permissions = decodedRefreshToken.permissions
-                    const newAccessToken = generateAccessToken({user_id, permissions})
+                    
+                    // Checking user's mitra
+                    const [mitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.id = ?', [user_id])
+                    let nama_mitra: string | undefined
+                    if (mitra.length > 0) {
+                        nama_mitra = mitra[0].nama
+                    }
+                    
+                    const newAccessToken = generateAccessToken({user_id, permissions, nama_mitra})
                     
                     // Directly set the new access token to the cookie jar if the request comes from web
                     const clientType = req.headers['x-client-type']
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
-                            httpOnly: true,
                             secure: true,
                             sameSite: 'none',
                             maxAge: 15 * 60 * 1000,
@@ -145,6 +152,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                 return
             }
         } else {
+            console.error(error) //Debug.
             res.status(401).json({message: "Unauthorized."})
             return
         }
