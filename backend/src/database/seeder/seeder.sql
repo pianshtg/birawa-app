@@ -194,7 +194,6 @@ CREATE TABLE aktivitas (
     deleted_at TIMESTAMP DEFAULT NULL,
     created_by CHAR(36),
     updated_by CHAR(36),
-    UNIQUE(kontrak_ss_pekerjaan_id, nama),
     FOREIGN KEY (kontrak_ss_pekerjaan_id) REFERENCES kontrak_ss_pekerjaan(id) ON DELETE SET NULL,
     FOREIGN KEY (tipe_aktivitas_id) REFERENCES tipe_aktivitas(id) ON DELETE SET NULL
 );
