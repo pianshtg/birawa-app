@@ -1,4 +1,4 @@
-import React, { useState, useMemo,useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Pagination,
@@ -9,89 +9,89 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
-import { EditIcon, TrashIcon } from "lucide-react";
+import { Edit2, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {z} from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+} from '@/components/ui/dialog';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useGetMitras } from '@/api/MitraApi';
+import { Mitra } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
 const formSchema = z.object({
-  alamat_Mitra : z.string().min(2,"alamat Mitra terlalu kecil").max(32,"Alamat Mitra terlalu panjang"),
-  nomor_Telephone_Mitra : z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
-})
+  alamat_Mitra: z.string().min(2, 'alamat Mitra terlalu kecil').max(32, 'Alamat Mitra terlalu panjang'),
+  nomor_Telephone_Mitra: z.string().min(4, 'Nomor Telephone terlalu sedikit').max(16, 'Nomor Telephone melebih batas'),
+});
 
 export type EditFormSchema = z.infer<typeof formSchema>;
 
-const DaftarPekerjaan: React.FC = () => {
-  const [selectedRow, setSelectedRow] = useState<number | null>(null);
+const DaftarMitra: React.FC = () => {
+  const { allMitra, isLoading } = useGetMitras();
+   // Memoize the dataMitra initialization
+  const dataMitra = useMemo(() => {
+    return allMitra?.mitras || [];
+  }, [allMitra]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+  const [selectedMitra, setSelectedMitra] = useState<Mitra | null>(null);
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
-    // Ambil nilai awal dari localStorage atau gunakan default 1
     const savedItemsPerPage = localStorage.getItem('itemsPerPageMitra');
     return savedItemsPerPage ? parseInt(savedItemsPerPage, 10) : 1;
   });
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
-  const [selectedMitra, setSelectedMitra] = useState<any | null>(null);
-
-  const [mitraData, setMitraData] = useState([
-    { id: "P-001", name: "Pasang Plafon", location: "Batam Centrum", contract: "Pekerjaan MEP" },
-    { id: "P-002", name: "Instalasi Listrik", location: "Jakarta Selatan", contract: "Pekerjaan Elektro" },
-    { id: "P-003", name: "Pengecatan Dinding", location: "Surabaya Timur", contract: "Pekerjaan Interior" },
-    { id: "P-004", name: "Pemasangan AC", location: "Bandung Kota", contract: "Pekerjaan HVAC" },
-    { id: "P-005", name: "Perbaikan Pipa", location: "Medan Barat", contract: "Pekerjaan Plumbing" },
-  ]);
 
   useEffect(() => {
-    // Simpan itemsPerPage ke localStorage setiap kali berubah
+    console.log(dataMitra)
     localStorage.setItem('itemsPerPageMitra', itemsPerPage.toString());
-  }, [itemsPerPage]);
+  }, [itemsPerPage,dataMitra]);
 
   const formEditMitra = useForm<EditFormSchema>({
-    resolver:zodResolver(formSchema),
-    defaultValues:{
-      alamat_Mitra:"",
-      nomor_Telephone_Mitra:""
-    }
-  })
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      alamat_Mitra: '',
+      nomor_Telephone_Mitra: '',
+    },
+  });
 
-   // Pagination logic
-   const paginatedData = useMemo(() => {
+  const onclickdetail = (namaMitra: string) => {
+    navigate(`/daftarmitra/detailmitra/${namaMitra}`);
+  };
+
+  // Pagination logic
+  const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return mitraData.slice(startIndex, startIndex + itemsPerPage);
-  }, [currentPage, itemsPerPage, mitraData]);
+    return dataMitra.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, itemsPerPage, dataMitra]);
 
-  const totalPages = Math.ceil(mitraData.length / itemsPerPage);
+  const totalPages = Math.ceil(dataMitra.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      setSelectedRow(null); // Reset selection when changing pages
     }
   };
+
   const handleDelete = () => {
-    if (selectedMitra) {
-      setMitraData((prevData) => prevData.filter((mitra) => mitra.name !== selectedMitra.name));
-      setIsDeleteDialogOpen(false);
-      setSelectedMitra(null);
-    }
+    console.log('delete dilakukan');
   };
 
-
-  const handleEditSubmit = (data: EditFormSchema) => {
-    console.log(data);
-    setIsEditDialogOpen(false); 
-    setSelectedMitra(null);
+  const handleEditSubmit = () => {
+    console.log('update dilakukan');
   };
-  
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="py-8 lg:p-8 flex-1 min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Manajemen Mitra</h1>
@@ -129,40 +129,40 @@ const DaftarPekerjaan: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm border-separate border-spacing-0">
             <thead className="bg-slate-200 text-left">
-              <tr className="text-left bg-slate-200">
+              <tr>
                 <th className="p-4 font-medium border-b">No</th>
                 <th className="p-4 font-medium border-b">Nama Mitra</th>
+                <th className="p-4 font-medium border-b">Nomor Telephone</th>
                 <th className="p-4 font-medium border-b">Alamat Mitra</th>
-                <th className="p-4 font-medium border-b">Nomor Telepon</th>
                 <th className="p-4 font-medium border-b">Action</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((job) => (
-                <tr key={job.id} className="hover:bg-gray-50 cursor-pointer">
-                  <td className="p-4 text-sm font-normal border-b">{job.id}</td>
-                  <td className="p-4 text-sm font-normal border-b">{job.name}</td>
-                  <td className="p-4 text-sm font-normal border-b">{job.location}</td>
-                  <td className="p-4 text-sm font-normal border-b">{job.contract}</td>
+              {paginatedData.map((mitra: Mitra, index: number) => (
+                <tr key={mitra.nama} aria-label="button detail mitra" onClick={() => onclickdetail(mitra.nama)} className="hover:bg-gray-50 cursor-pointer">
+                  <td className="p-4 text-sm font-normal border-b">{index + 1}</td>
+                  <td className="p-4 text-sm font-normal border-b">{mitra.nama}</td>
+                  <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon}</td>
+                  <td className="p-4 text-sm font-normal border-b">{mitra.alamat}</td>
                   <td className="p-4 text-sm font-normal border-b">
                     <div className="flex gap-x-2">
                       <button
                         onClick={() => {
-                          setSelectedMitra(job);
+                          setSelectedMitra(mitra);
                           setIsEditDialogOpen(true);
                         }}
                         className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                       >
-                        <EditIcon color="blue" size={18} />
+                        <Edit2 color="blue" size={18} />
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedMitra(job);
+                          setSelectedMitra(mitra);
                           setIsDeleteDialogOpen(true);
                         }}
                         className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                       >
-                        <TrashIcon color="red" size={18} />
+                        <Trash2 color="red" size={18} />
                       </button>
                     </div>
                   </td>
@@ -215,24 +215,13 @@ const DaftarPekerjaan: React.FC = () => {
           <DialogDescription className="py-5">
             <div className="space-y-6">
               <p className="text-center">
-                Apakah Anda yakin ingin menghapus mitra{" "}
-                <strong>{selectedMitra?.name}</strong>?  ini tidak dapat
-                dibatalkan.Tindakan
+                Apakah Anda yakin ingin menghapus mitra <strong>{selectedMitra?.nama}</strong>? ini tidak dapat dibatalkan.
               </p>
-
               <div className="flex gap-x-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                   Batal
                 </Button>
-                <Button
-                  type="button"
-                  className="bg-red-500 text-white hover:bg-red-600"
-                  onClick={handleDelete}
-                >
+                <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={handleDelete}>
                   Hapus
                 </Button>
               </div>
@@ -249,57 +238,46 @@ const DaftarPekerjaan: React.FC = () => {
           </DialogHeader>
           <DialogDescription className="py-5">
             <div className="space-y-6">
-            <Form {...formEditMitra}>
-              <form
-                onSubmit={formEditMitra.handleSubmit(handleEditSubmit)} // Kaitkan dengan handleSubmit
-                className="space-y-3"
-              >
-                <FormField
-                  control={formEditMitra.control}
-                  name="alamat_Mitra"
-                  render={({ field }) => (
+              <Form {...formEditMitra}>
+                <form onSubmit={formEditMitra.handleSubmit(handleEditSubmit)} className="space-y-3">
+                  <FormField control={formEditMitra.control} name="alamat_Mitra" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Alamat Mitra</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
                           placeholder="Masukkan Alamat Mitra"
-                          {...field} // Sambungkan ke field
+                          {...field}
                           required
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
+                  )} />
 
-                <FormField
-                  control={formEditMitra.control}
-                  name="nomor_Telephone_Mitra"
-                  render={({ field }) => (
+                  <FormField control={formEditMitra.control} name="nomor_Telephone_Mitra" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nomor Telepon Mitra</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
                           placeholder="Masukkan Nomor Telepon"
-                          {...field} // Sambungkan ke field
+                          {...field}
                           required
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
+                  )} />
 
-                <div className="flex gap-x-3">
-                  <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                    Batal
-                  </Button>
-                  <Button type="submit">Simpan Perubahan</Button>
-                </div>
-              </form>
-            </Form>
+                  <div className="flex gap-x-3">
+                    <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                      Batal
+                    </Button>
+                    <Button type="submit">Simpan Perubahan</Button>
+                  </div>
+                </form>
+              </Form>
             </div>
           </DialogDescription>
         </DialogContent>
@@ -308,4 +286,4 @@ const DaftarPekerjaan: React.FC = () => {
   );
 };
 
-export default DaftarPekerjaan;
+export default DaftarMitra;

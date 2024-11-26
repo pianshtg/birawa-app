@@ -24,7 +24,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<SignInSchema>({
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema),
+    defaultValues:{
+      email:"",
+      password:""
+    }
   })
 
   async function onSubmit (data: SignInSchema) {
