@@ -77,7 +77,6 @@ async function loginUser (req: Request, res: Response) {
                 } else {
                     
                     res.cookie('accessToken', accessToken, {
-                        httpOnly: true,
                         secure: true,
                         sameSite: 'none',
                         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -157,7 +156,15 @@ async function authenticateUser(req: Request, res: Response) {
                         // Transferring the data from refresh token to the new access token
                     const user_id = decodedRefreshToken.user_id
                     const permissions = decodedRefreshToken.permissions
-                    const newAccessToken = generateAccessToken({user_id, permissions})
+                    
+                    // Checking user's mitra
+                    const [mitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.id = ?', [user_id])
+                    let nama_mitra: string | undefined
+                    if (mitra.length > 0) {
+                        nama_mitra = mitra[0].nama
+                    }
+                    
+                    const newAccessToken = generateAccessToken({user_id, permissions, nama_mitra})
                     
                     console.log("Successfuly renewed the accessToken: ", newAccessToken, "\n") // Debug.
                     
@@ -165,7 +172,6 @@ async function authenticateUser(req: Request, res: Response) {
                     const clientType = req.headers['x-client-type']
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
-                            httpOnly: true,
                             secure: true,
                             sameSite: 'none',
                             maxAge: 15 * 60 * 1000,
@@ -191,6 +197,7 @@ async function authenticateUser(req: Request, res: Response) {
                 return
             }
         } else {
+            console.error(error) //Debug.
             res.status(401).json({message: "Unauthorized."})
             return
         }
