@@ -78,7 +78,7 @@ export function useGetMitraUsers(nama_mitra: string) {
     async function useGetMitraUsersRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/mitra/users`, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 "Content-Type": "application/json",
                 "X-Client-Type": "web"
