@@ -170,9 +170,18 @@ async function createLaporan(req: Request, res: Response) {
                                 waktu_berakhir = '06:00:00'
                                 break
                             default:
-                                waktu_mulai = cuaca.waktu_mulai
-                                waktu_berakhir = cuaca.waktu_berakhir
+                                throw new Error("Invalid waktu provided for 'cerah' type.")
                         }
+                    } else if (['gerimis', 'hujan'].includes(cuaca.tipe)) {
+                        // For 'gerimis' and 'hujan', use the provided waktu_mulai and waktu_berakhir from the request.
+                        if (!cuaca.waktu_mulai || !cuaca.waktu_berakhir) {
+                            throw new Error(`Missing waktu_mulai or waktu_berakhir for cuaca type '${cuaca.tipe}'.`);
+                        }
+                        waktu_mulai = cuaca.waktu_mulai;
+                        waktu_berakhir = cuaca.waktu_berakhir;
+                    } else {
+                        // Handle unexpected cuaca types.
+                        throw new Error(`Unsupported cuaca type '${cuaca.tipe}'.`);
                     }
                 // Generate cuaca_id and insert it into the database if tipe_cuaca exists.
                     const cuacaId = uuidv4()
@@ -184,8 +193,9 @@ async function createLaporan(req: Request, res: Response) {
             
             // Creating laporan
             const laporanId = uuidv4()
-            await connection.execute('INSERT INTO laporan (id, kontrak_ss_pekerjaan_id, tanggal) VALUES (?, ?, ?)', [laporanId, kontrak_ss_pekerjaan_id, tanggal])
+            await connection.execute('INSERT INTO laporan (id, kontrak_ss_pekerjaan_id, tanggal, created_by) VALUES (?, ?, ?, ?)', [laporanId, kontrak_ss_pekerjaan_id, tanggal, creator_id])
             console.log("Laporan created successfully.")
+            
             
             // Commit all the queries
             await connection.commit()
@@ -231,19 +241,16 @@ async function getLaporan(req: Request, res: Response) {
         if (permissions.includes('get_laporan')) {
             const {laporanId} = req.params
             
-            const [existingLaporan] = await pool.execute<RowDataPacket[]>('SELECT * FROM laporan WHERE id = ?', [laporanId])
-            if (existingLaporan.length === 0) {
-                res.status(409).json({message: "Failed to find laporan."})
-                return
-            }
+            const [existingLaporan] = await pool.execute<RowDataPacket[]>('SELECT id, kontrak_ss_pekerjaan_id, tanggal, created_by FROM laporan WHERE id = ?', [laporanId])
             
             if (existingLaporan.length > 0) {
                 const [laporanTenagaKerja] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, s.nama AS shift_nama, s.waktu_mulai AS shift_waktu_mulai, s.waktu_berakhir AS shift_waktu_berakhir, ptk.nama AS peran_tenaga_kerja_nama, tk.jumlah AS tenaga_kerja_jumlah FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN tenaga_kerja tk ON ksp.id = tk.kontrak_ss_pekerjaan_id AND l.tanggal = tk.tanggal JOIN shift s ON tk.shift_id = s.id JOIN peran_tenaga_kerja ptk ON tk.peran_tenaga_kerja_id = ptk.id WHERE l.id = ? AND l.deleted_at IS NULL', [laporanId])
                 const [laporanAktivitasRaw] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, ta.nama AS tipe_aktivitas_nama, a.nama AS aktivitas_nama, d.link AS url, d.deskripsi AS deskripsi FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN aktivitas a ON ksp.id = a.kontrak_ss_pekerjaan_id AND l.tanggal = a.tanggal JOIN tipe_aktivitas ta ON a.tipe_aktivitas_id = ta.id LEFT JOIN dokumentasi d ON a.id = d.aktivitas_id WHERE  l.id = ? AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND k.deleted_at IS NULL AND ksp.deleted_at IS NULL AND a.deleted_at IS NULL AND ta.deleted_at IS NULL', [laporanId])
+                const [laporanCuacaRaw] = await pool.execute<RowDataPacket[]>('SELECT tc.nama AS tipe_cuaca_nama, c.waktu, c.waktu_mulai, c.waktu_berakhir FROM cuaca c JOIN tipe_cuaca tc ON c.tipe_cuaca_id = tc.id WHERE c.kontrak_ss_pekerjaan_id = ? AND c.tanggal = ? AND c.deleted_at IS NULL AND tc.deleted_at IS NULL',[existingLaporan[0].kontrak_ss_pekerjaan_id, existingLaporan[0].tanggal])
                 
                 // Group the laporanTenagaKerja by shift_nama and peran_tenaga_kerja_nama
                 const groupedLaporanTenagaKerja = laporanTenagaKerja.reduce((acc: any, row: any) => {
-                    const shiftKey = row.shift_nama;
+                    const shiftKey = row.shift_nama
                 
                     if (!acc[shiftKey]) {
                         acc[shiftKey] = {
@@ -297,12 +304,32 @@ async function getLaporan(req: Request, res: Response) {
                     });
                 });
                 
+                // Convert laporanCuacaRaw to structured cuaca array
+                const cuaca = laporanCuacaRaw.map((row: any) => ({
+                    tipe: row.tipe_cuaca_nama,
+                    waktu: row.waktu,
+                    waktu_mulai: row.waktu_mulai,
+                    waktu_berakhir: row.waktu_berakhir
+                }));
+                
                 // Convert the grouped object into an array
                 const laporan = Object.values(groupedLaporanTenagaKerja);
                 
+                // Get pembuat laporan
+                const [user] = await pool.execute<RowDataPacket[]>('SELECT nama_lengkap FROM users WHERE id = ?', [existingLaporan[0].created_by])
+                console.log(existingLaporan[0].created_by) //Debug.
+                if (user.length === 0) {
+                    res.status(409).json({message: "Failed to find pembuat laporan."})
+                    return
+                }
+                
+                const pembuat_laporan = user[0].nama_lengkap
+                
                 res.status(200).json({
                     message: "Successfully retrieved laporan.",
+                    pembuat_laporan,
                     laporan,
+                    cuaca,
                     newAccessToken
                 })
                 return
