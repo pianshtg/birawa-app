@@ -37,6 +37,7 @@ export type TenagaKerja = {
 }
 
 export type Dokumentasi = {
+    url?: string,
     deskripsi: string
 }
 
@@ -49,4 +50,30 @@ export type Aktivitas = {
 export type Laporan = {
     id: string,
     tanggal: string
+}
+
+export type Cuaca = {
+    tipe: string,
+    waktu: string,
+    waktu_mulai?: string,
+    waktu_berakhir?: string
+}
+
+export type PeranTenagaKerja = {
+    nama: string,
+    jumlah: number,
+    aktivitas_arr: Aktivitas[]
+  }
+
+export type LaporanResponse = {
+    shift_nama: string,
+    shift_waktu_mulai: string,
+    shift_waktu_berakhir: string,
+    peran_tenaga_kerja_arr: PeranTenagaKerja[]
+}
+
+export type CustomJwtPayload = {
+    user_id: string,
+    permissions: string[],
+    nama_mitra?: string
 }
