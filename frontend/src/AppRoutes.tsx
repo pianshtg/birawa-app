@@ -8,12 +8,14 @@ import NotFound from "@/pages/NotFoundPage"
 import Forgotpassword from "@/pages/ForgotPasswordPage"
 import Layout from "@/components/custom/layout/Layout"
 import SettingsPage from "@/pages/SettingsPage"
-import MobilePage from "./pages/MobilePage"
+import MobilePage from "@/pages/mobilepage"
 import useDetection from "@/hooks/useDetection"
 import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage"
 import TambahMitraPage from "@/pages/CPM/tambahmitra/TambahMitraPage"
 import ProtectedRoute from "@/auth/ProtectedRoute"
 import DaftarMitraPage from "@/pages/CPM/tambahmitra/DaftarMitraPage"
+import BuatLaporanPages from "./pages/Mitra/buatlaporan-jeki/BuatLaporanPages"
+import MitraDetailPage from "./pages/CPM/MitraDetailPage"
 // import BuatLaporanPage from "@/pages/Mitra/buatlaporan-jeki/BuatLaporanPage"
 
 function AppRoutes() {
@@ -42,11 +44,18 @@ function AppRoutes() {
             </Layout> 
           }
         />
+
         <Route path="/daftarmitra" 
           element={
             <Layout>
               <DaftarMitraPage />
             </Layout>
+          } 
+        />
+
+        <Route path="/daftarmitra/detailmitra/:nama_mitra" 
+          element={
+            <MitraDetailPage/>  
           } 
         />
 
