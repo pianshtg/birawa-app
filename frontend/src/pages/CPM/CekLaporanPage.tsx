@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/tooltip"
 import { useGetMitraKontraks, useGetMitras } from '@/api/MitraApi';
 import { useGetKontrakPekerjaans } from '@/api/KontrakApi';
-import { useGetPekerjaanLaporans } from '@/api/LaporanApi';
+import { useGetLaporan, useGetPekerjaanLaporans } from '@/api/LaporanApi';
 import ComboboxComponent from '@/components/Combobox';
 import { Kontrak, Laporan, Mitra, Pekerjaan } from '@/types';
+import { useGetUser } from '@/api/UserApi';
 
 // Options dropdown
 // const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C', 'Perusahaan D'];
@@ -30,7 +31,9 @@ const CekLaporan = () => {
   const [laporanDates, setLaporanDates] = useState<Date[]>([])
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [showPDF, setShowPDF] = useState(false)
-  
+  const [fetchReport, setFetchReport] = useState(false)
+  const [dateToLaporanIdMap, setDateToLaporanIdMap] = useState<{ [key: string]: string }>({});
+
   const {allMitra, isLoading: isMitraLoading} = useGetMitras()
   const mitra_options = allMitra?.mitras?.map((mitra: Mitra) => ({value: mitra.nama, label: mitra.nama}))
   
@@ -43,12 +46,14 @@ const CekLaporan = () => {
   }, {enabled: !!selectedMitra && !!selectedKontrak})
   const kontrak_pekerjaans_options = kontrakPekerjaans?.kontrak_pekerjaans?.map((pekerjaan: Pekerjaan) => ({value: pekerjaan.nama, label: pekerjaan.nama}))
   
-  const {pekerjaanLaporans, isLoading: isPekerjaanLaporansLoading} = useGetPekerjaanLaporans({
+  const {pekerjaanLaporans} = useGetPekerjaanLaporans({
     nama_mitra: selectedMitra, 
     nomor_kontrak: selectedKontrak, 
     nama_pekerjaan: selectedPekerjaan
   }, {enabled: !!selectedMitra && !!selectedKontrak && !!selectedPekerjaan})
   const pekerjaan_laporans_arr = pekerjaanLaporans?.pekerjaan_laporans
+  
+  const {laporan, isLoading: isLaporanLoading} = useGetLaporan(selectedLaporan, {enabled: !!selectedLaporan})
 
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
@@ -60,188 +65,233 @@ const CekLaporan = () => {
   };
   
   useEffect(() => {
-    setSelectedKontrak('');
-    setSelectedPekerjaan('');
-    setLaporanDates([]);
-  }, [selectedMitra]);
+    setSelectedKontrak('')
+    setSelectedPekerjaan('')
+    setLaporanDates([])
+  }, [selectedMitra])
   
   useEffect(() => {
     setSelectedPekerjaan('');
-    setLaporanDates([]);
-  }, [selectedKontrak]);
+    setLaporanDates([])
+  }, [selectedKontrak])
   
   useEffect(() => {
-    setLaporanDates([]);
-  }, [selectedPekerjaan]);
+    setLaporanDates([])
+  }, [selectedPekerjaan])
   
   useEffect(() => {
-    if (pekerjaanLaporans) {
-      const laporanDates = pekerjaan_laporans_arr.map((laporan: Laporan) => new Date(laporan.tanggal));
-      setLaporanDates(laporanDates);
+    if (showPDF) {
+      setShowPDF(false)
     }
-  }, [pekerjaanLaporans]);
+  }, [selectedDate])
   
   useEffect(() => {
     if (laporanDates.length > 0) {
-      const latestLaporanDate = laporanDates.sort((a, b) => b.getTime() - a.getTime())[0];
-      setSelectedDate(latestLaporanDate);
+      const latestLaporanDate = laporanDates.sort((a, b) => b.getTime() - a.getTime())[0]
+      setSelectedDate(latestLaporanDate)
 
       // Scroll to the latest laporan
       const dateKey = format(latestLaporanDate, 'yyyy-MM-dd');
       setTimeout(() => {
-        dateRefs.current[dateKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        dateRefs.current[dateKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
       }, 200); // Delay to ensure the UI is rendered
     }
-  }, [laporanDates]);
+  }, [laporanDates])
+  
+  useEffect(() => {
+    if (pekerjaanLaporans) {
+      const map = pekerjaan_laporans_arr.reduce((acc: { [key: string]: string }, laporan: Laporan) => {
+        const dateKey = format(new Date(laporan.tanggal), 'yyyy-MM-dd');
+        acc[dateKey] = laporan.id; // Assuming laporan has an `id` field
+        return acc;
+      }, {});
+      setDateToLaporanIdMap(map);
+      const laporanDates = Object.keys(map).map((key) => new Date(key));
+      setLaporanDates(laporanDates);
+    } else {
+      setDateToLaporanIdMap({})
+    }
+  }, [pekerjaanLaporans]);
+  
 
   const daysInMonth = getDaysInMonth(currentMonth);
 
   const handleShowPDF = () => {
-    setShowPDF(!showPDF);
-  };
+    const selectedDateKey = format(selectedDate || new Date(), 'yyyy-MM-dd');
+    const laporanId = dateToLaporanIdMap[selectedDateKey];
+
+        if (laporanId) {
+          setSelectedLaporan(laporanId); // This will trigger the useGetLaporan API call
+          setFetchReport(!fetchReport);
+          setShowPDF(!showPDF);
+        } else {
+          alert('No laporan available for the selected date.');
+        }
+    }
 
   // Navigation for previous and next month
   const prevMonth = () => setCurrentMonth(addMonths(currentMonth, -1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  
+  const {user, isLoading: isUserLoading} = useGetUser()
+  const pencetak_laporan = user?.user?.nama_lengkap || ''
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold text-black mb-6">Cek Laporan</h1>
-
-      <div className="bg-white p-4 mb-6 border rounded-md">
-        <div className="flex items-center justify-between">
-          {/* Pop-up Calendar */}
-          <div className="flex items-center text-red-600 font-semibold mb-2">
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date: Date | null) => setSelectedDate(date)}
-              dateFormat="dd/MM/yyyy"
-              popperPlacement="bottom-start"
-              popperClassName="react-datepicker-popper"
-              customInput={
-                <button className="flex items-center space-x-2 text-red-600 font-semibold">
-                  <FaCalendarAlt className="mr-2" />
-                  <span>{format(currentMonth, 'MMMM yyyy')}</span>
-                </button>
-              }
-            />
-          </div>
-          {/* Navigation Buttons */}
-          <div className="flex space-x-2">
-            <TooltipProvider>
-              {/* Button for Previous Month */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button onClick={prevMonth} className="px-2 py-2 text-xl text-red-600 hover:text-red-700">
-                    <FaChevronLeft className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Bulan Sebelumnya</p>
-                </TooltipContent>
-              </Tooltip>
-
-              {/* Button for Next Month */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button onClick={nextMonth} className="px-2 py-2 text-xl text-red-600 hover:text-red-700">
-                    <FaChevronRight className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Bulan Selanjutnya</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-
-        {/* Horizontal Date Navigation */}
-        <div className="flex overflow-x-auto gap-x-4 pt-4 custom-scrollbar pb-4">
-          {daysInMonth.map((day) => {
-            const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
-            const hasLaporan = laporanDates.some((laporanDate) => isSameDay(day, laporanDate));
-            const dateKey = format(day, 'yyyy-MM-dd');
-
-            return (
-              <div
-                key={dateKey}
-                ref={(el) => (dateRefs.current[dateKey] = el)} // Attach ref to each date
-                onClick={() => setSelectedDate(day)}
-                className={`p-2 rounded-lg cursor-pointer text-center duration-200 ease-in-out mb-2 ${
-                  isSelected
-                    ? 'bg-red-200 text-red-600 font-semibold -translate-y-1'
-                    : hasLaporan
-                    ? 'bg-green-200 text-green-600 font-semibold'
-                    : 'text-gray-500 hover:bg-gray-200 font-medium'
-                }`}
-                style={{ minWidth: '45px' }}
-              >
-                <div>{format(day, 'd')}</div>
-                <div
-                  className={`text-xs ${
-                    isSelected
-                      ? 'text-red-600 font-semibold'
-                      : hasLaporan
-                      ? 'text-green-600 font-semibold'
-                      : 'text-gray-500 font-medium'
-                  }`}
-                >
-                  {format(day, 'EEE').slice(0, 3)}
+      
+      {
+        isUserLoading ? <div>Loading...</div> : (
+          <>
+            <div className="bg-white p-4 mb-6 border rounded-md">
+              <div className="flex items-center justify-between">
+                {/* Pop-up Calendar */}
+                <div className="flex items-center text-red-600 font-semibold mb-2">
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date: Date | null) => setSelectedDate(date)}
+                    dateFormat="dd/MM/yyyy"
+                    popperPlacement="bottom-start"
+                    popperClassName="react-datepicker-popper"
+                    customInput={
+                      <button className="flex items-center space-x-2 text-red-600 font-semibold">
+                        <FaCalendarAlt className="mr-2" />
+                        <span>{format(currentMonth, 'MMMM yyyy')}</span>
+                      </button>
+                    }
+                  />
+                </div>
+                {/* Navigation Buttons */}
+                <div className="flex space-x-2">
+                  <TooltipProvider>
+                    {/* Button for Previous Month */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button onClick={prevMonth} className="px-2 py-2 text-xl text-red-600 hover:text-red-700">
+                          <FaChevronLeft className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Bulan Sebelumnya</p>
+                      </TooltipContent>
+                    </Tooltip>
+    
+                    {/* Button for Next Month */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button onClick={nextMonth} className="px-2 py-2 text-xl text-red-600 hover:text-red-700">
+                          <FaChevronRight className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Bulan Selanjutnya</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Form dengan Dropdown */}
-      <div className="bg-white p-6 rounded-md border">
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <ComboboxComponent
-            label="Pilih Mitra"
-            placeholder="Nama perusahaan"
-            options={mitra_options || []}
-            selected={selectedMitra}
-            setSelected={setSelectedMitra}
-            isLoading={isMitraLoading}
-          />
-          <ComboboxComponent
-            label="Pilih Kontrak"
-            placeholder="Nama kontrak"
-            options={mitra_kontraks_options || []}
-            selected={selectedKontrak}
-            setSelected={setSelectedKontrak}
-            isLoading={isMitraKontraksLoading}
-          />
-          <ComboboxComponent
-            label="Pilih Pekerjaan"
-            placeholder="Nama pekerjaan"
-            options={kontrak_pekerjaans_options || []}
-            selected={selectedPekerjaan}
-            setSelected={setSelectedPekerjaan}
-            isLoading={isKontrakPekerjaansLoading}
-          />
-        </div>
-
-        <div className="text-right">
-          <button
-            onClick={handleShowPDF}
-            className="bg-red-600 text-white py-2 px-6 rounded-md font-semibold hover:bg-red-700 transition"
-          >
-            Tampilkan Laporan
-          </button>
-        </div>
-      </div>
-
-      {/* PDF Viewer */}
-      {showPDF && (
-        <div className="pdf-viewer mt-6">
-          <PDFViewer width="100%" height="900">
-            <ReportTemplate />
-          </PDFViewer>
-        </div>
-      )}
+    
+              {/* Horizontal Date Navigation */}
+              <div className="flex overflow-x-auto gap-x-4 pt-4 custom-scrollbar pb-4">
+                {daysInMonth.map((day) => {
+                  const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
+                  const hasLaporan = laporanDates.some((laporanDate) => isSameDay(day, laporanDate));
+                  const dateKey = format(day, 'yyyy-MM-dd');
+    
+                  return (
+                    <div
+                      key={dateKey}
+                      ref={(el) => (dateRefs.current[dateKey] = el)} // Attach ref to each date
+                      onClick={() => setSelectedDate(day)}
+                      className={`p-2 rounded-lg cursor-pointer text-center duration-200 ease-in-out mb-2 ${
+                        isSelected
+                          ? 'bg-red-200 text-red-600 font-semibold -translate-y-1'
+                          : hasLaporan
+                          ? 'bg-green-200 text-green-600 font-semibold'
+                          : 'text-gray-500 hover:bg-gray-200 font-medium'
+                      }`}
+                      style={{ minWidth: '45px' }}
+                    >
+                      <div>{format(day, 'd')}</div>
+                      <div
+                        className={`text-xs ${
+                          isSelected
+                            ? 'text-red-600 font-semibold'
+                            : hasLaporan
+                            ? 'text-green-600 font-semibold'
+                            : 'text-gray-500 font-medium'
+                        }`}
+                      >
+                        {format(day, 'EEE').slice(0, 3)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+    
+            {/* Form dengan Dropdown */}
+            <div className="bg-white p-6 rounded-md border">
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <ComboboxComponent
+                  label="Pilih Mitra"
+                  placeholder="Nama perusahaan"
+                  options={mitra_options || []}
+                  selected={selectedMitra}
+                  setSelected={setSelectedMitra}
+                  isLoading={isMitraLoading}
+                />
+                <ComboboxComponent
+                  label="Pilih Kontrak"
+                  placeholder="Nama kontrak"
+                  options={mitra_kontraks_options || []}
+                  selected={selectedKontrak}
+                  setSelected={setSelectedKontrak}
+                  isLoading={isMitraKontraksLoading}
+                />
+                <ComboboxComponent
+                  label="Pilih Pekerjaan"
+                  placeholder="Nama pekerjaan"
+                  options={kontrak_pekerjaans_options || []}
+                  selected={selectedPekerjaan}
+                  setSelected={setSelectedPekerjaan}
+                  isLoading={isKontrakPekerjaansLoading}
+                />
+              </div>
+    
+              <div className="text-right">
+                <button
+                  onClick={handleShowPDF}
+                  className={`py-2 px-6 rounded-md font-semibold transition ${
+                    !selectedPekerjaan || !dateToLaporanIdMap[format(selectedDate || new Date(), 'yyyy-MM-dd')]
+                      ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                      : 'bg-red-600 text-white hover:bg-red-700'
+                  }`}
+                  disabled={
+                    !selectedPekerjaan || // Ensure a pekerjaan is selected
+                    !dateToLaporanIdMap[format(selectedDate || new Date(), 'yyyy-MM-dd')] // Ensure a laporan exists for the selected date
+                  }
+                >
+                  {!selectedPekerjaan || !dateToLaporanIdMap[format(selectedDate || new Date(), 'yyyy-MM-dd')]
+                    ? 'Silahkan Pilih Laporan'
+                    : showPDF
+                    ? 'Tutup Laporan'
+                    : 'Tampilkan Laporan'}
+                </button>
+              </div>
+            </div>
+    
+            {/* PDF Viewer */}
+            {showPDF && !isLaporanLoading  && (
+              <div className="pdf-viewer mt-6">
+                <PDFViewer width="100%" height="900">
+                  <ReportTemplate pencetak_laporan={pencetak_laporan} pembuat_laporan={laporan.pembuat_laporan} nama_mitra={selectedMitra} nomor_kontrak={selectedKontrak} nama_pekerjaan={selectedPekerjaan} tanggal={selectedDate?.toString() ?? 'unknown '} laporan={laporan.laporan} cuaca={laporan.cuaca}/>
+                </PDFViewer>
+              </div>
+            )}
+          </>
+        )
+      }
     </div>
   );
 };

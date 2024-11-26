@@ -1,23 +1,44 @@
-import type { FC } from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import BirawaLogo from "@/assets/BirawaLogo.png";
+import { getAccessToken } from '@/lib/utils';
+import { CustomJwtPayload } from '@/types';
+import { Document, Page, Text, View, StyleSheet, Image, Link } from '@react-pdf/renderer';
+import { Font } from '@react-pdf/renderer'
+import {jwtDecode} from 'jwt-decode'
 
-// Define interfaces for our data structures
+Font.register({
+  family: 'Century',
+  src: '/fonts/Century.otf',
+})
 
-// interface WorkDescriptions {
-//   [key: number]: string;
-// }
+Font.register({
+  family: 'Century',
+  src: '/fonts/Century-Bold.ttf',
+  fontWeight: 'bold',
+});
 
+// Register a font that supports the checkmark
+Font.register({
+  family: 'Arial',
+  src: '/fonts/Arial.ttf',
+});
+
+// Use the font in your styles
 const styles = StyleSheet.create({
   page: {
     padding: 20,
     fontSize: 10,
+    fontFamily: 'Century'
+  },
+  text: {
+    fontFamily: 'Century'
+  },
+  checkmark: {
+    fontSize: 14,
+    fontFamily: 'Arial',// Fallback for the checkmark
   },
   header: {
     border: '1px solid black',
     marginBottom: 10,
     flexDirection: 'row',
-    display:'flex',
   },
   leftSection: {
     width: '30%',
@@ -36,21 +57,21 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
-    border : '1px solid black',
+    border: '1px solid black',
   },
   dateCell: {
     padding: 5,
     flex: 1,
   },
-   // New styles for workforce table
-   workforceTable: {
+
+  // Workforce Table Styles
+  workforceTable: {
     marginTop: 10,
     border: '1px solid black',
   },
   shiftRow: {
     flexDirection: 'row',
     borderBottom: '1px solid black',
-    marginBottom: 5,
   },
   shiftCell: {
     flex: 1,
@@ -74,10 +95,12 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRight: '1px solid black',
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   workforceRow: {
     flexDirection: 'row',
     minHeight: 20,
+    borderBottom: '1px solid black', // Consistent row border
   },
   workforceCell: {
     flex: 3,
@@ -90,6 +113,20 @@ const styles = StyleSheet.create({
     borderRight: '1px solid black',
     textAlign: 'center',
   },
+  categoryCell: {
+    flex: 3,
+    padding: 5,
+    borderRight: '1px solid black',
+    fontWeight: 'bold',
+    justifyContent: 'center', // Align vertically
+  },
+  categoryNumberCell: {
+    flex: 1,
+    padding: 5,
+    borderRight: '1px solid black',
+    textAlign: 'center',
+    justifyContent: 'center', // Align vertically
+  },
   subtotalRow: {
     flexDirection: 'row',
     borderTop: '1px solid black',
@@ -99,7 +136,7 @@ const styles = StyleSheet.create({
     borderTop: '1px solid black',
   },
 
-  // Styles for daily activities table
+  // Activities Table Styles
   activitiesTable: {
     marginTop: 20,
     border: '1px solid black',
@@ -126,31 +163,17 @@ const styles = StyleSheet.create({
     borderRight: '1px solid black',
   },
   boldText: {
-    fontWeight:'bold',
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    minHeight: 20,
-    backgroundColor: '#ffffff',
-  },
-  categoryCell: {
-    flex: 3,
-    padding: 5,
-    borderRight: '1px solid black',
     fontWeight: 'bold',
-  },
-  categoryNumberCell: {
-    flex: 1,
-    padding: 5,
-    borderRight: '1px solid black',
-    textAlign: 'center',
   },
   indentedCell: {
     flex: 3,
-    paddingLeft: 10, // Added indentation
+    paddingLeft: 10,
+    justifyContent: 'center', // Vertically align text
+    alignItems: 'flex-start', // Align text to the left
     borderRight: '1px solid black',
   },
 
+  // Table Wrapper
   table: {
     marginTop: 10,
     border: '1px solid black',
@@ -169,7 +192,7 @@ const styles = StyleSheet.create({
   tableCellNoBorder: {
     padding: 5,
     flex: 1,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   workItemCell: {
     padding: 5,
@@ -200,422 +223,647 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  //style for image
+  // Image Styles
   imagePage: {
     padding: 20,
     fontSize: 10,
   },
   imageRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20, // Jarak antar baris
+    flexDirection: 'row', // Images will be displayed in a row
+    flexWrap: 'wrap', // Allows wrapping to the next line if there are too many images
+    justifyContent: 'flex-start', // Align images to the left
+    marginBottom: 10, // Add spacing between rows
   },
   imageCell: {
-    width: '48%', // Lebar setiap gambar (dua kolom)
-    alignItems: 'center', // Tengah secara horizontal
+    width: '45%', // Adjust width to fit 2 images per row with some spacing
+    marginRight: '5%', // Add spacing between images
+    marginBottom: 10, // Add spacing below each image
+    alignItems: 'center', // Center-align the text under the image
   },
   image: {
-    width: 150,
-    height: 100, // Atur tinggi gambar
-    marginBottom: 5, // Jarak antara gambar dan teks
+    width: '100%', // Image will fill the cell width
+    height: 'auto', // Maintain the aspect ratio
+    aspectRatio: 1.5, // Adjust the aspect ratio as needed
   },
   imageText: {
+    fontSize: 10,
     textAlign: 'center',
-  },  
+    marginBottom: 10
+  },
   pageWithBorder: {
     padding: 20,
     fontSize: 10,
-    border: '1px solid black', // Border di sekeliling halaman
+    border: '1px solid black',
   },
   contentWithBorder: {
-    border: '1px solid black', // Border di sekitar konten
-    padding: 10, // Memberikan jarak antara border dan konten
+    border: '1px solid black',
+    padding: 10,
   },
-});
+})
 
-// const getWorkDescription = (index: number): string => {
-//   const descriptions: WorkDescriptions = {
-//     1: "Pekerjaan pemasangan brickwall walltreatment WT.06",
-//     2: "Pekerjaan penarikan instalasi listrik",
-//     3: "Pekerjaan piping & wiring instalasi listrik lampu",
-//     4: "Pekerjaan compound single sided gypsum partition P.1",
-//     5: "Pekerjaan pemasangan pintu D.1",
-//     6: "Pekerjaan pemasangan kaca tempered GL.01 ruang meeting 1",
-//     7: "Pekerjaan pemasangan list pertemuan lantai",
-//     8: "Pekerjaan pemasangan pintu ruang lab D.2",
-//     9: "Pekerjaan pabrikasi decorative ceiling",
-//     10: "Pekerjaan pemasangan rangka plafond pantry",
-//     11: "Pekerjaan pembongkaran keramik existing koridor",
-//     12: "Pekerjaan pengecatan cover kolom PT.04",
-//     13: "Pekerjaan pengecatan PT.04",
-//     14: "Pekerjaan instalasi pipa ac"
-//   };
-//   return descriptions[index] || "";
-// };
+type Dokumentasi = {
+  deskripsi: string,
+  url: string
+}
 
-const ReportTemplate: FC = () => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.leftSection}>
-          <Text>Nomor: 116</Text>
-          <Text>Kontraktor:</Text>
-          <Text>PT. Graha Sarana Duta</Text>
-        </View>
-        <View style={styles.middleSection}>
-          <Text style={styles.boldText}>LAPORAN HARIAN</Text>
-        </View>
-        <View style={styles.rightSection}>
-          <Text>Telkom DTV ADMEDIKA,</Text>
-          <Text>IPTV (ex. Pins), KAP &</Text>
-          <Text>AVATAR</Text>
-        </View>
-      </View>
+type Aktivitas = {
+  nama: string,
+  dokumentasi_arr: Dokumentasi[]
+}
 
-      {/* Date Row */}
-      <View style={styles.dateRow}>
-        <View style={[styles.dateCell, { borderRight: '1px solid black' }]}>
-          <Text>Tanggal: 02/09/2024</Text>
-        </View>
-        <View style={styles.dateCell}>
-          <Text>Lampiran: Dokumentasi</Text>
-        </View>
-      </View>
+type PeranTenagaKerja = {
+  nama: string,
+  jumlah: number,
+  aktivitas_arr: Aktivitas[]
+}
 
-     
-      {/* Workforce Table */}
-      <View style={styles.workforceTable}>
-        <View style={styles.shiftRow}>
-          <View style={styles.shiftCell}>
-            <Text>SHIFT 1</Text>
-          </View>
-          <View style={styles.shiftCell}>
-            <Text>SHIFT 2</Text>
-          </View>
-        </View>
-        
-        {/* Column Headers */}
-        <View style={styles.workforceHeaderRow}>
-          <View style={styles.workforceHeaderCell}>
-            <Text>Jenis Tenaga Kerja</Text>
-          </View>
-          <View style={styles.workforceCountCell}>
-            <Text>Jumlah</Text>
-          </View>
-          <View style={styles.workforceHeaderCell}>
-            <Text>Jenis Tenaga Kerja</Text>
-          </View>
-          <View style={styles.workforceCountCell}>
-            <Text>Jumlah</Text>
-          </View>
-        </View>
+type Props = {
+  pencetak_laporan: string,
+  pembuat_laporan: string,
+  nama_mitra: string,
+  nomor_kontrak: string,
+  nama_pekerjaan: string,
+  tanggal: string,
+  laporan: {
+    shift_nama: string,
+    shift_waktu_mulai: string,
+    shift_waktu_berakhir: string,
+    peran_tenaga_kerja_arr: PeranTenagaKerja[]
+  }[]
+  cuaca: {
+    tipe: string,
+    waktu: string,
+    waktu_mulai: string,
+    waktu_berakhir: string
+  }[]
+}
 
-        {/* Workforce Rows - Management */}
-        <View style={styles.workforceRow}>
-          <View style={styles.categoryCell}>
-            <Text>I. Manajemen</Text>
+const shiftList = ['1', '2']
+
+const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_kontrak, nama_pekerjaan, tanggal, laporan, cuaca}: Props) => {
+  
+  console.log("Pencetak laporan:", pencetak_laporan) //Debug.
+  console.log("Pembuat laporan:", pembuat_laporan) //Debug.
+  
+  const accessToken = getAccessToken();
+  console.log("Access token:", accessToken) //Debug.
+
+  // const metaData = jwtDecode<CustomJwtPayload>(accessToken!);
+  let metaData: CustomJwtPayload = { user_id: '', permissions: [] };
+
+  if (typeof accessToken === 'string' && accessToken.trim() !== '') {
+    try {
+      metaData = jwtDecode<CustomJwtPayload>(accessToken)
+      // console.log('Decoded Token:', metaData) //Debug.
+      console.log('Decoded Token:', metaData) //Debug.
+    } catch (error) {
+      // console.error('Error decoding token:', error) //Debug.
+    }
+  } else {
+    console.error('Token is undefined or invalid') //Debug.
+  }
+  
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.leftSection}>
+            <Text>Nomor Kontrak: {nomor_kontrak}</Text>
+            <Text>Kontraktor:</Text>
+            <Text>Pt. Graha Sarana Duta</Text>
           </View>
-          <View style={styles.categoryNumberCell}>
-            <Text></Text>
+          <View style={styles.middleSection}>
+            <Text style={styles.boldText}>LAPORAN HARIAN {nama_pekerjaan.toUpperCase()}</Text>
           </View>
-          <View style={styles.categoryCell}>
-            <Text>I. Manajemen</Text>
-          </View>
-          <View style={styles.categoryNumberCell}>
-            <Text></Text>
+          <View style={styles.rightSection}>
+            <Text>{nama_mitra}</Text>
+            <Text>IPTV (ex. Pins), KAP &</Text>
+            <Text>AVATAR</Text>
           </View>
         </View>
 
-
-        {/*  */}
-        <View style={styles.workforceRow}>
-          <View style={styles.indentedCell}>
-            <Text>1. Project Manager Shift 1</Text>
+        {/* Date Row */}
+        <View style={styles.dateRow}>
+          <View style={[styles.dateCell, { borderRight: '1px solid black' }]}>
+          <Text>
+            Hari / Tanggal: {new Intl.DateTimeFormat('id-ID', {
+              weekday: 'long', // Full weekday name (e.g., Monday)
+              day: '2-digit',  // Day of the month (e.g., 25)
+              month: 'long',   // Full month name (e.g., November)
+              year: 'numeric', // Full year (e.g., 2024)
+            }).format(new Date(tanggal))}
+          </Text>
           </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>1</Text>
-          </View>
-          <View style={styles.indentedCell}>
-            <Text>1. Project Manager Shift 2</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>1</Text>
-          </View>
-        </View>
-
-        <View style={styles.workforceRow}>
-          <View style={styles.indentedCell}>
-            <Text>2. Site Manager</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>2</Text>
-          </View>
-          <View style={styles.indentedCell}>
-            <Text></Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>2</Text>
+          <View style={styles.dateCell}>
+            <Text>Lampiran: Dokumentasi</Text>
           </View>
         </View>
 
-        <View style={styles.workforceRow}>
-          <View style={styles.categoryCell}>
-            <Text>II. Lapangan</Text>
+      
+        {/* Tenaga Kerja Table */}
+        <View style={styles.workforceTable}>
+          <View style={styles.shiftRow}>
+            <View style={styles.shiftCell}>
+              <Text>SHIFT {shiftList[0]}</Text>
+            </View>
+            <View style={styles.shiftCell}>
+              <Text>SHIFT {shiftList[1]}</Text>
+            </View>
           </View>
-          <View style={styles.categoryNumberCell}>
-            <Text></Text>
+          
+          {/* Column Headers */}
+          <View style={styles.workforceHeaderRow}>
+            <View style={styles.workforceHeaderCell}>
+              <Text>Jenis Tenaga Kerja</Text>
+            </View>
+            <View style={styles.workforceCountCell}>
+              <Text>Jumlah</Text>
+            </View>
+            <View style={styles.workforceHeaderCell}>
+              <Text>Jenis Tenaga Kerja</Text>
+            </View>
+            <View style={styles.workforceCountCell}>
+              <Text>Jumlah</Text>
+            </View>
           </View>
-          <View style={styles.categoryCell}>
-            <Text>II. Lapangan</Text>
+
+          {/* Tenaga_Kerja Rows - Management */}
+          <View style={styles.workforceRow}>
+            <View style={[styles.categoryCell, {borderRight: '0px'}]}>
+              <Text>I. Manajemen</Text>
+            </View>
+            <View style={styles.categoryNumberCell}>
+              <Text></Text>
+            </View>
+            <View style={[styles.categoryCell, {borderRight: '0px'}]}>
+              <Text>I. Manajemen</Text>
+            </View>
+            <View style={styles.categoryNumberCell}>
+              <Text></Text>
+            </View>
           </View>
-          <View style={styles.categoryNumberCell}>
-            <Text></Text>
+          
+          {/* Map Tenaga Kerja Manajemen */}
+          {(() => {
+            // Find data for both shifts
+            const shift1Data = laporan.find((item) => item.shift_nama === "1")
+            const shift2Data = laporan.find((item) => item.shift_nama === "2")
+
+            // Filter non-"pekerja" rows for both shifts
+            const shift1TenagaKerja = shift1Data
+              ? shift1Data.peran_tenaga_kerja_arr.filter(
+                  (tenagaKerja) => !tenagaKerja.nama.toLowerCase().startsWith("pekerja")
+                )
+              : []
+
+            const shift2TenagaKerja = shift2Data
+              ? shift2Data.peran_tenaga_kerja_arr.filter(
+                  (tenagaKerja) => !tenagaKerja.nama.toLowerCase().startsWith("pekerja")
+                )
+              : []
+              
+            // Determine the maximum number of rows to display
+            const maxLength = Math.max(shift1TenagaKerja.length, shift2TenagaKerja.length)
+
+            // Iterate through the rows for both shifts
+            return [...Array(maxLength)].map((_, rowIndex) => {
+              const tenagaKerjaShift1 = shift1TenagaKerja[rowIndex] || null
+              const tenagaKerjaShift2 = shift2TenagaKerja[rowIndex] || null
+
+              return (
+                <View key={`row-${rowIndex}`} style={styles.workforceRow}>
+                  {/* Left Side (Shift 1) */}
+                  {tenagaKerjaShift1 ? (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text>
+                          {rowIndex + 1}. {tenagaKerjaShift1.nama}
+                        </Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text>{tenagaKerjaShift1.jumlah}</Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text></Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text></Text>
+                      </View>
+                    </>
+                  )}
+
+                  {/* Right Side (Shift 2) */}
+                  {tenagaKerjaShift2 ? (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text>
+                          {rowIndex + 1}. {tenagaKerjaShift2.nama}
+                        </Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text>{tenagaKerjaShift2.jumlah}</Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text></Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text></Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+              )
+            })
+          })()}
+
+          <View style={[styles.workforceRow, {borderTop: "1px solid black", borderBottom: "1px solid black", }]}>
+            <View style={[styles.categoryCell, {borderRight: '0px'}]}>
+              <Text>II. Lapangan</Text>
+            </View>
+            <View style={styles.categoryNumberCell}>
+              <Text></Text>
+            </View>
+            <View style={[styles.categoryCell, {borderRight: '0px'}]}>
+              <Text>II. Lapangan</Text>
+            </View>
+            <View style={styles.categoryNumberCell}>
+              <Text></Text>
+            </View>
+          </View>
+            
+          {/* Map Tenaga Kerja Lapangan */}
+          {(() => {
+            // Find data for both shifts
+            const shift1Data = laporan.find((item) => item.shift_nama === "1")
+            const shift2Data = laporan.find((item) => item.shift_nama === "2")
+            
+            // Filter non-"pekerja" rows for both shifts
+            const shift1TenagaKerja = shift1Data
+              ? shift1Data.peran_tenaga_kerja_arr.filter(
+                  (tenagaKerja) => tenagaKerja.nama.toLowerCase().startsWith("pekerja")
+                )
+                : []
+
+            const shift2TenagaKerja = shift2Data
+            ? shift2Data.peran_tenaga_kerja_arr.filter(
+              (tenagaKerja) => tenagaKerja.nama.toLowerCase().startsWith("pekerja"))
+              : []
+                  
+                  // Determine the maximum number of rows to display
+            const maxLength = Math.max(shift1TenagaKerja.length, shift2TenagaKerja.length)
+            
+            // Iterate through the rows for both shifts
+            return [...Array(maxLength)].map((_, rowIndex) => {
+              const tenagaKerjaShift1 = shift1TenagaKerja[rowIndex] || null
+              const tenagaKerjaShift2 = shift2TenagaKerja[rowIndex] || null
+              
+              return (
+                <View key={`row-${rowIndex}`} style={styles.workforceRow}>
+                  {/* Left Side (Shift 1) */}
+                  {tenagaKerjaShift1 ? (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text style={{textAlign: 'left', alignContent: 'center'}}>
+                          {rowIndex + 1}. {tenagaKerjaShift1.nama}
+                        </Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text style={{textAlign: 'center'}}>{tenagaKerjaShift1.jumlah}</Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text></Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text></Text>
+                      </View>
+                    </>
+                  )}
+
+                  {/* Right Side (Shift 2) */}
+                  {tenagaKerjaShift2 ? (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text>
+                          {rowIndex + 1}. {tenagaKerjaShift2.nama}
+                        </Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text>{tenagaKerjaShift2.jumlah}</Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.indentedCell}>
+                        <Text></Text>
+                      </View>
+                      <View style={styles.workforceNumberCell}>
+                        <Text></Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+              )
+            })
+          })()}
+
+          {/* Subtotals */}
+          {/* laporan.find((item) => item.shift_nama === "1")
+          const shift2Data = laporan.find((item) => item.shift_nama === "2") */}
+          <View style={styles.subtotalRow}>
+            <View style={styles.workforceCell}>
+              <Text style={styles.boldText}>Sub Total 1</Text>
+            </View>
+            <View style={styles.workforceNumberCell}>
+              <Text>{
+                laporan
+                  .filter((item) => item.shift_nama === "1")
+                  .reduce((sum, shift) =>
+                    shift.peran_tenaga_kerja_arr.reduce(
+                      (innerSum, tenagaKerja) => innerSum + tenagaKerja.jumlah,
+                      sum
+                    ), 0)  
+              }</Text>
+            </View>
+            <View style={styles.workforceCell}>
+              <Text style={styles.boldText}>Sub Total 2</Text>
+            </View>
+            <View style={styles.workforceNumberCell}>
+              <Text>{
+                laporan
+                .filter((item) => item.shift_nama === "2")
+                .reduce((sum, shift) =>
+                  shift.peran_tenaga_kerja_arr.reduce(
+                    (innerSum, tenagaKerja) => innerSum + tenagaKerja.jumlah,
+                    sum
+                  ), 0) 
+              }</Text>
+            </View>
+          </View>
+
+          {/* Total */}
+          <View style={styles.totalRow}>
+            <View style={[styles.workforceCell, { flex: 14.7 }]}>
+              <Text style={styles.boldText}>Total Pekerja Hari ini</Text>
+            </View>
+            <View style={[styles.workforceNumberCell, { flex: 2 }]}>
+              <Text>{
+                laporan.reduce(
+                  (total, shift) =>
+                    shift.peran_tenaga_kerja_arr.reduce(
+                      (innerTotal, tenagaKerja) => innerTotal + tenagaKerja.jumlah,
+                      total
+                    ),
+                  0
+                )}
+              </Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.workforceRow}>
-          <View style={styles.indentedCell}>
-            <Text>1. Pekerja Sipil</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>3</Text>
-          </View>
-          <View style={styles.indentedCell}>
-            <Text>1. Pekerja Sipil</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>4</Text>
-          </View>
-        </View>
-
-        <View style={styles.workforceRow}>
-          <View style={styles.indentedCell}>
-            <Text>2. Pekerja Arsitektur</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>5</Text>
-          </View>
-          <View style={styles.indentedCell}>
-            <Text></Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text></Text>
-          </View>
-        </View>
-        {/* Add more workforce rows as needed */}
-
-        {/* Subtotals */}
-        <View style={styles.subtotalRow}>
-          <View style={styles.workforceCell}>
-            <Text style={styles.boldText}>Sub Total 1</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>11</Text>
-          </View>
-          <View style={styles.workforceCell}>
-            <Text style={styles.boldText}>Sub Total 2</Text>
-          </View>
-          <View style={styles.workforceNumberCell}>
-            <Text>7</Text>
-          </View>
-        </View>
-
-        {/* Total */}
-        <View style={styles.totalRow}>
-          <View style={[styles.workforceCell, { flex: 14.7 }]}>
-            <Text style={styles.boldText}>Total Pekerjaan Hari ini</Text>
-          </View>
-          <View style={[styles.workforceNumberCell, { flex: 2 }]}>
-            <Text>18</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Daily Activities Table */}
-      <View style={styles.activitiesTable}>
-        {/* Header Row*/}
-        <View style={styles.activityHeaderRow}>
-          <View style={styles.numberCell}>
-            <Text style={styles.boldText}>No.</Text>
-          </View>
-          <View style={styles.activityCell}>
-            <Text style={styles.boldText}>Tipe Pekerjaan</Text>
-          </View>
-          <View style={styles.activityCell}>
-            <Text style={styles.boldText}>Detail Aktivitas Pekerjaan</Text>
-          </View>
-        </View>
-        {/* Activity rows */}
-        {[
-          { type: 'Sipil', activities: ['Pengukuran topografi, analisis tanah dan pengambilan data lapangan'] },
-          { type: 'Arsitektur', activities: ['Membuat konsep awal desain bangunan, termasuk sketsa'] },
-          { type: 'Furniture', activities: ['Mengikuti tren desain interior dan gaya furniture terkini'] },
-          { type: 'Mekanikal', activities: ['Merancang mesin, alat atau komponen mekanik dengan menggunakan sofware'] },
-        ].map((item, index) => (
-          <View key={index} style={styles.activityRow}>
-            {/* Number Column */}
+        {/* Daily Activities Table */}
+        <View style={styles.activitiesTable}>
+          {/* Header Row */}
+          <View style={[styles.activityHeaderRow, {fontWeight: 'bold'}]}>
             <View style={styles.numberCell}>
-              <Text>{index + 1}.</Text>
+              <Text style={styles.boldText}>No.</Text>
             </View>
-            {/* Tipe Pekerjaan Column */}
             <View style={styles.activityCell}>
-              <Text>{item.type}</Text>
+              <Text style={styles.boldText}>Tipe Pekerjaan</Text>
             </View>
-            {/* Detail Aktivitas Pekerjaan Column */}
-            <View style={[styles.activityCell, { flexDirection: 'column' }]}>
-              {item.activities.map((activity, i) => (
-                <Text key={i}>{activity}</Text>
-              ))}
+            <View style={styles.activityCell}>
+              <Text style={styles.boldText}>Detail Aktivitas Pekerjaan</Text>
             </View>
           </View>
-        ))}
-      </View>
 
+          {/* Map Data */}
+          {(() => {
+            const allActivities: { type: string, activities: string[] }[] = [];
+            const typeTracker = new Set();
+            let globalIndex = 0; // Counter for global numbering
 
-      {/* Weather Table */}
-      <View style={styles.weatherTable}>
-        <View style={styles.tableRow}>
-          <View style={styles.tableCell}>
-            <Text>Cuaca</Text>
-          </View>
-          <View style={styles.tableCell}>
-            <Text>Cerah</Text>
-          </View>
-          <View style={styles.tableCell}>
-            <Text>Gerimis (Waktu)</Text>
-          </View>
-          <View style={styles.tableCellNoBorder}>
-            <Text>Hujan (Waktu)</Text>
-          </View>
+            // Iterate over shifts
+            laporan.forEach((shift) => {
+              shift.peran_tenaga_kerja_arr.forEach((tenagaKerja) => {
+                const typeWord =
+                  tenagaKerja.nama.toLowerCase().startsWith("pekerja") &&
+                  tenagaKerja.nama.split(" ").slice(1).join(" ");
+                if (!typeWord || typeTracker.has(typeWord)) return;
+
+                // Collect all activities for this type
+                const activities = tenagaKerja.aktivitas_arr.map(
+                  (activity) => activity.nama
+                );
+
+                // Add to allActivities
+                allActivities.push({
+                  type: typeWord,
+                  activities: activities,
+                });
+
+                // Mark this type as processed
+                typeTracker.add(typeWord);
+              });
+            });
+
+            // Map activities to rows
+            return allActivities.flatMap((item) =>
+              item.activities.map((activity) => {
+                globalIndex++; // Increment global index
+                return (
+                  <View key={globalIndex} style={styles.activityRow}>
+                    {/* Number Column */}
+                    <View style={styles.numberCell}>
+                      <Text>{globalIndex}.</Text>
+                    </View>
+
+                    {/* Tipe Pekerjaan Column */}
+                    <View style={styles.activityCell}>
+                      <Text>{item.type}</Text>
+                    </View>
+
+                    {/* Detail Aktivitas Pekerjaan Column */}
+                    <View style={styles.activityCell}>
+                      <Text>{activity}</Text>
+                    </View>
+                  </View>
+                );
+              })
+            );
+          })()}
         </View>
-        {['Pagi', 'Siang', 'Sore', 'Malam'].map((time: string) => (
-          <View key={time} style={styles.tableRow}>
-            <View style={styles.tableCell}>
-              <Text>{time}</Text>
-            </View>
-            <View style={styles.tableCell}>
-              <Text>✓</Text>
-            </View>
-            <View style={styles.tableCell}>
-              <Text>s/d</Text>
-            </View>
-            <View style={styles.tableCellNoBorder}>
-              <Text>s/d</Text>
-            </View>
-          </View>
-        ))}
-      </View>
 
-      {/* Materials Section */}
-      <View wrap={false}>
-        <View style={styles.materialSection}>
+
+
+        {/* Weather Table */}
+        <View style={styles.weatherTable}>
+          {/* Header Row */}
           <View style={styles.tableRow}>
             <View style={styles.tableCell}>
-              <Text>Material Diterima</Text>
+              <Text style={styles.boldText}>Cuaca</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text>Volume</Text>
+              <Text style={styles.boldText}>Cerah</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text>Material Ditolak</Text>
+              <Text style={styles.boldText}>Gerimis (Waktu)</Text>
             </View>
             <View style={styles.tableCellNoBorder}>
-              <Text>Volume</Text>
+              <Text style={styles.boldText}>Hujan (Waktu)</Text>
             </View>
           </View>
-          {[1, 2, 3, 4, 5].map((i: number) => (
-            <View key={i} style={styles.tableRow}>
+
+          {/* Weather Rows */}
+          {['pagi', 'siang', 'sore', 'malam'].map((time: string) => {
+            const cerahData = cuaca.find(item => item.waktu === time && item.tipe === 'cerah');
+            const gerimisData = cuaca.find(item => item.waktu === time && item.tipe === 'gerimis');
+            const hujanData = cuaca.find(item => item.waktu === time && item.tipe === 'hujan');
+
+            return (
+              <View key={time} style={styles.tableRow}>
+                {/* Time Row */}
+                <View style={styles.tableCell}>
+                  <Text>{time.charAt(0).toUpperCase() + time.slice(1)}</Text>
+                </View>
+                
+                {/* Cerah Column */}
+                <View style={styles.tableCell}>
+                  <Text style={styles.checkmark}>{cerahData ? '\u221A\u221A\u221A' : ''}</Text>
+                </View>
+                
+                {/* Gerimis Column */}
+                <View style={styles.tableCell}>
+                  <Text>
+                    {gerimisData ? `${gerimisData.waktu_mulai} s/d ${gerimisData.waktu_berakhir}` : ''}
+                  </Text>
+                </View>
+                
+                {/* Hujan Column */}
+                <View style={styles.tableCellNoBorder}>
+                  <Text>
+                    {hujanData ? `${hujanData.waktu_mulai} s/d ${hujanData.waktu_berakhir}` : ''}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Materials Section */}
+        <View wrap={false} style={styles.materialSection}>
+          <View style={styles.materialSection}>
+            <View style={styles.tableRow}>
               <View style={styles.tableCell}>
-                <Text></Text>
+                <Text>Material Diterima</Text>
               </View>
               <View style={styles.tableCell}>
-                <Text></Text>
+                <Text>Volume</Text>
               </View>
               <View style={styles.tableCell}>
-                <Text></Text>
+                <Text>Material Ditolak</Text>
               </View>
               <View style={styles.tableCellNoBorder}>
-                <Text></Text>
+                <Text>Volume</Text>
               </View>
             </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Issues Section */}
-      <View style={styles.issuesSection}>
-        <View style={styles.tableRow}>
-          <View style={[styles.tableCell, { flex: 1 }]}>
-            <Text>Permasalahan yang timbul</Text>
-          </View>
-          <View style={[styles.tableCellNoBorder, { flex: 1 }]}>
-            <Text>Penyelesaian</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <View style={styles.footerColumn}>
-          <Text>Dilaporkan Oleh,</Text>
-          <Text>Kontraktor Pelaksana</Text>
-          <Text>PT Graha Sarana Duta</Text>
-          <Text style={{ marginTop: 40 }}>Site Manager</Text>
-        </View>
-        <View style={styles.footerColumn}>
-          <Text>Konsultan Pengawas</Text>
-          <Text>PT Multi Reka Indonesia</Text>
-          <Text style={{ marginTop: 40 }}>Adam Rivansyah</Text>
-          <Text>Site Supervisor</Text>
-        </View>
-      </View>
-    </Page>
-
-    <Page size="A4" style={styles.page}>
-      <View style={styles.contentWithBorder}>
-        <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 20 }}>
-          Lampiran: Dokumentasi Lapangan
-        </Text>
-
-        {/* Baris pertama */}
-        <View style={styles.imageRow}>
-          <View style={styles.imageCell}>
-            <Image style={styles.image} src={BirawaLogo}  />
-            <Text style={styles.imageText}>Logo Birawa</Text>
-          </View>
-          <View style={styles.imageCell}>
-            <Image style={styles.image} src={BirawaLogo} />
-            <Text style={styles.imageText}>Logo Birawa</Text>
+            {[1, 2, 3, 4, 5].map((i: number) => (
+              <View key={i} style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <Text></Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text></Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text></Text>
+                </View>
+                <View style={styles.tableCellNoBorder}>
+                  <Text></Text>
+                </View>
+              </View>
+            ))}
           </View>
         </View>
 
-        {/* Baris kedua */}
-        <View style={styles.imageRow}>
-          <View style={styles.imageCell}>
-            <Image style={styles.image} src={BirawaLogo} />
-            <Text style={styles.imageText}>Logo Telkom Property</Text>
-          </View>
-          <View style={styles.imageCell}>
-            <Image style={styles.image} src={BirawaLogo} />
-            <Text style={styles.imageText}>Logo Telkom Property</Text>
+        {/* Issues Section */}
+        <View wrap={false} style={styles.issuesSection}>
+          <View style={styles.tableRow}>
+            <View style={[styles.tableCell, { flex: 1 }]}>
+              <Text>Permasalahan yang timbul</Text>
+            </View>
+            <View style={[styles.tableCellNoBorder, { flex: 1 }]}>
+              <Text>Penyelesaian</Text>
+            </View>
           </View>
         </View>
 
-        {/* Baris pertama */}
-        <View style={styles.imageRow}>
-          <View style={styles.imageCell}>
-            <Image style={styles.image} src={BirawaLogo} />
-            <Text style={styles.imageText}>Logo Telkom Property</Text>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.footerColumn}>
+            <Text>Dilaporkan Oleh,</Text>
+            <Text>Kontraktor Pelaksana</Text>
+            <Text>PT Graha Sarana Duta</Text>
+            <Text style={{ marginTop: 40 }}>___________________</Text>
+            <Text style={{ marginTop: 5 }}>Site Manager</Text>
           </View>
-          <View style={styles.imageCell}>
-            <Image style={styles.image} src={BirawaLogo} />
-            <Text style={styles.imageText}>Logo Telkom Property</Text>
+          <View style={styles.footerColumn}>
+            <Text>Konsultan Pengawas</Text>
+            <Text>{nama_mitra}</Text>
+            <Text style={{ marginTop: 40 }}>___________________</Text>
+            <Text style={{ marginTop: 5 }}>{metaData.nama_mitra ? pencetak_laporan : pembuat_laporan}</Text>
           </View>
         </View>
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+
+      <Page size="A4" style={styles.page}>
+        <View style={styles.contentWithBorder}>
+          <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 20 }}>
+            Lampiran: Dokumentasi Lapangan
+          </Text>
+
+          {/* Dynamically render images based on the response */}
+          {laporan.map((shift, shiftIndex) =>
+            shift.peran_tenaga_kerja_arr.map((tenagaKerja, tenagaIndex) =>
+              tenagaKerja.aktivitas_arr.map((aktivitas, aktivitasIndex) => (
+                <View key={`shift-${shiftIndex}-tenaga-${tenagaIndex}-aktivitas-${aktivitasIndex}`}>
+                  <Text style={{ fontSize: 10, marginBottom: 10 }}>
+                    Aktivitas: {aktivitas.nama}
+                  </Text>
+
+                  {/* Image Row for the Aktivitas */}
+                  <View style={styles.imageRow}>
+                    {aktivitas.dokumentasi_arr.map((doc, docIndex) => (
+                      <View style={styles.imageCell} key={`doc-${docIndex}`}>
+                        {doc.url ? (
+                          <Image style={styles.image} src={doc.url.replace('.webp', '.jpg')} />
+                        ) : (
+                          <Text style={styles.imageText}>Image not available</Text>
+                        )}
+                        <Link style={[styles.imageText, {textAlign: 'left'}]} src={doc.url}>
+                          Klik di sini untuk beralih ke gambar pada tab ini
+                        </Link>
+                        <Text style={[styles.imageText, {marginTop: 8, fontWeight: 'bold'}]}>{doc.deskripsi}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ))
+            )
+          )}
+        </View>
+      </Page>
+
+    </Document>
+  )
+}
 
 export default ReportTemplate;
