@@ -56,8 +56,8 @@ export function useCreateKontrak() {
 }
 
 type GetKontrakPekerjaansRequest = {
-    nama_mitra: string | null,
-    nomor_kontrak: string | null
+    nama_mitra: string | undefined,
+    nomor_kontrak: string | undefined
 }
 
 export function useGetKontrakPekerjaans(detailKontrak: GetKontrakPekerjaansRequest | null, options: {enabled?: boolean} = {enabled: true}) {
