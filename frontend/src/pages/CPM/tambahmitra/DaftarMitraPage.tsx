@@ -25,23 +25,28 @@ import { Input } from '@/components/ui/input';
 import { useGetMitras } from '@/api/MitraApi';
 import { Mitra } from '@/types';
 import { useNavigate } from 'react-router-dom';
+import { useUpdateMitra } from '@/api/MitraApi';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  alamat_Mitra: z.string().min(2, 'alamat Mitra terlalu kecil').max(32, 'Alamat Mitra terlalu panjang'),
-  nomor_Telephone_Mitra: z.string().min(4, 'Nomor Telephone terlalu sedikit').max(16, 'Nomor Telephone melebih batas'),
+  nama_mitra : z.string().optional(),
+  alamat_Mitra: z.string().min(2, 'alamat Mitra terlalu kecil').max(32, 'Alamat Mitra terlalu panjang').optional(),
+  nomor_Telephone_Mitra: z.string().min(4, 'Nomor Telephone terlalu sedikit').max(16, 'Nomor Telephone melebih batas').optional(),
 });
 
 export type EditFormSchema = z.infer<typeof formSchema>;
 
 const DaftarMitra: React.FC = () => {
-  const { allMitra, isLoading } = useGetMitras();
-   // Memoize the dataMitra initialization
-  const dataMitra = useMemo(() => {
-    return allMitra?.mitras || [];
-  }, [allMitra]);
+  const {toast} = useToast();
+  const { allMitra, isLoading , refetch } = useGetMitras();
+  const { updateMitra, isLoading: isUpdating } = useUpdateMitra();
+
+
+  // Dialog Needed
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
   const [selectedMitra, setSelectedMitra] = useState<Mitra | null>(null);
+
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
@@ -49,18 +54,19 @@ const DaftarMitra: React.FC = () => {
     return savedItemsPerPage ? parseInt(savedItemsPerPage, 10) : 1;
   });
 
+
   useEffect(() => {
-    console.log(dataMitra)
     localStorage.setItem('itemsPerPageMitra', itemsPerPage.toString());
-  }, [itemsPerPage,dataMitra]);
+  }, [itemsPerPage]);
+
+  
 
   const formEditMitra = useForm<EditFormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      alamat_Mitra: '',
-      nomor_Telephone_Mitra: '',
-    },
   });
+
+  // Memoize the dataMitra initialization
+  const dataMitra = useMemo(() => allMitra?.mitras || [], [allMitra]);
 
   const onclickdetail = (namaMitra: string) => {
     navigate(`/daftarmitra/detailmitra/${namaMitra}`);
@@ -80,13 +86,49 @@ const DaftarMitra: React.FC = () => {
     }
   };
 
-  const handleDelete = () => {
+  const handleEditClick = (e:React.MouseEvent, mitra: Mitra) => 
+  {
+    e.stopPropagation();
+    setSelectedMitra(mitra);
+    setIsEditDialogOpen(true);
+  }
+
+   const handleDelete = () => {
     console.log('delete dilakukan');
+    setIsDeleteDialogOpen(false);
   };
 
-  const handleEditSubmit = () => {
-    console.log('update dilakukan');
+  const handleEditSubmit = async (data: EditFormSchema) => {
+    if (!selectedMitra) return;
+
+    try {
+      const updatedMitra = {
+        nama_mitra: selectedMitra.nama, // Nama Mitra tetap tidak berubah
+        alamat: data.alamat_Mitra || selectedMitra.alamat,  // Use the updated address, fallback to existing
+        nomor_telepon: data.nomor_Telephone_Mitra || selectedMitra.nomor_telepon,
+      };
+
+      await updateMitra(updatedMitra); // Update mitra via API
+      toast({
+        title: "Data Mitra Berhasil Diperbarui",
+        variant: "success",
+      });
+
+      // Refresh data mitra
+      await refetch();
+
+      // Close the dialog
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Update gagal', error);
+      toast({
+        title: "Terjadi Kesalahan",
+        description: "Gagal memperbarui data mitra.",
+        variant: "destructive",
+      });
+    }
   };
+  
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -139,24 +181,22 @@ const DaftarMitra: React.FC = () => {
             </thead>
             <tbody>
               {paginatedData.map((mitra: Mitra, index: number) => (
-                <tr key={mitra.nama} aria-label="button detail mitra" onClick={() => onclickdetail(mitra.nama)} className="hover:bg-gray-50 cursor-pointer">
-                  <td className="p-4 text-sm font-normal border-b">{index + 1}</td>
-                  <td className="p-4 text-sm font-normal border-b">{mitra.nama}</td>
+                <tr key={mitra.nama} aria-label="button detail mitra" onDoubleClick={() => onclickdetail(mitra.nama)}  className="hover:bg-gray-50 cursor-pointer">
+                  <td  className="p-4 text-sm font-normal border-b">{index + 1}</td>
+                  <td  className="p-4 text-sm font-normal border-b">{mitra.nama}</td>
                   <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon}</td>
                   <td className="p-4 text-sm font-normal border-b">{mitra.alamat}</td>
                   <td className="p-4 text-sm font-normal border-b">
                     <div className="flex gap-x-2">
-                      <button
-                        onClick={() => {
-                          setSelectedMitra(mitra);
-                          setIsEditDialogOpen(true);
-                        }}
+                    <button
+                        onClick={(e) => handleEditClick(e,mitra)}
                         className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
                       >
                         <Edit2 color="blue" size={18} />
                       </button>
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedMitra(mitra);
                           setIsDeleteDialogOpen(true);
                         }}
@@ -231,7 +271,8 @@ const DaftarMitra: React.FC = () => {
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      {isEditDialogOpen && selectedMitra && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Mitra</DialogTitle>
@@ -240,15 +281,31 @@ const DaftarMitra: React.FC = () => {
             <div className="space-y-6">
               <Form {...formEditMitra}>
                 <form onSubmit={formEditMitra.handleSubmit(handleEditSubmit)} className="space-y-3">
+
+                <FormField control={formEditMitra.control} name="nama_mitra" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama Mitra</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          defaultValue={selectedMitra?.nama}
+                          {...field}
+                          disabled
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
                   <FormField control={formEditMitra.control} name="alamat_Mitra" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Alamat Mitra</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
-                          placeholder="Masukkan Alamat Mitra"
+                          defaultValue={selectedMitra?.alamat}
                           {...field}
-                          required
+                          
                         />
                       </FormControl>
                       <FormMessage />
@@ -261,9 +318,9 @@ const DaftarMitra: React.FC = () => {
                       <FormControl>
                         <Input
                           type="text"
-                          placeholder="Masukkan Nomor Telepon"
+                          defaultValue={selectedMitra?.nomor_telepon}
                           {...field}
-                          required
+                          
                         />
                       </FormControl>
                       <FormMessage />
@@ -274,7 +331,9 @@ const DaftarMitra: React.FC = () => {
                     <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                       Batal
                     </Button>
-                    <Button type="submit">Simpan Perubahan</Button>
+                    <Button type="submit" disabled={isUpdating}>
+                      {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
+                    </Button>
                   </div>
                 </form>
               </Form>
@@ -282,6 +341,7 @@ const DaftarMitra: React.FC = () => {
           </DialogDescription>
         </DialogContent>
       </Dialog>
+      )}
     </div>
   );
 };
