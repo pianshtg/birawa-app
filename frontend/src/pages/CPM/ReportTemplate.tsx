@@ -48,12 +48,15 @@ const styles = StyleSheet.create({
   middleSection: {
     width: '40%',
     padding: 5,
+    justifyContent: 'center',
     alignItems: 'center',
     borderRight: '1px solid black',
   },
   rightSection: {
     width: '30%',
     padding: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   dateRow: {
     flexDirection: 'row',
@@ -328,7 +331,7 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.leftSection}>
+          <View style={[styles.leftSection, {fontWeight: 'bold'}]}>
             <Text>Nomor Kontrak: {nomor_kontrak}</Text>
             <Text>Kontraktor:</Text>
             <Text>Pt. Graha Sarana Duta</Text>
@@ -337,7 +340,7 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
             <Text style={styles.boldText}>LAPORAN HARIAN {nama_pekerjaan.toUpperCase()}</Text>
           </View>
           <View style={styles.rightSection}>
-            <Text>{nama_mitra}</Text>
+            <Text style={{fontWeight: 'bold'}}>{nama_mitra}</Text>
           </View>
         </View>
 
