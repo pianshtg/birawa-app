@@ -1,20 +1,32 @@
-import { useAuth } from "@/api/AuthApi";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom"
+import { getAccessToken } from "@/lib/utils"
+import {jwtDecode} from "jwt-decode"
 
-const ProtectedRoute = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  roles: ("admin" | "mitra")[]
+}
 
-  if (isLoading) {
-    return null;
+const ProtectedRoute = ({ roles }: ProtectedRouteProps) => {
+  const accessToken = getAccessToken()
+
+  if (!accessToken) {
+    return <Navigate to="/" replace />
   }
 
-  if (isAuthenticated) {
-    return <Outlet />;
+  try {
+    const { nama_mitra }: { nama_mitra?: string } = jwtDecode(accessToken)
+    const userRole = nama_mitra ? "mitra" : "admin"
+
+    // Check if user's role matches any of the allowed roles
+    if (!roles.includes(userRole)) {
+      return <Navigate to="/" replace />
+    }
+
+    return <Outlet />
+  } catch (error) {
+    console.error("Error decoding token:", error)
+    return <Navigate to="/" replace />
   }
+}
 
-  return <Navigate to="/" replace />;
-
-  // return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
-};
-
-export default ProtectedRoute;
+export default ProtectedRoute
