@@ -15,13 +15,32 @@ import { useGetMitraKontraks, useGetMitras } from '@/api/MitraApi';
 import { useGetKontrakPekerjaans } from '@/api/KontrakApi';
 import { useGetLaporan, useGetPekerjaanLaporans } from '@/api/LaporanApi';
 import ComboboxComponent from '@/components/Combobox';
-import { Kontrak, Laporan, Mitra, Pekerjaan } from '@/types';
+import { CustomJwtPayload, Kontrak, Laporan, Mitra, Pekerjaan } from '@/types';
 import { useGetUser } from '@/api/UserApi';
+import { getAccessToken } from '@/lib/utils';
+import { jwtDecode } from 'jwt-decode';
 
 // Options dropdown
 // const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C', 'Perusahaan D'];
 
 const CekLaporan = () => {
+  
+  const accessToken = getAccessToken()
+  let metaData: CustomJwtPayload = { user_id: '', permissions: [] };
+
+  if (typeof accessToken === 'string' && accessToken.trim() !== '') {
+    try {
+      metaData = jwtDecode<CustomJwtPayload>(accessToken)
+      // console.log('Decoded Token:', metaData) //Debug.
+      console.log('Decoded Token:', metaData) //Debug.
+    } catch (error) {
+      console.error('Error decoding token:', error) //Debug.
+    }
+  } else {
+    console.error('Token is undefined or invalid') //Debug.
+  }
+  
+  const isAdmin = metaData.nama_mitra ? false : true
   
   const [selectedMitra, setSelectedMitra] = useState<string>('')
   const [selectedKontrak, setSelectedKontrak] = useState<string>('')
@@ -37,20 +56,20 @@ const CekLaporan = () => {
   const {allMitra, isLoading: isMitraLoading} = useGetMitras()
   const mitra_options = allMitra?.mitras?.map((mitra: Mitra) => ({value: mitra.nama, label: mitra.nama}))
   
-  const {mitraKontraks, isLoading: isMitraKontraksLoading} = useGetMitraKontraks(selectedMitra, {enabled: !!selectedMitra})
+  const {mitraKontraks, isLoading: isMitraKontraksLoading} = useGetMitraKontraks(isAdmin ? selectedMitra : metaData.nama_mitra, {enabled: isAdmin ? !!selectedMitra : true})
   const mitra_kontraks_options = mitraKontraks?.mitra_kontraks?.map((kontrak: Kontrak) => ({value: kontrak.nomor, label: kontrak.nomor}))
   
   const {kontrakPekerjaans, isLoading: isKontrakPekerjaansLoading} = useGetKontrakPekerjaans({
-    nama_mitra: selectedMitra, 
+    nama_mitra: isAdmin ? selectedMitra : metaData.nama_mitra, 
     nomor_kontrak: selectedKontrak
-  }, {enabled: !!selectedMitra && !!selectedKontrak})
+  }, {enabled: isAdmin ? !!selectedMitra && !!selectedKontrak : !!selectedKontrak})
   const kontrak_pekerjaans_options = kontrakPekerjaans?.kontrak_pekerjaans?.map((pekerjaan: Pekerjaan) => ({value: pekerjaan.nama, label: pekerjaan.nama}))
   
   const {pekerjaanLaporans} = useGetPekerjaanLaporans({
-    nama_mitra: selectedMitra, 
+    nama_mitra: isAdmin ? selectedMitra : metaData.nama_mitra, 
     nomor_kontrak: selectedKontrak, 
     nama_pekerjaan: selectedPekerjaan
-  }, {enabled: !!selectedMitra && !!selectedKontrak && !!selectedPekerjaan})
+  }, {enabled: isAdmin ? !!selectedMitra && !!selectedKontrak && !!selectedPekerjaan : !!selectedKontrak && !!selectedPekerjaan})
   const pekerjaan_laporans_arr = pekerjaanLaporans?.pekerjaan_laporans
   
   const {laporan, isLoading: isLaporanLoading} = useGetLaporan(selectedLaporan, {enabled: !!selectedLaporan})
@@ -134,6 +153,11 @@ const CekLaporan = () => {
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   
   const {user, isLoading: isUserLoading} = useGetUser()
+  
+  useEffect(() => {
+    console.log('Fetched user:', user)
+  }, [user])
+  
   const pencetak_laporan = user?.user?.nama_lengkap || ''
 
   return (
@@ -232,15 +256,17 @@ const CekLaporan = () => {
     
             {/* Form dengan Dropdown */}
             <div className="bg-white p-6 rounded-md border">
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <ComboboxComponent
-                  label="Pilih Mitra"
-                  placeholder="Nama perusahaan"
-                  options={mitra_options || []}
-                  selected={selectedMitra}
-                  setSelected={setSelectedMitra}
-                  isLoading={isMitraLoading}
-                />
+              <div className={`grid gap-4 mb-4 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                {isAdmin && (
+                  <ComboboxComponent
+                    label="Pilih Mitra"
+                    placeholder="Nama perusahaan"
+                    options={mitra_options || []}
+                    selected={selectedMitra}
+                    setSelected={setSelectedMitra}
+                    isLoading={isMitraLoading}
+                  />
+                )}
                 <ComboboxComponent
                   label="Pilih Kontrak"
                   placeholder="Nama kontrak"
@@ -285,7 +311,7 @@ const CekLaporan = () => {
             {showPDF && !isLaporanLoading  && (
               <div className="pdf-viewer mt-6">
                 <PDFViewer width="100%" height="900">
-                  <ReportTemplate pencetak_laporan={pencetak_laporan} pembuat_laporan={laporan.pembuat_laporan} nama_mitra={selectedMitra} nomor_kontrak={selectedKontrak} nama_pekerjaan={selectedPekerjaan} tanggal={selectedDate?.toString() ?? 'unknown '} laporan={laporan.laporan} cuaca={laporan.cuaca}/>
+                  <ReportTemplate pencetak_laporan={pencetak_laporan} pembuat_laporan={laporan.pembuat_laporan} nama_mitra={isAdmin ? selectedMitra : metaData.nama_mitra!} nomor_kontrak={selectedKontrak} nama_pekerjaan={selectedPekerjaan} tanggal={selectedDate?.toString() ?? 'unknown '} laporan={laporan.laporan} cuaca={laporan.cuaca}/>
                 </PDFViewer>
               </div>
             )}

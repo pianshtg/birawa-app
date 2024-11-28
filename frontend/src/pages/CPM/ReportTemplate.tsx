@@ -338,8 +338,6 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           </View>
           <View style={styles.rightSection}>
             <Text>{nama_mitra}</Text>
-            <Text>IPTV (ex. Pins), KAP &</Text>
-            <Text>AVATAR</Text>
           </View>
         </View>
 

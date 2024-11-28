@@ -1,5 +1,5 @@
 import { toast } from "@/hooks/use-toast";
-import { Aktivitas, Shift, TenagaKerja } from "@/types";
+import { Aktivitas, Cuaca, Shift, TenagaKerja } from "@/types";
 import { useMutation, useQuery } from "react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -11,7 +11,8 @@ export type CreateLaporanRequest = {
     tanggal: string,
     shift: Shift,
     tenaga_kerja_arr: TenagaKerja[],
-    aktivitas_arr: Aktivitas[]
+    aktivitas_arr: Aktivitas[],
+    cuaca_arr: Cuaca[]
 };
 
 export function useCreateLaporan() {
@@ -60,7 +61,7 @@ export function useCreateLaporan() {
     return {createLaporan, isLoading}
 }
 
-export function useGetLaporan(id: string) {
+export function useGetLaporan(id: string | null, options: {enabled: boolean}) {
     async function useGetLaporanRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/laporan/${id}`, {
@@ -78,9 +79,9 @@ export function useGetLaporan(id: string) {
         return response.json()
     }
     
-    const { data: laporan, isLoading } = useQuery( "fetchLaporan", useGetLaporanRequest )
+    const { data: laporan, isLoading, refetch } = useQuery( ["fetchLaporan", id], useGetLaporanRequest, { enabled: options.enabled && !!id, retry: false })
     
-    return { laporan, isLoading }
+    return { laporan, isLoading, refetch }
 }
 
 type GetPekerjaanLaporansRequest = {
