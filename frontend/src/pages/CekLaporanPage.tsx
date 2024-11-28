@@ -53,7 +53,7 @@ const CekLaporan = () => {
   const [fetchReport, setFetchReport] = useState(false)
   const [dateToLaporanIdMap, setDateToLaporanIdMap] = useState<{ [key: string]: string }>({});
 
-  const {allMitra, isLoading: isMitraLoading} = useGetMitras()
+  const {allMitra, isLoading: isMitraLoading} = useGetMitras({enabled: isAdmin})
   const mitra_options = allMitra?.mitras?.map((mitra: Mitra) => ({value: mitra.nama, label: mitra.nama}))
   
   const {mitraKontraks, isLoading: isMitraKontraksLoading} = useGetMitraKontraks(isAdmin ? selectedMitra : metaData.nama_mitra, {enabled: isAdmin ? !!selectedMitra : true})
@@ -83,6 +83,15 @@ const CekLaporan = () => {
     return eachDayOfInterval({ start, end });
   };
   
+  const getLatestLaporanInMonth = (month: Date, laporanDates: Date[]) => {
+    const start = startOfMonth(month);
+    const end = endOfMonth(month);
+    const datesInMonth = laporanDates.filter(
+      (date) => date >= start && date <= end // Filter laporan within the month
+    );
+    return datesInMonth.sort((a, b) => b.getTime() - a.getTime())[0] || null; // Return latest date in month
+  };
+  
   useEffect(() => {
     setSelectedKontrak('')
     setSelectedPekerjaan('')
@@ -108,7 +117,7 @@ const CekLaporan = () => {
     if (laporanDates.length > 0) {
       const latestLaporanDate = laporanDates.sort((a, b) => b.getTime() - a.getTime())[0]
       setSelectedDate(latestLaporanDate)
-
+      setCurrentMonth(latestLaporanDate)
       // Scroll to the latest laporan
       const dateKey = format(latestLaporanDate, 'yyyy-MM-dd');
       setTimeout(() => {
@@ -149,8 +158,37 @@ const CekLaporan = () => {
     }
 
   // Navigation for previous and next month
-  const prevMonth = () => setCurrentMonth(addMonths(currentMonth, -1));
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const prevMonth = () => {
+    const newMonth = addMonths(currentMonth, -1);
+    setCurrentMonth(newMonth);
+  
+    // Find the latest laporan in the new month
+    const latestLaporanInNewMonth = getLatestLaporanInMonth(newMonth, laporanDates);
+  
+    if (latestLaporanInNewMonth) {
+      setSelectedDate(latestLaporanInNewMonth);
+      const dateKey = format(latestLaporanInNewMonth, 'yyyy-MM-dd');
+      setTimeout(() => {
+        dateRefs.current[dateKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }, 200); // Delay for rendering
+    }
+  };
+  
+  const nextMonth = () => {
+    const newMonth = addMonths(currentMonth, 1);
+    setCurrentMonth(newMonth);
+  
+    // Find the latest laporan in the new month
+    const latestLaporanInNewMonth = getLatestLaporanInMonth(newMonth, laporanDates);
+  
+    if (latestLaporanInNewMonth) {
+      setSelectedDate(latestLaporanInNewMonth);
+      const dateKey = format(latestLaporanInNewMonth, 'yyyy-MM-dd');
+      setTimeout(() => {
+        dateRefs.current[dateKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }, 200); // Delay for rendering
+    }
+  };
   
   const {user, isLoading: isUserLoading} = useGetUser()
   
