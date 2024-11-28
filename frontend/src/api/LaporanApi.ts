@@ -61,7 +61,7 @@ export function useCreateLaporan() {
     return {createLaporan, isLoading}
 }
 
-export function useGetLaporan(id: string | null, options: {enabled: boolean}) {
+export function useGetLaporan(id: string | undefined, options: {enabled: boolean}) {
     async function useGetLaporanRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/laporan/${id}`, {
@@ -85,9 +85,9 @@ export function useGetLaporan(id: string | null, options: {enabled: boolean}) {
 }
 
 type GetPekerjaanLaporansRequest = {
-    nama_mitra: string | null ,
-    nomor_kontrak: string | null,
-    nama_pekerjaan: string | null
+    nama_mitra: string | undefined ,
+    nomor_kontrak: string | undefined,
+    nama_pekerjaan: string | undefined
 }
 
 export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest | null, options: {enabled: boolean}) {
