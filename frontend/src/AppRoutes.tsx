@@ -1,118 +1,119 @@
 import { Route, Routes } from "react-router-dom"
 import Home from "@/pages/LoginPage"
 import Dashboard from "@/pages/DashboardPage"
-import Ceklaporan from "@/pages/CPM/CekLaporanPage"
+import Ceklaporan from "@/pages/CekLaporanPage"
 import Inbox from "@/pages/InboxPage"
 import Buatlaporan from "@/pages/Mitra/buatlaporan/BuatLaporanPage"
 import NotFound from "@/pages/NotFoundPage"
 import Forgotpassword from "@/pages/ForgotPasswordPage"
 import Layout from "@/components/custom/layout/Layout"
 import SettingsPage from "@/pages/SettingsPage"
-import MobilePage from "@/pages/mobilepage"
+import MobilePage from "./pages/mobilepage"
 import useDetection from "@/hooks/useDetection"
 import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage"
 import TambahMitraPage from "@/pages/CPM/tambahmitra/TambahMitraPage"
 import ProtectedRoute from "@/auth/ProtectedRoute"
 import DaftarMitraPage from "@/pages/CPM/tambahmitra/DaftarMitraPage"
-import BuatLaporanPages from "./pages/Mitra/buatlaporan-jeki/BuatLaporanPages"
-import MitraDetailPage from "./pages/CPM/MitraDetailPage"
-// import BuatLaporanPage from "@/pages/Mitra/buatlaporan-jeki/BuatLaporanPage"
+import MitraDetailPage from "@/pages/CPM/detailmitra/MitraDetailPage"
 
 function AppRoutes() {
-  const isMobile = useDetection(620); // Tentukan ukuran maksimum untuk dianggap sebagai mobile
+  const isMobile = useDetection(620)
 
-  // Jika perangkat adalah mobile, arahkan ke halaman khusus mobile
   if (isMobile) {
     return (
       <Routes>
         <Route path="*" element={<MobilePage />} />
       </Routes>
-    );
+    )
   }
-
 
   return (
     <Routes>
-      <Route path='/' element={<Home />} />
-      <Route path='/forgotpassword' element={<Forgotpassword />} />
-      
-      <Route element={<ProtectedRoute/>}>
-        <Route path="/dashboard" 
+      {/* Public Routes */}
+      <Route path="/" element={<Home />} />
+      <Route path="/forgotpassword" element={<Forgotpassword />} />
+
+      {/* Shared Routes (Admin & Mitra) */}
+      <Route element={<ProtectedRoute roles={["admin", "mitra"]} />}>
+        <Route
+          path="/dashboard"
           element={
             <Layout>
               <Dashboard />
-            </Layout> 
+            </Layout>
           }
         />
-
-        <Route path="/daftarmitra" 
-          element={
-            <Layout>
-              <DaftarMitraPage />
-            </Layout>
-          } 
-        />
-
-        <Route path="/daftarmitra/detailmitra/:nama_mitra" 
-          element={
-            <MitraDetailPage/>  
-          } 
-        />
-
-        {/* Tempat Testing BUAT LAPORAN */}
-        <Route path="/buatlaporans" 
-          element={
-            <Layout>
-              <BuatLaporanPages />
-            </Layout>
-          } 
-        />
-
-        <Route path="daftarmitra/tambahmitra" 
-          element={
-            <Layout>
-              <TambahMitraPage />
-            </Layout>
-          } 
-        />
-
-        {/* Buat Laporan Page */}
-        <Route path='/daftarpekerjaan' 
-          element={
-            <Layout>
-              <DaftarPekerjaan/>
-            </Layout>
-          } 
-        /> 
-        <Route path='/daftarpekerjaan/buatlaporan' 
-          element={
-            <Layout>
-              <Buatlaporan/>
-            </Layout>
-          } 
-        />
-
-        <Route path='/ceklaporan' 
+        <Route
+          path="/ceklaporan"
           element={
             <Layout>
               <Ceklaporan />
             </Layout>
-          } 
+          }
         />
-
-        <Route path='/inbox' 
+        <Route
+          path="/inbox"
           element={
             <Layout>
               <Inbox />
             </Layout>
-          } 
+          }
         />
-        <Route path='/settings/*' element={<SettingsPage />} />
+        <Route path="/settings/*" element={<SettingsPage />} />
       </Route>
-      {/* 404 Not Found Page */}
-      <Route path='*' element={<NotFound />} />
+
+      {/* Admin Routes */}
+      <Route element={<ProtectedRoute roles={["admin"]} />}>
+        <Route
+          path="/daftarmitra"
+          element={
+            <Layout>
+              <DaftarMitraPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/daftarmitra/detailmitra/:nama_mitra"
+          element={
+            <Layout>
+              <MitraDetailPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="daftarmitra/tambahmitra"
+          element={
+            <Layout>
+              <TambahMitraPage />
+            </Layout>
+          }
+        />
+      </Route>
+
+      {/* Mitra Routes */}
+      <Route element={<ProtectedRoute roles={["mitra"]} />}>
+        <Route
+          path="/daftarpekerjaan"
+          element={
+            <Layout>
+              <DaftarPekerjaan />
+            </Layout>
+          }
+        />
+        <Route
+          path="/daftarpekerjaan/buatlaporan"
+          element={
+            <Layout>
+              <Buatlaporan />
+            </Layout>
+          }
+        />
+      </Route>
+
+      {/* 404 Not Found */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
-  );
+  )
 }
 
-export default AppRoutes;
+export default AppRoutes

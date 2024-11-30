@@ -1,3 +1,4 @@
+import { CountryCode } from "libphonenumber-js"
 export type Mitra = {
     id?: string,
     nama: string,
@@ -78,4 +79,10 @@ export type CustomJwtPayload = {
     user_id: string,
     permissions: string[],
     nama_mitra?: string
+}
+
+export type Country = {
+    code: CountryCode;
+    dialCode: string;
+    name: string;
 }

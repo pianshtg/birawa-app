@@ -98,7 +98,7 @@ export function useGetMitraUsers(nama_mitra: string) {
     return { mitraUsers, isLoading }
 }
 
-export function useGetMitraKontraks(nama_mitra: string | null, options: {enabled: boolean}) {
+export function useGetMitraKontraks(nama_mitra: string | undefined, options: {enabled: boolean}) {
     async function useGetMitraKontraksRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/mitra/kontraks`, {
@@ -122,7 +122,7 @@ export function useGetMitraKontraks(nama_mitra: string | null, options: {enabled
     return { mitraKontraks, isLoading, refetch }
 }
 
-export function useGetMitras() {
+export function useGetMitras(options: {enabled: boolean}) {
     async function useGetMitrasRequest() {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/mitra/all`, {
@@ -143,7 +143,7 @@ export function useGetMitras() {
     }
 
     // Use useQuery hook to fetch mitra data
-    const { data: allMitra, isLoading, refetch } = useQuery('fetchMitraKontraks', useGetMitrasRequest);
+    const { data: allMitra, isLoading, refetch } = useQuery(['fetchMitraKontraks'], useGetMitrasRequest, {enabled: options.enabled});
 
     return { allMitra, isLoading, refetch };
 }

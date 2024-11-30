@@ -1,12 +1,11 @@
 import { useMutation, useQuery } from "react-query"
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 type CreateUserRequest = {
     nama_lengkap: string,
     email: string,
     nomor_telepon: string,
-    mitra_nama: string
+    nama_mitra: string
 }
 
 export function useCreateUser() {
@@ -92,9 +91,9 @@ export function useGetUsers() {
         return response.json()
     }
     
-    const { data: allUser, isLoading } = useQuery( "fetchMitra", useGetUsersRequest )
+    const { data: allUser, isLoading, refetch } = useQuery( "fetchMitra", useGetUsersRequest )
     
-    return { allUser, isLoading }
+    return { allUser, isLoading ,refetch}
 }
 
 type UpdateUserRequest = {
@@ -139,4 +138,50 @@ export function useUpdateUser() {
     }
     
     return { updateUser, isLoading }
+}
+
+type DeleteUserRequest = {
+    email: string
+}
+
+export function useDeleteUser() {
+    async function useDeleteUserRequest(request: DeleteUserRequest) {
+        const response = await fetch(`${API_BASE_URL}/api/user/soft-delete`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+            },
+            body: JSON.stringify(request),
+            credentials: 'include'
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Failed to delete user')
+        }
+        
+        return response.json()
+    }
+    
+    const {
+        mutateAsync: deleteUser,
+        isLoading,
+        isSuccess,
+        error,
+        reset
+    } = useMutation(useDeleteUserRequest)
+
+    if (isSuccess) {
+        // Uncomment and replace with your toast library if needed
+        // toast.success("User successfully deleted")
+    }
+
+    if (error) {
+        // Uncomment and replace with your toast library if needed
+        // toast.error(error.toString())
+        reset()
+    }
+
+    return { deleteUser, isLoading }
 }
