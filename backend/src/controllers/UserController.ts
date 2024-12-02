@@ -129,7 +129,7 @@ async function getUser(req: Request, res: Response) {
             } else {
                 // console.log(user) // Debug.
                 res.status(200).json({
-                    user,
+                    user: user[0],
                     newAccessToken
                 })
                 return

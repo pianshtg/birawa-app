@@ -117,6 +117,38 @@ async function loginUser (req: Request, res: Response) {
     }
 }
 
+async function logoutUser (req: Request, res: Response) {
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        const user_id = metaData.user_id
+        
+        await pool.execute('DELETE FROM users_hashed_refresh_token WHERE user_id = ?', [user_id])
+        
+        const clientType = req.headers['x-client-type']
+        if (clientType === 'web') {
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            })
+            res.clearCookie('accessToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            })
+        }
+        
+        res.status(200).json({message: "Successfully logged out user."})
+        
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message: "Failed to log out."})
+        return;
+    }
+}
+
 async function authenticateUser(req: Request, res: Response) {
     console.log("Jwt checking...") //Debug.
     try {
@@ -228,6 +260,7 @@ async function verifyEmail(req: Request, res: Response) {
 
 export default {
     loginUser,
+    logoutUser,
     authenticateUser,
     verifyEmail
 }
