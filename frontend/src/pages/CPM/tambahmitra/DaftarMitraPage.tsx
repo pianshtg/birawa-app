@@ -252,10 +252,10 @@ const DaftarMitra: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Hapus Mitra</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="py-5">
+          <DialogDescription >
             <div className="space-y-6">
               <p className="text-center">
-                Apakah Anda yakin ingin menghapus mitra <strong>{selectedMitra?.nama}</strong>? ini tidak dapat dibatalkan.
+                Apakah Anda yakin ingin menghapus mitra <strong className='text-black'>{selectedMitra?.nama}</strong> ?
               </p>
               <div className="flex gap-x-3">
                 <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
@@ -277,7 +277,7 @@ const DaftarMitra: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Edit Mitra</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="py-5">
+          <DialogDescription >
             <div className="space-y-6">
               <Form {...formEditMitra}>
                 <form onSubmit={formEditMitra.handleSubmit(handleEditSubmit)} className="space-y-3">

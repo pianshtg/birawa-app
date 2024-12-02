@@ -14,7 +14,7 @@ import DaftarPekerjaan from "@/pages/Mitra/buatlaporan/DaftarPekerjaanPage"
 import TambahMitraPage from "@/pages/CPM/tambahmitra/TambahMitraPage"
 import ProtectedRoute from "@/auth/ProtectedRoute"
 import DaftarMitraPage from "@/pages/CPM/tambahmitra/DaftarMitraPage"
-import MitraDetailPage from "./pages/CPM/MitraDetailPage"
+import MitraDetailPage from "@/pages/CPM/detailmitra/MitraDetailPage"
 
 function AppRoutes() {
   const isMobile = useDetection(620)
