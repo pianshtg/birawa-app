@@ -17,6 +17,7 @@ import { getAccessToken } from "@/lib/utils"
 import { CustomJwtPayload } from "@/types"
 import { jwtDecode } from "jwt-decode"
 import { useSignOutUser } from "@/api/AuthApi"
+import { useGetUser } from "@/api/UserApi"
 
 type SidebarProps = {
   isOpen: boolean
@@ -24,6 +25,7 @@ type SidebarProps = {
 }
 
 export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
+  const {user} = useGetUser();
   
   const { signOutUser, isLoading: isLogoutLoading } = useSignOutUser()
   
@@ -67,6 +69,17 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       console.error("Failed to log out:", error) //Debug.
     }
   }
+
+  function formatMitraInitials(name: string) {
+
+    const nameParts = name.split(' ');  // Pisahkan nama berdasarkan spasi
+    const initials = nameParts
+      .map(part => part.charAt(0).toUpperCase())  // Ambil huruf pertama dari setiap kata
+      .join('');  // Gabungkan menjadi satu string
+  
+    return initials.substring(0, 1)+initials.substring(initials.length-1, initials.length);  // Ambil tiga huruf pertama
+  }
+
   
   return (
     <div 
@@ -80,6 +93,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <TooltipTrigger asChild>
             <button 
               onClick={onToggle} // Menggunakan onToggle dari props
+              aria-label="button Toggle sidebar"
               className={`w-10 h-10 bg-white flex items-center justify-center transition duration-300 ease-in-out backdrop-blur-md rounded-md  ${isOpen ? "absolute top-12 -right-5 border border-r hover:bg-slate-50 " : "absolute top-5 right-[17px]"}`}
             >
               {isOpen ? 
@@ -98,9 +112,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       <div className="flex-grow flex flex-col">
         {/* Logo */}
         <div className={`pr-6 mb-8 transition-all duration-300 ${!isOpen ? 'scale-0 h-0' : 'scale-100 h-auto'}`}>
-          <a href="/" className="text-2xl flex items-center justify-center">
+          <div className="text-2xl flex items-center justify-center">
             <img src={LogoTelkom} alt="Logo Telkom Property" />
-          </a>
+          </div>
         </div>
 
         {/* Navigation menu */}
@@ -162,13 +176,15 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </button>
         </ul>
         <div className={`flex items-center ${isOpen ? 'gap-3' : 'justify-center'} mt-4 p-3`}>
+          
           <div className="min-w-[40px] h-10 rounded-full bg-slate-400/40 flex items-center justify-center text-xs font-semibold">
-            ADM
+          {isAdmin ? "ADM" : formatMitraInitials(user?.user?.nama_lengkap || "???")} 
           </div>
           <div className={`transition-all duration-300 ${!isOpen ? 'hidden' : 'block'}`}>
-            <p className="font-semibold text-base">Admin 1</p>
-            <p className="font-normal text-xs text-gray-500">CPM</p>
+            <p className={`font-semibold text-base truncate max-w-[200px] ease-linear  ${isOpen ? "visible duration-400 translate-x-0" : "invisible -translate-x-20"}`}>{user?.user?.nama_lengkap || "User"}</p>
+            <p className="font-normal text-xs text-gray-500">{metaData.nama_mitra || "Admin CPM"}</p>
           </div>
+
         </div>
       </div>
     </div>
