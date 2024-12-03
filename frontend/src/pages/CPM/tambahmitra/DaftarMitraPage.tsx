@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUpdateMitra } from '@/api/MitraApi';
 import { useToast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const formSchema = z.object({
   nama_mitra : z.string().optional(),
@@ -144,7 +145,7 @@ const DaftarMitra: React.FC = () => {
   
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingScreen/>;
   }
 
   return (

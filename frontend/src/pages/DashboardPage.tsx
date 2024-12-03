@@ -28,6 +28,7 @@ import { CustomJwtPayload, Mitra } from "@/types"
 import { EditIcon, TrashIcon } from "lucide-react"
 import { getAccessToken } from "@/lib/utils"
 import {jwtDecode} from "jwt-decode"
+import LoadingScreen from "@/components/LoadingScreen"
 
 // Zod Schema
 const formEditMitraSchema = z.object({
@@ -89,7 +90,7 @@ const DashboardPage = () => {
   }
 
   if (isGettingMitras) {
-    return <div>Loading...</div>
+    return <LoadingScreen/>
   }
 
   return (

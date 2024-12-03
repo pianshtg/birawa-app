@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode'
 import { Kontrak } from '@/types'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import LoadingScreen from '@/components/LoadingScreen'
 type TableFormattedPekerjaan = {
   nama_kontrak: string
   nomor_kontrak: string
@@ -136,7 +137,7 @@ const DaftarPekerjaan = () => {
 
       <div className="bg-white p-6 border rounded-lg">
         {isLoading || isMitraKontraksLoading ? (
-          <div>Loading...</div>
+          <LoadingScreen/>
         ) : (
           <>
             <div className="flex justify-between items-center mb-4">
