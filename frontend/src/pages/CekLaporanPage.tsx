@@ -19,6 +19,7 @@ import { CustomJwtPayload, Kontrak, Laporan, Mitra, Pekerjaan } from '@/types';
 import { useGetUser } from '@/api/UserApi';
 import { getAccessToken } from '@/lib/utils';
 import { jwtDecode } from 'jwt-decode';
+import LoadingScreen from '@/components/LoadingScreen';
 
 // Options dropdown
 // const options = ['Perusahaan A', 'Perusahaan B', 'Perusahaan C', 'Perusahaan D'];
@@ -203,7 +204,7 @@ const CekLaporan = () => {
       <h1 className="text-2xl font-semibold text-black mb-6">Cek Laporan</h1>
       
       {
-        isUserLoading ? <div>Loading...</div> : (
+        isUserLoading ? <LoadingScreen/> : (
           <>
             <div className="bg-white p-4 mb-6 border rounded-md">
               <div className="flex items-center justify-between">
