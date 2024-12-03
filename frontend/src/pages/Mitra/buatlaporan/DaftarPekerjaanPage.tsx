@@ -5,7 +5,8 @@ import { useGetMitraKontraks } from '@/api/MitraApi'
 import { getAccessToken } from '@/lib/utils'
 import { jwtDecode } from 'jwt-decode'
 import { Kontrak } from '@/types'
-
+import { Input } from '@/components/ui/input'
+import { Search } from 'lucide-react'
 type TableFormattedPekerjaan = {
   nama_kontrak: string
   nomor_kontrak: string
@@ -32,6 +33,7 @@ const DaftarPekerjaan = () => {
   const [itemsPerPage, setItemsPerPage] = useState<number>(5)
   const [tableData, setTableData] = useState<TableFormattedPekerjaan[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { mitraKontraks, isLoading: isMitraKontraksLoading } = useGetMitraKontraks(metaData.nama_mitra, {
     enabled: !!metaData.nama_mitra,
@@ -85,12 +87,24 @@ const DaftarPekerjaan = () => {
     fetchData()
   }, [mitraKontraks, metaData.nama_mitra])
 
+  // Use useMemo to filter table data based on searchQuery
+  const filteredData = useMemo(() => {
+    return tableData.filter((pekerjaan) => {
+      const query = searchQuery.toLowerCase()
+      return (
+        pekerjaan.nama_kontrak.toLowerCase().includes(query) || 
+        pekerjaan.nama_pekerjaan.toLowerCase().includes(query) ||
+        pekerjaan.lokasi_pekerjaan.toLowerCase().includes(query) 
+      )
+    })
+  }, [searchQuery, tableData])
+
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
-    return tableData.slice(startIndex, startIndex + itemsPerPage)
-  }, [currentPage, itemsPerPage, tableData])
+    return filteredData.slice(startIndex, startIndex + itemsPerPage)
+  }, [currentPage, itemsPerPage, filteredData])
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage)
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -126,7 +140,19 @@ const DaftarPekerjaan = () => {
         ) : (
           <>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Pilih Pekerjaan</h2>
+              <div className='flex gap-x-3 items-center'>
+                <h2 className="text-lg font-medium min-w-32 max-w-40">Pilih Pekerjaan</h2>
+                <div className="relative w-full">
+                  <Input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Cari pekerjaan atau kontrak..."
+                    className="border p-2 placeholder:text-sm rounded-full pl-8 w-full"
+                  />
+                  <Search size={18} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                </div>
+              </div>
 
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
