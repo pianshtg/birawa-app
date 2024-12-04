@@ -183,10 +183,29 @@ async function createLaporan(req: Request, res: Response) {
                         // Handle unexpected cuaca types.
                         throw new Error(`Unsupported cuaca type '${cuaca.tipe}'.`);
                     }
-                // Generate cuaca_id and insert it into the database if tipe_cuaca exists.
-                    const cuacaId = uuidv4()
-                    await connection.execute('INSERT INTO cuaca (id, kontrak_ss_pekerjaan_id, tipe_cuaca_id, waktu, waktu_mulai, waktu_berakhir, tanggal, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [cuacaId, kontrak_ss_pekerjaan_id, tipeCuaca[0].id, cuaca.waktu, waktu_mulai, waktu_berakhir, tanggal, creator_id])
-                    console.log(`Cuaca "${cuaca.tipe}" berhasil dibuat untuk tanggal ${tanggal}`) //Debug.
+                    
+                    const [existingCuaca] = await connection.execute<RowDataPacket[]>('SELECT * FROM cuaca WHERE kontrak_ss_pekerjaan_id = ? AND waktu = ? AND tanggal = ?', [kontrak_ss_pekerjaan_id, cuaca.waktu, tanggal])
+                    if (existingCuaca.length > 0) {
+                        // Compare the existing and the new waktu_mulai and pick the earliest one.
+                        const existingWaktuMulai = existingCuaca[0].waktu_mulai;
+                        const earliestWaktuMulai = new Date(Math.min(new Date(`1970-01-01T${existingWaktuMulai}Z`).getTime(), new Date(`1970-01-01T${waktu_mulai}Z`).getTime()));
+                        
+                        // Format earliestWaktuMulai as 'hh:mm:ss' for MySQL
+                        const formattedEarliestWaktuMulai = earliestWaktuMulai.toISOString().slice(11, 19);
+                        
+                        // Update cuaca with the earliest waktu_mulai and the new waktu_berakhir
+                        await connection.execute(
+                          'UPDATE cuaca SET waktu_mulai = ?, waktu_berakhir = ? WHERE id = ?', 
+                          [formattedEarliestWaktuMulai, waktu_berakhir, existingCuaca[0].id]
+                        );
+                        
+                        console.log(`Cuaca updated for ${cuaca.tipe} on ${tanggal} with earliest waktu_mulai.`); // Debug.                        
+                    } else {
+                    // Generate cuaca_id and insert it into the database if tipe_cuaca exists.
+                        const cuacaId = uuidv4()
+                        await connection.execute('INSERT INTO cuaca (id, kontrak_ss_pekerjaan_id, tipe_cuaca_id, waktu, waktu_mulai, waktu_berakhir, tanggal, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [cuacaId, kontrak_ss_pekerjaan_id, tipeCuaca[0].id, cuaca.waktu, waktu_mulai, waktu_berakhir, tanggal, creator_id])
+                        console.log(`Cuaca "${cuaca.tipe}" berhasil dibuat untuk tanggal ${tanggal}`) //Debug.
+                    }
                 })
             )
             console.log("Cuaca successfully created:", cuaca_arr) //Debug.
@@ -281,7 +300,7 @@ async function getLaporan(req: Request, res: Response) {
                     Object.values(groupedLaporanTenagaKerja).forEach((shift: any) => {
                         shift.peran_tenaga_kerja_arr.forEach((ptk: any) => {
                             const peranTenagaKerja = ptk.nama.split(' ').slice(1).join(' '); // Extract other than the first word
-                            if (tipeAktivitas === peranTenagaKerja) {
+                            if (tipeAktivitas.toLowerCase() === peranTenagaKerja.toLowerCase()) {
                                 // Find or add the aktivitas
                                 let aktivitas = ptk.aktivitas_arr.find((a: any) => a.nama === aktivitasNama);
                                 if (!aktivitas) {
@@ -377,7 +396,7 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
                 })
                 return
             } else {
-                res.status(409).json({message: "Failed to find pekerjaan."})
+                res.status(409).json({message: "Failed to find any pekerjaan's laporan(s)."})
                 return
             }
         } else {
