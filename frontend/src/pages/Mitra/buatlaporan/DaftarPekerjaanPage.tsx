@@ -2,15 +2,16 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { useGetMitraKontraks } from '@/api/MitraApi'
-import { getAccessToken } from '@/lib/utils'
+import { capitalizeWords, getAccessToken } from '@/lib/utils'
 import { jwtDecode } from 'jwt-decode'
-import { Kontrak } from '@/types'
+import { Kontrak, Laporan } from '@/types'
 
 type TableFormattedPekerjaan = {
   nama_kontrak: string
   nomor_kontrak: string
   nama_pekerjaan: string
   lokasi_pekerjaan: string
+  latest_tanggal_laporan: string | null
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -56,34 +57,64 @@ const DaftarPekerjaan = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (mitraKontraks?.mitra_kontraks?.length) {
-        setIsLoading(true)
-        const allData: TableFormattedPekerjaan[] = []
-
+        setIsLoading(true);
+        const allData: TableFormattedPekerjaan[] = [];
+  
         await Promise.all(
           mitraKontraks.mitra_kontraks.map(async (kontrak: Kontrak) => {
             try {
-              const { kontrak_pekerjaans } = await fetchKontrakPekerjaans(metaData.nama_mitra!, kontrak.nomor)
-              kontrak_pekerjaans.forEach((pekerjaan: any) => {
-                allData.push({
-                  nama_kontrak: kontrak.nama,
-                  nomor_kontrak: kontrak.nomor,
-                  nama_pekerjaan: pekerjaan.nama,
-                  lokasi_pekerjaan: pekerjaan.lokasi,
+              const { kontrak_pekerjaans } = await fetchKontrakPekerjaans(metaData.nama_mitra!, kontrak.nomor);
+  
+              await Promise.all(
+                kontrak_pekerjaans.map(async (pekerjaan: any) => {
+                  try {
+                    const { pekerjaan_laporans } = await fetch(`${API_BASE_URL}/api/laporan/laporan-pekerjaan`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-Client-Type': 'web',
+                      },
+                      body: JSON.stringify({
+                        nama_mitra: metaData.nama_mitra!,
+                        nomor_kontrak: kontrak.nomor,
+                        nama_pekerjaan: pekerjaan.nama,
+                      }),
+                      credentials: 'include',
+                    }).then((res) => res.json());
+  
+                    const latestLaporan = pekerjaan_laporans?.reduce(
+                      (latest: Laporan, current: Laporan) =>
+                        new Date(current.tanggal) > new Date(latest.tanggal) ? current : latest,
+                      pekerjaan_laporans[0]
+                    );
+  
+                    allData.push({
+                      nama_kontrak: kontrak.nama,
+                      nomor_kontrak: kontrak.nomor,
+                      nama_pekerjaan: pekerjaan.nama,
+                      lokasi_pekerjaan: pekerjaan.lokasi,
+                      latest_tanggal_laporan: latestLaporan?.tanggal || null,
+                    });
+                  } catch (error) {
+                    console.error(`Error fetching laporan for pekerjaan ${pekerjaan.nama}:`, error);
+                  }
                 })
-              })
+              );
             } catch (error) {
-              console.error(`Error fetching pekerjaan for kontrak ${kontrak.nomor}:`, error)
+              console.error(`Error fetching pekerjaan for kontrak ${kontrak.nomor}:`, error);
             }
           })
-        )
-
-        setTableData(allData)
-        setIsLoading(false)
+        );
+  
+        setTableData(allData);
+        setIsLoading(false);
       }
-    }
-
-    fetchData()
-  }, [mitraKontraks, metaData.nama_mitra])
+    };
+  
+    fetchData();
+  }, [mitraKontraks, metaData.nama_mitra]);
+  
+  
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -106,9 +137,9 @@ const DaftarPekerjaan = () => {
   const handleBuatLaporanClick = () => {
     if (selectedRow !== null) {
       const selectedJob = paginatedData[selectedRow]
-      navigate('/daftarpekerjaan/buatlaporan', {
+      navigate('/daftarpekerjaan/buatlaporan-test', {
         state: {
-          nama_kontrak: selectedJob.nama_kontrak,
+          nama_mitra: metaData.nama_mitra,
           nomor_kontrak: selectedJob.nomor_kontrak,
           nama_pekerjaan: selectedJob.nama_pekerjaan,
         },
@@ -157,31 +188,41 @@ const DaftarPekerjaan = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm border-separate border-spacing-0">
-                <thead className="bg-slate-200 text-left">
-                  <tr className="text-left bg-slate-200">
-                    <th className="p-4 font-medium border-b"></th>
-                    <th className="p-4 font-medium border-b">Nama Kontrak</th>
-                    <th className="p-4 font-medium border-b">Nomor Kontrak</th>
-                    <th className="p-4 font-medium border-b">Nama Pekerjaan</th>
-                    <th className="p-4 font-medium border-b">Lokasi Pekerjaan</th>
+            <div className="w-full h-auto mt-4  ">
+              <table className="w-full text-center text-sm border border-gray-300">
+                <thead className="bg-gray-200 border-b border-gray-300">
+                  <tr>
+                    <th className="p-4 border-r font-semibold text-gray-600 w-[2%]"></th>
+                    <th className="p-4 font-semibold text-gray-600 w-[19.5%]">Nama Kontrak</th>
+                    <th className="p-4 font-semibold text-gray-600 w-[19.5%]">Nomor Kontrak</th>
+                    <th className="p-4 font-semibold text-gray-600 w-[19.5%]">Nama Pekerjaan</th>
+                    <th className="p-4 font-semibold text-gray-600 w-[19.5%]">Lokasi Pekerjaan</th>
+                    <th className="p-4 font-semibold text-gray-600 w-[19.5%]">Last Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedData.map((pekerjaan, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="p-4 border-b">
+                    <tr key={index} className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} hover:bg-gray-100`}>
+                      <td className="p-4 border-b border-r">
                         <input
                           type="checkbox"
                           checked={selectedRow === index}
                           onChange={() => handleCheckboxChange(index)}
                         />
                       </td>
-                      <td className="p-4 text-sm font-normal border-b">{pekerjaan.nama_kontrak}</td>
-                      <td className="p-4 text-sm font-normal border-b">{pekerjaan.nomor_kontrak}</td>
-                      <td className="p-4 text-sm font-normal border-b">{pekerjaan.nama_pekerjaan}</td>
-                      <td className="p-4 text-sm font-normal border-b">{pekerjaan.lokasi_pekerjaan}</td>
+                      <td className="p-4 text-sm font-normal border-b">{capitalizeWords(pekerjaan.nama_kontrak)}</td>
+                      <td className="p-4 text-sm font-normal border-b">{capitalizeWords(pekerjaan.nomor_kontrak)}</td>
+                      <td className="p-4 text-sm font-normal border-b">{capitalizeWords(pekerjaan.nama_pekerjaan)}</td>
+                      <td className="p-4 text-sm font-normal border-b">{capitalizeWords(pekerjaan.lokasi_pekerjaan)}</td>
+                      <td className="p-4 text-sm font-normal border-b">
+                      {pekerjaan.latest_tanggal_laporan ? 
+                        new Date(pekerjaan.latest_tanggal_laporan).toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })
+                        : '-'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
