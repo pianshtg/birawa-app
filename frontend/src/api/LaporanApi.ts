@@ -1,4 +1,4 @@
-import { toast } from "@/hooks/use-toast";
+import { toast, useToast } from "@/hooks/use-toast";
 import { Aktivitas, Cuaca, Shift, TenagaKerja } from "@/types";
 import { useMutation, useQuery } from "react-query";
 
@@ -16,14 +16,8 @@ export type CreateLaporanRequest = {
 };
 
 export function useCreateLaporan() {
-    async function useCreateLaporanRequest (laporan: CreateLaporanRequest, files: File[]) {
-        const formData = new FormData()
-        formData.append('data', JSON.stringify(laporan))
-        files.forEach((file, index) => {
-            formData.append(`files[${index}]`, file)
-        })
-        
-        
+    const {toast} = useToast()
+    async function useCreateLaporanRequest (formData: FormData) {        
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/laporan`, {
             method: 'POST',
@@ -45,17 +39,23 @@ export function useCreateLaporan() {
         mutateAsync: createLaporan,
         isLoading,
         isSuccess,
-        error,
-        reset
-    } = useMutation(({laporan, files}: {laporan: CreateLaporanRequest, files: File[]}) => useCreateLaporanRequest(laporan, files))
+        isError,
+        // reset
+    } = useMutation(useCreateLaporanRequest)
 
     if (isSuccess) {
-        // toast.success("Laporan berhasil dibuat!")
+        toast({
+            title: "Laporan berhasil dibuat!",
+            variant: "success"
+        })
     }
 
-    if (error) {
-        // toast.error(error.toString()) .debug
-        reset()
+    if (isError) {
+        toast({
+            title: Error.toString(),
+            variant: 'danger'
+        }) //Debug.
+        // reset()
     }
 
     return {createLaporan, isLoading}
