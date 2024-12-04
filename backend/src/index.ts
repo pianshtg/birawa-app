@@ -11,6 +11,7 @@ import mitraRoute from './routes/MitraRoute'
 import kontrakRoute from './routes/KontrakRoute'
 import userRoute from './routes/UserRoute'
 import laporanRoute from './routes/LaporanRoute'
+import inboxRoute from './routes/InboxRoute'
 import { clientType, jwtCheck } from './middlewares/auth'
 import { testConnection } from './database'
 
@@ -46,6 +47,7 @@ app.use("/api/mitra", clientType, jwtCheck, mitraRoute)
 app.use("/api/kontrak", clientType, jwtCheck, kontrakRoute)
 app.use("/api/user", clientType, jwtCheck, userRoute)
 app.use("/api/laporan", clientType, jwtCheck, laporanRoute)
+app.use("/api/inbox", clientType, jwtCheck, inboxRoute)
 
 // Start Server
 async function startServer() {
