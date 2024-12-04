@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { capitalizeWords, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -23,7 +23,8 @@ interface ComboboxProps {
   selected: string;
   setSelected: (value: string) => void;
   isLoading?: boolean;
-  disabled?: boolean; // New prop for disabling combobox
+  disabled?: boolean;
+  emptyMessage?: string
 }
 
 export function Combobox({
@@ -34,6 +35,7 @@ export function Combobox({
   setSelected,
   isLoading = false,
   disabled = false, // Default to false
+  emptyMessage = "No option found."
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -59,11 +61,11 @@ export function Combobox({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-full p-0" align="start">
           <Command>
             <CommandInput placeholder="Search..." />
             <CommandList>
-              <CommandEmpty>No options found.</CommandEmpty>
+              <CommandEmpty className="text-sm text-wrap w-[200px] text-gray-500 px-4 py-2 break-words whitespace-normal">{emptyMessage}</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => (
                   <CommandItem
@@ -80,7 +82,7 @@ export function Combobox({
                         selected === option.value ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    {option.label}
+                    {capitalizeWords(option.label)}
                   </CommandItem>
                 ))}
               </CommandGroup>

@@ -84,7 +84,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   return (
     <div 
       className={`h-screen fixed border-r z-50 ${
-        isOpen ? 'md:w-[300px] w-[300px]' : 'w-[80px]'
+        isOpen ? 'w-[300px]' : 'w-[80px]'
       } py-8 left-0 bg-white flex flex-col justify-between transition-all duration-300`}
     >
         {/* Toggle Button */}
