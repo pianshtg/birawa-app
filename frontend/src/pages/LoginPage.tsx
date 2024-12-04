@@ -20,6 +20,14 @@ const formSchema = z.object({
 export type SignInSchema = z.infer<typeof formSchema>
 
 const Login = () => {
+  const navigate = useNavigate()
+  
+  const {isAuthenticated} = useAuth()
+  
+  if (isAuthenticated) (
+    navigate('/dashboard')
+  )
+  
   const {signInUser, isLoading } = useSignInUser()
   const [showPassword, setShowPassword] = useState(false);
 
