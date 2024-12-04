@@ -32,7 +32,6 @@ const CekLaporan = () => {
     try {
       metaData = jwtDecode<CustomJwtPayload>(accessToken)
       // console.log('Decoded Token:', metaData) //Debug.
-      console.log('Decoded Token:', metaData) //Debug.
     } catch (error) {
       console.error('Error decoding token:', error) //Debug.
     }
@@ -199,14 +198,13 @@ const CekLaporan = () => {
   const pencetak_laporan = user?.user?.nama_lengkap || ''
 
   return (
-    <div className="p-6">
+    <div className="flex flex-col">
       <h1 className="text-2xl font-semibold text-black mb-6">Cek Laporan</h1>
       
-      {
-        isUserLoading ? <div>Loading...</div> : (
+      {isUserLoading ? <div>Loading...</div> : (
           <>
-            <div className="bg-white p-4 mb-6 border rounded-md">
-              <div className="flex items-center justify-between">
+            <div className="bg-white p-4 mb-6 border rounded-md overflow-auto">
+              <div className="flex overflow-x-auto items-center justify-between">
                 {/* Pop-up Calendar */}
                 <div className="flex items-center text-red-600 font-semibold mb-2">
                   <DatePicker
@@ -254,7 +252,7 @@ const CekLaporan = () => {
               </div>
     
               {/* Horizontal Date Navigation */}
-              <div className="flex overflow-x-auto gap-x-4 pt-4 custom-scrollbar pb-4">
+              <div className="flex w-full overflow-x-auto gap-x-4 pt-4 custom-scrollbar pb-4">
                 {daysInMonth.map((day) => {
                   const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate || new Date(), 'yyyy-MM-dd');
                   const hasLaporan = laporanDates.some((laporanDate) => isSameDay(day, laporanDate));
