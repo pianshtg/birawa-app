@@ -73,28 +73,8 @@ const TambahMitraForm = ({onSubmit, isLoading}: Props) => {
     })
     
     function handleSubmit(formData: tambahMitraFormData) {
-        const payload: CreateMitraRequest = {
-            mitra: {
-              nama: formData.mitra.nama,
-              alamat: formData.mitra.alamat,
-              nomor_telepon: formData.mitra.nomor_telepon,
-            },
-            kontrak: {
-              nama: formData.kontrak.nama,
-              nomor: formData.kontrak.nomor,
-              tanggal: formData.kontrak.tanggal,
-              nilai: formData.kontrak.nilai,
-              jangka_waktu: formData.kontrak.jangka_waktu,
-            },
-            pekerjaan_arr: formData.pekerjaan_arr,
-            user: {
-              email: formData.user.email,
-              nama_lengkap: formData.user.nama_lengkap,
-              nomor_telepon: formData.user.nomor_telepon,
-            },
-        }
-        console.log(payload) //Debug.
-        onSubmit(payload)
+        console.log(formData) //Debug.
+        onSubmit(formData)
     }
     
     return (

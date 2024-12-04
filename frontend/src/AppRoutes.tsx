@@ -3,7 +3,6 @@ import Home from "@/pages/LoginPage"
 import Dashboard from "@/pages/DashboardPage"
 import Ceklaporan from "@/pages/CekLaporanPage"
 import Inbox from "@/pages/InboxPage"
-import Buatlaporan from "@/pages/Mitra/buatlaporan/BuatLaporanPage"
 import NotFound from "@/pages/NotFoundPage"
 import Forgotpassword from "@/pages/ForgotPasswordPage"
 import Layout from "@/components/custom/layout/Layout"
@@ -15,6 +14,8 @@ import TambahMitraPage from "@/pages/CPM/tambahmitra/TambahMitraPage"
 import ProtectedRoute from "@/auth/ProtectedRoute"
 import DaftarMitraPage from "@/pages/CPM/tambahmitra/DaftarMitraPage"
 import MitraDetailPage from "@/pages/CPM/detailmitra/MitraDetailPage"
+import BuatLaporanPage from "@/pages/Mitra/buatlaporan/BuatLaporanPage"
+import BuatLaporanPageTest from "@/pages/Mitra/buatlaporan-jeki/BuatLaporanPageTest.tsx"
 
 function AppRoutes() {
   const isMobile = useDetection(620)
@@ -104,7 +105,15 @@ function AppRoutes() {
           path="/daftarpekerjaan/buatlaporan"
           element={
             <Layout>
-              <Buatlaporan />
+              <BuatLaporanPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/daftarpekerjaan/buatlaporan-test"
+          element={
+            <Layout>
+              <BuatLaporanPageTest />
             </Layout>
           }
         />

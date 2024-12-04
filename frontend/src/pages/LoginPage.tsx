@@ -1,11 +1,11 @@
-import { useSignInUser } from "@/api/AuthApi"
+import { useAuth, useSignInUser } from "@/api/AuthApi"
 import LoadingButton from "@/components/LoadingButton"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { z } from "zod"
 import { Eye, EyeOff } from 'lucide-react';
 // import LoginForm from "@/components/custom/organism/LoginForm"
@@ -52,7 +52,7 @@ const Login = () => {
         </div>
         <Form {...form}>
           <form
-            className="flex flex-col w-full items-center gap-y-5   "
+            className="flex flex-col w-full items-center gap-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
@@ -61,7 +61,7 @@ const Login = () => {
               render={({field}) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl className="relative top-[-4px] mb-7">
+                  <FormControl className="relative top-[-4px] mb-2">
                     <Input placeholder="Masukan  Email Anda" type="email"  {...field}/>
                   </FormControl>
                   <FormMessage/>
@@ -72,7 +72,7 @@ const Login = () => {
               control={form.control}
               name='password'
               render={({field}) => (
-                <FormItem>
+                <FormItem className="mt-[-16px]">
                   <FormLabel className="text-gray-700">Password</FormLabel>
                   <div className="relative">
                     <FormControl className="font-sans">

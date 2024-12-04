@@ -13,10 +13,20 @@ import {
 } from "@/components/ui/dialog"
 import { MdEdit,MdDelete  } from "react-icons/md";
 
-export default function Buatlaporan() {
+export default function BuatLaporanPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const jobData = location.state;
+  
+  const { nama_kontrak, nomor_kontrak, nama_pekerjaan } = location.state || {};
+  // if (!nama_kontrak || !nomor_kontrak || !nama_pekerjaan) {
+  //   return (
+  //     <div>
+  //       <p>Data tidak tersedia. Silakan kembali ke halaman sebelumnya.</p>
+  //       <Button onClick={() => navigate('/daftarpekerjaan')}>Kembali</Button>
+  //     </div>
+  //   );
+  // }
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleOpenDialog = () => {
@@ -38,14 +48,13 @@ export default function Buatlaporan() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold mb-6">Buat Laporan untuk {jobData?.name}</h1>
+      <h1 className="text-2xl font-semibold mb-6">Buat Laporan</h1>
       
       <Accordion title="Tahap 1: Tenaga Kerja">
         <ShadowContainer 
           title="Tenaga Kerja"  
-          buttonName="Tentukan Shift" 
-          Dialogtitle="Tambah Shift"
-          DialogDesc={
+          buttonName="Tentukan Shift"
+          dialogContent={
             <DialogCustom
               type="shift"
               onSubmit={() => console.log("Data saved")}
@@ -82,13 +91,8 @@ export default function Buatlaporan() {
         <ShadowContainer 
           title='Lapangan' 
           buttonName='Tambah Pekerjaan Baru'
-          Dialogtitle='Role Pekerjaan Baru' 
-          DialogDesc={
-            <DialogCustom
-              type="role"
-              onSubmit={() => console.log("Data saved")}
-            />
-          }>
+          setIsDialogOpen={setIsDialogOpen}
+        >
           <div>
             <div className="grid grid-cols-2 gap-4">
               <div>

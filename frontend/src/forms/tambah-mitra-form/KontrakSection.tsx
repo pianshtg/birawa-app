@@ -34,29 +34,29 @@ const KontrakSection = () => {
   });
 
   const openDialogForNew = () => {
-    pekerjaanForm.reset({ nama: "", lokasi: "" }); // Clear the dialog form
-    setCurrentPekerjaanIndex(null);
-    setIsDialogOpen(true);
+    pekerjaanForm.reset({ nama: "", lokasi: "" }) // Clear the dialog form
+    setCurrentPekerjaanIndex(null)
+    setIsDialogOpen(true)
   };
 
   const openDialogForEdit = (index: number) => {
-    const pekerjaan = getValues(`pekerjaan_arr.${index}`);
-    pekerjaanForm.reset(pekerjaan); // Populate dialog form with the selected pekerjaan
-    setCurrentPekerjaanIndex(index);
-    setIsDialogOpen(true);
+    const pekerjaan = getValues(`pekerjaan_arr.${index}`)
+    pekerjaanForm.reset(pekerjaan) // Populate dialog form with the selected pekerjaan
+    setCurrentPekerjaanIndex(index)
+    setIsDialogOpen(true)
   };
 
   const handleSavePekerjaan = pekerjaanForm.handleSubmit((data) => {
     if (currentPekerjaanIndex === null) {
       // Add new pekerjaan
-      append(data);
+      append(data)
     } else {
       // Update existing pekerjaan
-      update(currentPekerjaanIndex, data);
+      update(currentPekerjaanIndex, data)
     }
-    setIsDialogOpen(false);
-    setCurrentPekerjaanIndex(null);
-  });
+    setIsDialogOpen(false)
+    setCurrentPekerjaanIndex(null)
+  })
 
   return (
     <Accordion title="Detail Kontrak">
@@ -164,7 +164,7 @@ const KontrakSection = () => {
                     name="lokasi"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel>Lokasi Pekerjaan</FormLabel>
+                        <FormLabel className="mt-4">Lokasi Pekerjaan</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Lokasi Pekerjaan" />
                         </FormControl>
@@ -186,7 +186,7 @@ const KontrakSection = () => {
           {/* Table to display pekerjaan */}
           <div className="w-full h-auto mt-4">
           <table className="w-full text-center text-sm border border-gray-300">
-            <thead className="bg-gray-100 border-b border-gray-300">
+            <thead className="bg-gray-200 border-b border-gray-300">
               <tr>
                 <th className="p-4 font-semibold text-gray-600 w-[44%]">Pekerjaan</th>
                 <th className="p-4 font-semibold text-gray-600 w-[44%]">Lokasi</th>
@@ -204,7 +204,7 @@ const KontrakSection = () => {
                 fields.map((field, index) => (
                   <tr
                     key={field.id}
-                    className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
+                    className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} hover:bg-gray-100`}
                   >
                     <td className="p-4 text-gray-700">
                       {getValues(`pekerjaan_arr.${index}.nama`)
@@ -221,7 +221,7 @@ const KontrakSection = () => {
                     <td className="p-4">
                       <div className="flex gap-2">
                         <Button variant="outline" className="border-gray-400 text-gray-600" onClick={() => openDialogForEdit(index)}>
-                          <EditIcon />
+                          <EditIcon/>
                         </Button>
                         <Button
                           className="border-red-500 text-red-500 hover:bg-red-100"

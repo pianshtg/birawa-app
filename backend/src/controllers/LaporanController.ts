@@ -3,7 +3,7 @@ import { pool } from "../database";
 import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
 import jwt from 'jsonwebtoken'
-import { Aktivitas, Cuaca, Dokumentasi, laporanAktivitas, TenagaKerja } from "../types";
+import { Aktivitas, Cuaca, TenagaKerja } from "../types";
 import { uploadImages } from "../lib/utils";
 
 async function createLaporan(req: Request, res: Response) {
@@ -154,20 +154,20 @@ async function createLaporan(req: Request, res: Response) {
                     if (cuaca.tipe == 'cerah') {
                         switch (cuaca.waktu) {
                             case 'pagi':
-                                waktu_mulai = '06:00:01'
-                                waktu_berakhir = '11:00:00'
+                                waktu_mulai = '06:00:00'
+                                waktu_berakhir = '11:59:59'
                                 break
                             case 'siang':
-                                waktu_mulai = '11:00:01'
-                                waktu_berakhir = '15:00:00'
+                                waktu_mulai = '12:00:00'
+                                waktu_berakhir = '14:59:59'
                                 break
                             case 'sore':
-                                waktu_mulai = '15:00:01'
-                                waktu_berakhir = '18:00:00'
+                                waktu_mulai = '15:00:00'
+                                waktu_berakhir = '17:59:59'
                                 break
                             case 'malam':
-                                waktu_mulai = '18:00:01'
-                                waktu_berakhir = '06:00:00'
+                                waktu_mulai = '18:00:00'
+                                waktu_berakhir = '22:00:00'
                                 break
                             default:
                                 throw new Error("Invalid waktu provided for 'cerah' type.")

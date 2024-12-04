@@ -36,9 +36,9 @@ const formSchema = z.object({
 
 export type EditFormSchema = z.infer<typeof formSchema>;
 
-const DaftarMitra: React.FC = () => {
+const DaftarMitra = () => {
   const {toast} = useToast();
-  const { allMitra, isLoading , refetch } = useGetMitras();
+  const { allMitra, isLoading , refetch } = useGetMitras({enabled: true})
   const { updateMitra, isLoading: isUpdating } = useUpdateMitra();
 
 
