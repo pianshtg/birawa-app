@@ -18,3 +18,30 @@ export function getCookies (cookieName: string) {
 export function getAccessToken () {
   return getCookies ('accessToken')
 }
+
+export function capitalizeWords(str: string): string {
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ")
+}
+
+export function getCurrentDate (): string {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0') // Month is 0-based
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+};
+
+export const parseTimeToMinutes = (time: string): number => {
+  if (!time) return 0
+  const [hour, minute] = time.split(":").map(Number)
+  return hour * 60 + minute
+};
+
+export const formatMinutesToTime = (minutes: number) => {
+  const hours = Math.floor(minutes / 60).toString().padStart(2, "0")
+  const mins = (minutes % 60).toString().padStart(2, "0")
+  return `${hours}:${mins}`
+}
