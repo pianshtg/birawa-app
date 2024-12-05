@@ -276,10 +276,8 @@ const MitraDetailPage: React.FC = () => {
       return { status: 'Belum Terverifikasi', color: 'text-yellow-500' };
     } else if (is_verified === 1 && is_active === 1) {
       return { status: 'Terverifikasi', color: 'text-green-500' };
-    } else if (is_verified === 1 && is_active === 0) {
+    } 
       return { status: 'Terblokir', color: 'text-red-500' };
-    }
-    return { status: 'Unknown', color: 'text-gray-500' }; // Default case, if needed
   };
 
   return (
@@ -380,7 +378,7 @@ const MitraDetailPage: React.FC = () => {
                   </thead>
                   <tbody>
                     {users.map((user: User) => {
-                      const {status, color} = getStatus(user.is_verified,user.is_active);
+                      const {status, color} = getStatus(user.is_verified, user.is_active);
                       return(
                         <tr key={user.email} className="border-b">
                           <td className="p-3">

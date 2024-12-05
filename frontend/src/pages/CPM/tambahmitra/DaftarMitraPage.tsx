@@ -27,6 +27,8 @@ import { Mitra } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { useUpdateMitra } from '@/api/MitraApi';
 import { useToast } from '@/hooks/use-toast';
+import { Search } from 'lucide-react';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const formSchema = z.object({
   nama_mitra : z.string().optional(),
@@ -54,6 +56,8 @@ const DaftarMitra = () => {
     return savedItemsPerPage ? parseInt(savedItemsPerPage, 10) : 1;
   });
 
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
 
   useEffect(() => {
     localStorage.setItem('itemsPerPageMitra', itemsPerPage.toString());
@@ -68,6 +72,16 @@ const DaftarMitra = () => {
   // Memoize the dataMitra initialization
   const dataMitra = useMemo(() => allMitra?.mitras || [], [allMitra]);
 
+  // Memoized search filter logic
+  const filteredMitra = useMemo(() => {
+    return dataMitra.filter((mitra:Mitra) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        mitra.nama.toLowerCase().includes(query) 
+      );
+    });
+  }, [dataMitra, searchQuery]);
+
   const onclickdetail = (namaMitra: string) => {
     navigate(`/daftarmitra/detailmitra/${namaMitra}`);
   };
@@ -75,10 +89,10 @@ const DaftarMitra = () => {
   // Pagination logic
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return dataMitra.slice(startIndex, startIndex + itemsPerPage);
-  }, [currentPage, itemsPerPage, dataMitra]);
+    return filteredMitra.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, itemsPerPage, filteredMitra]);
 
-  const totalPages = Math.ceil(dataMitra.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredMitra.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -131,7 +145,7 @@ const DaftarMitra = () => {
   
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingScreen/>;
   }
 
   return (
@@ -140,7 +154,19 @@ const DaftarMitra = () => {
 
       <div className="bg-white p-6 border rounded-lg">
         <div className="flex justify-between items-center mb-4">
+          <div className='flex gap-x-3 items-center'>
           <h2 className="text-lg font-medium">Daftar Mitra</h2>
+            <div className="relative">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari Mitra..."
+                className="border p-2 placeholder:text-sm rounded-full pl-8"
+              />
+              <Search size={18} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+            </div>
+          </div>
 
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
