@@ -92,7 +92,7 @@ export function useGetMitraUsers(nama_mitra: string) {
                 "X-Client-Type": "web"
                 // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
             },
-            body: JSON.stringify({nama_mitra:nama_mitra}),
+            body: JSON.stringify({nama_mitra}),
             credentials: 'include'
         })
         if (!response.ok) {

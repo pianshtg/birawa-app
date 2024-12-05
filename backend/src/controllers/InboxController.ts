@@ -111,7 +111,7 @@ async function getInboxes(req: Request, res: Response) {
                         WHERE sender_id IN (${placeholders}) OR receiver_id IN (${placeholders})
                         GROUP BY judul
                     )
-                    SELECT i.judul, i.isi AS last_message, i.created_at
+                    SELECT i.judul AS subject, i.isi AS last_message, i.created_at
                     FROM inbox i
                     INNER JOIN latest_message lm
                     ON i.judul = lm.judul AND i.created_at = lm.latest_created_at
