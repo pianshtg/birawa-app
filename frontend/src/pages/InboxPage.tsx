@@ -1,12 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
 import {z} from "zod";
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Combobox, Transition } from "@headlessui/react";
+import Comboboxs from '@/components/Combobox';
+import { getAccessToken } from "@/lib/utils"
+import { CustomJwtPayload } from "@/types"
+import { jwtDecode } from "jwt-decode"
+import { Search } from 'lucide-react';
+
 interface Message {
   id: number;
   company: string;
@@ -26,8 +30,6 @@ interface Message {
     isAdmin: boolean;
   }[];
 }
-
-
 interface Recipient {
   value: string;
   label: string;
@@ -51,10 +53,24 @@ const InboxComponent: React.FC = () => {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showReply, setShowReply] = useState<boolean>(false);
   const [showNewMessage, setShowNewMessage] = useState<boolean>(false);
-  const [selectedRecipient, setSelectedRecipient] = useState<string>('');
-  const [subject, setSubject] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [query, setQuery] = useState<string>(""); 
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const accessToken = getAccessToken()
+  let metaData: CustomJwtPayload = { user_id: '', permissions: [] }
+  let isAdmin = false
+  if (typeof accessToken === 'string' && accessToken.trim() !== '') {
+    try {
+      metaData = jwtDecode<CustomJwtPayload>(accessToken)
+      // console.log('Decoded Token:', metaData) //Debug.
+      isAdmin = !!!metaData.nama_mitra
+    } catch (error) {
+      console.error('Error decoding token:', error) //Debug.
+    }
+  } else {
+    console.error('Token is undefined or invalid') //Debug.
+  }
 
   const formPesanBaru = useForm<PesanBaruSchema>({
     resolver: zodResolver(formPesanBaruSchema),
@@ -165,7 +181,232 @@ const InboxComponent: React.FC = () => {
           isAdmin: true
         }
       ]
-    }
+    },
+    {
+      id: 3,
+      company: "PT. Bangun Negeri Selalu",
+      date: "27/09/2024",
+      title: "Perubahan Privacy Policy",
+      subject: "Tidak Bisa Upload Foto pada Form Buat Laporan",
+      preview: "Saya tidak bisa upload foto pada buat lapor...",
+      content: "Tidak bisa upload foto pada buat laporan. Mohon bantuan untuk kendala ini.",
+      sender: "bangunnegeriselalu.co.id",
+      time: "Rabu, 27 Sep",
+      replies: [
+        {
+          id: 1,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Mohon maaf kami sedang mengalami kendala teknis. Tim kami sedang bekerja untuk memperbaiki masalah ini secepatnya.",
+          time: "Rabu, 27 Sep",
+          isAdmin: true
+        },
+        {
+          id: 2,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Kami sedang memeriksa masalah ini lebih lanjut. Mohon menunggu update dari kami.",
+          time: "Kamis, 28 Sep",
+          isAdmin: true
+        },
+        {
+          id: 3,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        },
+        {
+          id: 4,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        }
+      ]
+    },
+    {
+      id: 4,
+      company: "PT. Bangun Negeri Selalu",
+      date: "27/09/2024",
+      title: "Perubahan Privacy Policy",
+      subject: "Tidak Bisa Upload Foto pada Form Buat Laporan",
+      preview: "Saya tidak bisa upload foto pada buat lapor...",
+      content: "Tidak bisa upload foto pada buat laporan. Mohon bantuan untuk kendala ini.",
+      sender: "bangunnegeriselalu.co.id",
+      time: "Rabu, 27 Sep",
+      replies: [
+        {
+          id: 1,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Mohon maaf kami sedang mengalami kendala teknis. Tim kami sedang bekerja untuk memperbaiki masalah ini secepatnya.",
+          time: "Rabu, 27 Sep",
+          isAdmin: true
+        },
+        {
+          id: 2,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Kami sedang memeriksa masalah ini lebih lanjut. Mohon menunggu update dari kami.",
+          time: "Kamis, 28 Sep",
+          isAdmin: true
+        },
+        {
+          id: 3,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        },
+        {
+          id: 4,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        }
+      ]
+    },
+    {
+      id: 5,
+      company: "PT. Bangun Negeri Selalu",
+      date: "27/09/2024",
+      title: "Perubahan Privacy Policy",
+      subject: "Tidak Bisa Upload Foto pada Form Buat Laporan",
+      preview: "Saya tidak bisa upload foto pada buat lapor...",
+      content: "Tidak bisa upload foto pada buat laporan. Mohon bantuan untuk kendala ini.",
+      sender: "bangunnegeriselalu.co.id",
+      time: "Rabu, 27 Sep",
+      replies: [
+        {
+          id: 1,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Mohon maaf kami sedang mengalami kendala teknis. Tim kami sedang bekerja untuk memperbaiki masalah ini secepatnya.",
+          time: "Rabu, 27 Sep",
+          isAdmin: true
+        },
+        {
+          id: 2,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Kami sedang memeriksa masalah ini lebih lanjut. Mohon menunggu update dari kami.",
+          time: "Kamis, 28 Sep",
+          isAdmin: true
+        },
+        {
+          id: 3,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        },
+        {
+          id: 4,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        }
+      ]
+    },
+    {
+      id: 6,
+      company: "PT. Bangun Negeri Selalu",
+      date: "27/09/2024",
+      title: "Perubahan Privacy Policy",
+      subject: "Tidak Bisa Upload Foto pada Form Buat Laporan",
+      preview: "Saya tidak bisa upload foto pada buat lapor...",
+      content: "Tidak bisa upload foto pada buat laporan. Mohon bantuan untuk kendala ini.",
+      sender: "bangunnegeriselalu.co.id",
+      time: "Rabu, 27 Sep",
+      replies: [
+        {
+          id: 1,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Mohon maaf kami sedang mengalami kendala teknis. Tim kami sedang bekerja untuk memperbaiki masalah ini secepatnya.",
+          time: "Rabu, 27 Sep",
+          isAdmin: true
+        },
+        {
+          id: 2,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Kami sedang memeriksa masalah ini lebih lanjut. Mohon menunggu update dari kami.",
+          time: "Kamis, 28 Sep",
+          isAdmin: true
+        },
+        {
+          id: 3,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        },
+        {
+          id: 4,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        }
+      ]
+    },
+    {
+      id: 6,
+      company: "PT. Bangun Negeri Selalu",
+      date: "27/09/2024",
+      title: "Perubahan Privacy Policy",
+      subject: "Tidak Bisa Upload Foto pada Form Buat Laporan",
+      preview: "Saya tidak bisa upload foto pada buat lapor...",
+      content: "Tidak bisa upload foto pada buat laporan. Mohon bantuan untuk kendala ini.",
+      sender: "bangunnegeriselalu.co.id",
+      time: "Rabu, 27 Sep",
+      replies: [
+        {
+          id: 1,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Mohon maaf kami sedang mengalami kendala teknis. Tim kami sedang bekerja untuk memperbaiki masalah ini secepatnya.",
+          time: "Rabu, 27 Sep",
+          isAdmin: true
+        },
+        {
+          id: 2,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Kami sedang memeriksa masalah ini lebih lanjut. Mohon menunggu update dari kami.",
+          time: "Kamis, 28 Sep",
+          isAdmin: true
+        },
+        {
+          id: 3,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        },
+        {
+          id: 4,
+          sender: "Admin CPM1",
+          senderEmail: "admincpm@telkomproperty.co.id",
+          content: "Update: Masalah sedang dalam proses perbaikan.",
+          time: "Jumat, 29 Sep",
+          isAdmin: true
+        }
+      ]
+    },
   ];
 
   const recipients: Recipient[] = [
@@ -191,6 +432,7 @@ const InboxComponent: React.FC = () => {
     }, 100);
   };
 
+
   const onSubmitNewMessage = (data: PesanBaruSchema) => {
     console.log("Data Pesan Baru:", data);
   };
@@ -201,10 +443,58 @@ const InboxComponent: React.FC = () => {
   return (
     <div className="flex min-h-screen ">
       <div className="w-1/3 border-r bg-white rounded-l-md">
-        <div className="p-4 border-b">
-          <h2 className="font-bold text-lg text-gray-700">9 Percakapan Aktif</h2>
+        <div className="p-4 border-b space-y-4">
+          <h2 className="font-bold text-lg">9 Percakapan Aktif</h2>
+          {isAdmin ? 
+          <div className='flex flex-col-reverse items-center gap-4'>
+            <div className='w-full'>
+              <div className="relative w-full">
+                    <Input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Cari SubJudul..."
+                      className="border p-2 placeholder:text-sm rounded-md pl-8 w-full"
+                    />
+                    <Search size={18} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                </div>
+            </div>
+            <div className='w-full'>
+              <Comboboxs
+                  placeholder="Pilih Mitra..."
+                  options={[
+                    { value: "Mitra ini panjang banget 1", label: "Mitra ini panjang banget  1" },
+                    { value: "Mitra ini panjang banget 3", label: "Mitra ini panjang banget  3" },
+                    { value: "Mitra ini panjang banget 4", label: "Mitra ini panjang banget  4" },
+                    { value: "Mitra ini panjang banget 5", label: "Mitra ini panjang banget  5" },
+                    { value: "Mitra ini panjang banget 3", label: "Mitra ini panjang banget  3" },
+                    { value: "Mitra ini panjang banget 4", label: "Mitra ini panjang banget  4" },
+                    { value: "Mitra ini panjang banget 5", label: "Mitra ini panjang banget  5" },
+                    { value: "Mitra ini panjang banget 3", label: "Mitra ini panjang banget  3" },
+                    { value: "Mitra ini panjang banget 4", label: "Mitra ini panjang banget  4" },
+                    { value: "Mitra ini panjang banget 5", label: "Mitra ini panjang banget  5" },
+                  ]}
+                  selected=""
+                  setSelected={() => {}}
+                />
+            </div>
+          </div>
+          :
+          <div className='w-full'>
+            <div className="relative w-full">
+                <Input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari Subjudul..."
+                  className="border p-2 placeholder:text-sm rounded-md pl-8 w-full"
+                  />
+                  <Search size={18} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              </div>
+          </div>
+          }
         </div>
-        <div className="divide-y">
+        <div className="divide-y overflow-y-auto max-h-[42em] custom-scrollbar">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -245,7 +535,7 @@ const InboxComponent: React.FC = () => {
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
               >
-                Pesan Baru +
+                Buat Pesan Baru
               </button>
             </div>
             
@@ -340,13 +630,13 @@ const InboxComponent: React.FC = () => {
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 mb-3"
               >
-                Pesan Baru +
+                Buat Pesan Baru 
               </button>
         </>}
 
         {/* Form Pesan Baru */}
         {showNewMessage && (
-          <div className=" shadow-md bg-slate-50/80 p-6 rounded-lg">
+          <div className="p-6 border rounded-lg ">
             <div className="mb-4">
             <Form {...formPesanBaru}>
                   <form onSubmit={formPesanBaru.handleSubmit(onSubmitNewMessage)} className="space-y-4">
@@ -356,54 +646,23 @@ const InboxComponent: React.FC = () => {
                   render={({ field }) => (
                   <FormItem>
                     <FormLabel>Kepada:</FormLabel>
-                    <Combobox
-                      value={field.value}
-                      onChange={field.onChange}
-                      as="div"
-                      className="relative"
-                    >
-                <div className="relative w-full">
-                  <Combobox.Input
-                    className="w-full border rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => setShowDropdown(true)}
-                    onBlur={() => setShowDropdown(false)}
-                    placeholder="Cari penerima..."
-                  />
-                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
-                  </Combobox.Button>
-                </div>
-
-                <Transition
-                  show={filteredRecipients.length > 0}
-                  enter="transition ease-out duration-200"
-                  enterFrom="opacity-0 transform scale-95"
-                  enterTo="opacity-100 transform scale-100"
-                  leave="transition ease-in duration-150"
-                  leaveFrom="opacity-100 transform scale-100"
-                  leaveTo="opacity-0 transform scale-95"
-                >
-                  <Combobox.Options 
-                    className="absolute z-10 mt-2 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto focus:outline-none"
-                    hidden={!showDropdown}
-                    >
-                    {filteredRecipients.map((recipient) => (
-                      <Combobox.Option
-                        key={recipient.value}
-                        value={recipient.value}
-                        className={({ active }) =>
-                          `cursor-pointer select-none relative py-2 px-4 ${
-                            active ? "bg-red-100 text-red-900" : "text-gray-900"
-                          }`
-                        }
-                      >
-                        {recipient.label}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
-                </Transition>
-              </Combobox>
+                    <Comboboxs
+                  placeholder="Pilih Mitra..."
+                  options={[
+                    { value: "Mitra ini panjang banget 1", label: "Mitra ini panjang banget  1" },
+                    { value: "Mitra ini panjang banget 3", label: "Mitra ini panjang banget  3" },
+                    { value: "Mitra ini panjang banget 4", label: "Mitra ini panjang banget  4" },
+                    { value: "Mitra ini panjang banget 5", label: "Mitra ini panjang banget  5" },
+                    { value: "Mitra ini panjang banget 3", label: "Mitra ini panjang banget  3" },
+                    { value: "Mitra ini panjang banget 4", label: "Mitra ini panjang banget  4" },
+                    { value: "Mitra ini panjang banget 5", label: "Mitra ini panjang banget  5" },
+                    { value: "Mitra ini panjang banget 3", label: "Mitra ini panjang banget  3" },
+                    { value: "Mitra ini panjang banget 4", label: "Mitra ini panjang banget  4" },
+                    { value: "Mitra ini panjang banget 5", label: "Mitra ini panjang banget  5" },
+                  ]}
+                  selected=""
+                  setSelected={() => {}}
+                />
               <FormMessage />
             </FormItem>
           )}
