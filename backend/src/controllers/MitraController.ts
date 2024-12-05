@@ -210,6 +210,9 @@ async function getMitraKontraks(req: Request, res: Response) {
             if (!nama_mitra) {
                 res.status(400).json({message: "Nama mitra is required."})
                 return
+            } else if (metaData.nama_mitra && req.body.nama_mitra && metaData.nama_mitra != req.body.nama_mitra) {
+                res.status(401).json({message: "Unauthorized."})
+                return
             }
             
             const [existingMitraKontraks] = await pool.execute<RowDataPacket[]>('SELECT kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu FROM kontrak INNER JOIN mitra ON kontrak.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])
