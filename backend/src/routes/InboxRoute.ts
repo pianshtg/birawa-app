@@ -6,5 +6,6 @@ import { validateUserRequest } from '../middlewares/validation'
 const router = express.Router()
 
 router.post('/', InboxController.createInbox)
+router.post('/es', InboxController.getInboxes)
 
 export default router
