@@ -58,3 +58,28 @@ export function useCreateInbox() {
 
     return {createInbox, isLoading}
 }
+
+export function useGetInboxes(nama_mitra: string | undefined, options: {enabled?: boolean} = {enabled: true}) {
+    const {enabled} = options
+    async function useGetInboxesRequest () {
+        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const response = await fetch(`${API_BASE_URL}/api/inbox/es`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+            },
+            body: JSON.stringify({nama_mitra}),
+            credentials: 'include'
+        })
+        if (!response.ok) {
+            throw new Error("Failed to get kontrak's pekerjaan(s).")
+        }
+        return response.json()
+    }
+    
+    const { data: inboxes, isLoading, refetch } = useQuery( ["fetchInboxes", nama_mitra], useGetInboxesRequest, { enabled: enabled && !!nama_mitra } )
+    
+    return { inboxes, isLoading, refetch }
+}
