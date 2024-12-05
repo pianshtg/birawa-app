@@ -147,7 +147,70 @@ async function getInboxes(req: Request, res: Response) {
 
 async function getInbox(req: Request, res: Response) {
     try {
-        
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const permissions = metaData.permissions
+
+        // Check the user permission
+        if (permissions.includes('create_inbox')) { // don't forget to change the permission (get_inboxes)
+            // Get nama_mitra
+            const nama_mitra = metaData.nama_mitra || req.body.nama_mitra
+            const {subject} = req.body
+            
+            if (!nama_mitra) {
+                res.status(400).json({message: "Nama mitra is required."})
+                return
+            } else if (metaData.nama_mitra && req.body.nama_mitra && metaData.nama_mitra != req.body.nama_mitra) {
+                res.status(401).json({message: "Unauthorized."})
+                return
+            }
+            
+            if (!subject) {
+                res.status(400).json({ message: "Subject is required." });
+                return;
+            }
+            
+            
+            let inboxMessages
+            
+            const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT user_id FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])
+            if (existingMitraUsers.length > 0) {
+                // Get inboxes
+                const existingMitraUsersId = existingMitraUsers.map(user => user.user_id);
+                const placeholders = existingMitraUsersId.map(() => '?').join(', ');
+                const dynamicQuery = `
+                    SELECT i.judul AS subject, i.isi AS message, i.sender_id, i.receiver_id, i.created_at
+                    FROM inbox i
+                    WHERE i.sender_id IN (${placeholders}) OR i.receiver_id IN (${placeholders}) 
+                    AND i.judul = ?
+                    ORDER BY i.created_at ASC
+                `;
+                const [rows] = await pool.execute<RowDataPacket[]>(dynamicQuery, [...existingMitraUsersId, ...existingMitraUsersId, subject]);
+                inboxMessages = rows
+                console.log("Inboxes:", inboxMessages) //Debug.
+                console.log('Existing mitra users:', existingMitraUsersId) //Debug.
+            } else {
+                console.log(existingMitraUsers) //Debug.
+                res.status(409).json({message: "Failed to find any of mitra's user."})
+                return
+            }
+            
+            // Debug.
+            res.status(201).json({
+                message: "Inbox created successfully.",
+                inboxMessages,
+                newAccessToken
+            })
+            return
+        } else {
+            // User doesn't have the permission.
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
     } catch (error) {
         console.error(error) //Debug.
         res.status(500).json({message: "Error getting inbox."})
