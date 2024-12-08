@@ -40,22 +40,7 @@ export function useCreateMitra () {
         // reset
     } = useMutation(useCreateMitraRequest)
 
-    if (isSuccess) {
-        toast({
-            title: "Mitra berhasil dibuat!",
-            variant: "success"
-        })
-    }
-
-    if (error) {
-        toast({
-            title: error.toString(),
-            variant: "danger"
-        }) //Debug.
-        // reset()
-    }
-
-    return {createMitra, isLoading}
+    return {createMitra, isLoading, isSuccess, error}
 }
 
 export function useGetMitra(nama_mitra: string) {
