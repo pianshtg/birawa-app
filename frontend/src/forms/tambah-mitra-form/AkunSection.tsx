@@ -61,8 +61,9 @@ const AkunSection = () => {
                             const [filteredCountries, setFilteredCountries] = useState(countries); // Filtered countries list
                             
                             useEffect(() => {
-                                field.onChange(`${selectedDialCode}${localPhoneNumber}`);
-                            }, [selectedDialCode, localPhoneNumber]);
+                                const correctedPhoneNumber = localPhoneNumber.startsWith('0') ? localPhoneNumber.slice(1) : localPhoneNumber
+                                field.onChange(`${selectedDialCode}${correctedPhoneNumber}`);
+                            }, [selectedDialCode, localPhoneNumber, field]);
                             
                             // Filter countries based on search term
                             useEffect(() => {

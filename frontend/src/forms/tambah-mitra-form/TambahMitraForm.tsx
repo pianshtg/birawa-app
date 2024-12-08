@@ -15,7 +15,7 @@ const formSchema = z.object({
     mitra: z.object({
       nama: z.string().min(1, "Nama perusahaan wajib diisi").max(50, "Nama perusahaan terlalu panjang"),
       alamat: z.string().min(1, "Alamat perusahaan wajib diisi").max(50, "Alamat perusahaan terlalu panjang"),
-      nomor_telepon: z.string().min(1, "Nomor telepon perusahaan wajib diisi").max(20, "Nomor telepon perusahaan terlalu panjang"),
+      nomor_telepon: z.string().min(12, "Nomor telepon perusahaan wajib diisi").max(20, "Nomor telepon perusahaan terlalu panjang"),
     }),
     
     kontrak: z.object({
@@ -36,7 +36,7 @@ const formSchema = z.object({
     user: z.object({
       email: z.string().email("Email tidak valid").max(55, "Email terlalu panjang"),
       nama_lengkap: z.string().min(1, "Nama lengkap wajib diisi").max(40, "Nama lengkap terlalu panjang"),
-      nomor_telepon: z.string().min(1, "Nomor telepon wajib diisi").max(20, "Nomor telepon terlalu panjang"),
+      nomor_telepon: z.string().min(12, "Nomor telepon wajib diisi").max(20, "Nomor telepon terlalu panjang"),
     })
 })
 
