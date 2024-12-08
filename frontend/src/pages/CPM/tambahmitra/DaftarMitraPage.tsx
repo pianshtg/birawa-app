@@ -210,7 +210,7 @@ const DaftarMitra = () => {
                 <tr key={mitra.nama} aria-label="button detail mitra" onDoubleClick={() => onclickdetail(mitra.nama)}  className="hover:bg-gray-50 cursor-pointer">
                   <td  className="p-4 text-sm font-normal border-b">{index + 1}</td>
                   <td  className="p-4 text-sm font-normal border-b">{mitra.nama}</td>
-                  <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon}</td>
+                  <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon.slice(0, 3)} {mitra.nomor_telepon.slice(3)}</td>
                   <td className="p-4 text-sm font-normal border-b">{mitra.alamat}</td>
                   <td className="p-4 text-sm font-normal border-b">
                     <div className="flex gap-x-2">
