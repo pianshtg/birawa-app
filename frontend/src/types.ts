@@ -86,3 +86,16 @@ export type Country = {
     dialCode: string;
     name: string;
 }
+
+export type Inbox = {
+    id?: string
+    subject: string
+    last_message?: string
+    content?: string
+    created_at?: string
+    sender_nama_mitra?: string | null
+    sender_email?: string
+    sender_nama_lengkap?: string
+    receiver_email?: string
+    receiver_nama_lengkap?: string
+}
