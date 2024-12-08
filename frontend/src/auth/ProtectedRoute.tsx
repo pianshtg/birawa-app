@@ -8,6 +8,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ roles }: ProtectedRouteProps) => {
   const accessToken = getAccessToken()
+  console.log("Access token:", accessToken) //Debug.
 
   if (!accessToken) {
     return <Navigate to="/" replace />
@@ -23,6 +24,7 @@ const ProtectedRoute = ({ roles }: ProtectedRouteProps) => {
     }
 
     return <Outlet />
+    
   } catch (error) {
     console.error("Error decoding token:", error)
     return <Navigate to="/" replace />
