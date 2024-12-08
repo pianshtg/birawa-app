@@ -87,6 +87,7 @@ CREATE TABLE inbox (
     id CHAR(36) PRIMARY KEY,
     sender_id CHAR(36),
     receiver_id CHAR(36),
+    receiver_type ENUM('admin', 'mitra') NOT NULL,
     judul VARCHAR(100) NOT NULL,
     isi VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -94,8 +95,7 @@ CREATE TABLE inbox (
     deleted_at TIMESTAMP DEFAULT NULL,
     created_by CHAR(36),
     updated_by CHAR(36),
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL
 );
 CREATE TABLE kontrak (
     id CHAR(36) PRIMARY KEY,
@@ -1048,6 +1048,7 @@ INSERT INTO inbox (
         id,
         sender_id,
         receiver_id,
+        receiver_type,
         judul,
         isi,
         created_by,
@@ -1062,9 +1063,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra1@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company One'
         ),
+        'mitra',
         'title_1',
         'content_1',
         NULL,
@@ -1079,9 +1081,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra2@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Two'
         ),
+        'mitra',
         'title_2',
         'content_2',
         NULL,
@@ -1096,9 +1099,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra3@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Three'
         ),
+        'mitra',
         'title_3',
         'content_3',
         NULL,
@@ -1113,9 +1117,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra4@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Four'
         ),
+        'mitra',
         'title_4',
         'content_4',
         NULL,
@@ -1130,9 +1135,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra5@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Five'
         ),
+        'mitra',
         'title_5',
         'content_5',
         NULL,
@@ -1147,9 +1153,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra6@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Six'
         ),
+        'mitra',
         'title_6',
         'content_6',
         NULL,
@@ -1164,9 +1171,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra7@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Seven'
         ),
+        'mitra',
         'title_7',
         'content_7',
         NULL,
@@ -1181,9 +1189,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra8@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Eight'
         ),
+        'mitra',
         'title_8',
         'content_8',
         NULL,
@@ -1198,9 +1207,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra9@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Nine'
         ),
+        'mitra',
         'title_9',
         'content_9',
         NULL,
@@ -1215,9 +1225,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra10@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Ten'
         ),
+        'mitra',
         'title_10',
         'content_10',
         NULL,
@@ -1232,9 +1243,10 @@ VALUES (
         ),
         (
             SELECT id
-            FROM users
-            WHERE email = 'mitra11@example.com'
+            FROM mitra
+            WHERE nama = 'Mitra Company Eleven'
         ),
+        'mitra',
         'title_11',
         'content_11',
         NULL,
@@ -2231,7 +2243,7 @@ VALUES (
         WHERE mitra.nama = 'Mitra Company One' AND kontrak.nomor = '1' AND kontrak_ss_pekerjaan.nama = 'pekerjaan_1'
         ),
         '2024-10-10',
-        NULL,
+        (SELECT id FROM users WHERE email = 'admin@example.com'),
         NULL
     );
 -- Insert data into log
