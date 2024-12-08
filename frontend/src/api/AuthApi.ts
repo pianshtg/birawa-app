@@ -156,7 +156,7 @@ export function useAuth() {
 
     if (error) {
       toast({
-        title: "Authentication failed",
+      title: "Please re-login!",
         description: error.toString(),
         variant: "danger",
       });

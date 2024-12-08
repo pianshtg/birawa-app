@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "react-query";
 import { Kontrak, Mitra, Pekerjaan, User } from "../types";
-import { useToast } from "@/hooks/use-toast";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -12,7 +11,6 @@ export type CreateMitraRequest = {
 };
 
 export function useCreateMitra () {
-    const {toast} = useToast()
     async function useCreateMitraRequest (mitra: CreateMitraRequest) {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/mitra`, {
