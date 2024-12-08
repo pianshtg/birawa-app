@@ -51,13 +51,6 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
             }
         }
 
-        // Check if there's an accessToken
-        if (!accessToken) {
-            // console.log("There's no access token.") // Debug.
-            res.status(401).json({message: "Invalid access token."})
-            return
-        }
-
         // Check if there's refresh token
         if (!refreshToken) {
             // console.log("There's no refresh token.") // Debug.
@@ -79,82 +72,76 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
 }
 
 export async function jwtCheck(req: Request, res: Response, next: NextFunction) {
-    console.log("Jwt checking...") //Debug.
+    console.log("JWT checking..."); // Debug.
     try {
-        // console.log('Received cookies (jwtCheck):', req.cookies) // Debug.
-        const accessToken = req.accessToken
-        // console.log(token) (debuggin)
+        const accessToken = req.accessToken;
+        const refreshToken = req.refreshToken;
+
+        // If there's an access token, validate it normally
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
-            // console.log(token) // Debug.
-            console.log('Successfully authenticating jwt. Proceeding to the controller...') //Debug.
-            next()
-        } else {
-            // console.log("there's no access token") // Debug.
-            res.status(401).json({message: "Unauthorized"})
-            return
-        }
-    } catch (error) {
-        console.log("Access token verification failed:", error) // Debug.
+            console.log('Successfully authenticating with access token. Proceeding to the controller...'); // Debug.
+            next();
+            
+        } else if (refreshToken) {
+            // If no access token but there is a refresh token, we try to renew the access token
+            console.log("Access token is missing, but refresh token is present. Renewing access token...");
 
-        if (error instanceof jwt.TokenExpiredError) {
-            const refreshToken = req.refreshToken!
+            // Decode the refresh token
             try {
-                // Decode the refresh token
-                const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload
+                const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
 
-                // Check if the user has refresh token in the database
-                const [user_hashed_refresh_token] = await pool.execute<RowDataPacket[]>('SELECT hashed_refresh_token FROM users_hashed_refresh_token WHERE user_id = ?', [decodedRefreshToken.user_id])
+                // Check if the user has the refresh token in the database
+                const [user_hashed_refresh_token] = await pool.execute<RowDataPacket[]>('SELECT hashed_refresh_token FROM users_hashed_refresh_token WHERE user_id = ?', [decodedRefreshToken.user_id]);
                 if (user_hashed_refresh_token.length === 0) {
-                    res.status(401).json({message: "Unauthorized."})
+                    res.status(401).json({ message: "Unauthorized." });
                     return
                 }
 
-                // Check if the refresh token is valid
-                const isValidRefreshToken = await bcrypt.compare(refreshToken, user_hashed_refresh_token[0].hashed_refresh_token)
-                if (isValidRefreshToken) {
-                    // Generate new access token since the refresh token is valid
-                        // Transferring the data from refresh token to the new access token
-                    const user_id = decodedRefreshToken.user_id
-                    const permissions = decodedRefreshToken.permissions
-                    
-                    // Checking user's mitra
-                    const [mitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.id = ?', [user_id])
-                    let nama_mitra: string | undefined
-                    if (mitra.length > 0) {
-                        nama_mitra = mitra[0].nama
-                    }
-                    
-                    const newAccessToken = generateAccessToken({user_id, permissions, nama_mitra})
-                    
-                    // Directly set the new access token to the cookie jar if the request comes from web
-                    const clientType = req.headers['x-client-type']
-                    if (clientType === 'web') {
-                        res.cookie('accessToken', newAccessToken, {
-                            secure: true,
-                            sameSite: 'none',
-                            maxAge: 15 * 60 * 1000,
-                            path: '/'
-                        })
-                    } else {
-                        // Passing the new access token to the controller to be sent as json data
-                        req.newAccessToken = newAccessToken
-                    }
-                    console.log("Successfuly renewed the accessToken: ", newAccessToken, "\n") // Debug.
-                    next()
-                    
-                } else {
+                // Compare the refresh token to the one stored in the database
+                const isValidRefreshToken = await bcrypt.compare(refreshToken, user_hashed_refresh_token[0].hashed_refresh_token);
+                if (!isValidRefreshToken) {
                     res.status(401).json({ message: "Invalid refresh token." });
                     return
                 }
+
+                // If valid, generate a new access token
+                const user_id = decodedRefreshToken.user_id;
+                const permissions = decodedRefreshToken.permissions;
+                const nama_mitra = decodedRefreshToken.nama_mitra || undefined;
+
+                // Create a new access token
+                const newAccessToken = generateAccessToken({ user_id, permissions, nama_mitra });
+
+                // Set the new access token in the cookie for web clients
+                const clientType = req.headers['x-client-type'];
+                if (clientType === 'web') {
+                    res.cookie('accessToken', newAccessToken, {
+                        secure: true,
+                        sameSite: 'none',  // Required for cross-site cookies (e.g., with CORS)
+                        maxAge: 15 * 60 * 1000,  // 15 minutes
+                        path: '/'
+                    });
+                } else {
+                    // If mobile, send the new access token in the response body
+                    req.newAccessToken = newAccessToken;
+                }
+
+                console.log("Successfully renewed access token:", newAccessToken); // Debug.
+                next(); // Proceed to the next middleware or controller
             } catch (error) {
-                console.error(error) // Debug.
-                res.status(401).json({message: "Unauthorized"})
+                console.log("Error while renewing access token:", error); // Debug.
+                res.status(401).json({ message: "Unauthorized." });
                 return
             }
         } else {
-            console.error(error) //Debug.
-            res.status(401).json({message: "Unauthorized."})
+            // If no access token and no refresh token, deny the request
+            console.log("No access token or refresh token found."); // Debug.
+            res.status(401).json({ message: "Unauthorized." });
             return
         }
+    } catch (error) {
+        console.log("JWT verification failed:", error); // Debug.
+        res.status(401).json({ message: "Unauthorized." });
+        return
     }
 }
