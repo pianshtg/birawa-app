@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -220,16 +220,7 @@ const DaftarMitra = () => {
                       >
                         <Edit2 color="blue" size={18} />
                       </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedMitra(mitra);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                        className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
-                      >
-                        <Trash2 color="red" size={18} />
-                      </button>
+                      
                     </div>
                   </td>
                 </tr>
