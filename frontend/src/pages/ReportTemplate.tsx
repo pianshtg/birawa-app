@@ -212,18 +212,25 @@ const styles = StyleSheet.create({
     break: 'before',
   },
   issuesSection: {
-    marginTop: 50,
+    marginTop: 30,
     border: '1px solid black',
-    minHeight: 100,
   },
   footer: {
+    width: '100%',
     marginTop: 20,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  footerRow: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingHorizontal: '60px'
   },
-  footerColumn: {
-    width: '30%',
-    alignItems: 'center',
+  footerCell: {
+    padding: '12px',
+    alignItems: 'center'
   },
 
   // Image Styles
@@ -334,14 +341,13 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
         <View style={styles.header}>
           <View style={[styles.leftSection, {fontWeight: 'bold'}]}>
             <Text>Nomor Kontrak: {nomor_kontrak}</Text>
-            <Text>Kontraktor:</Text>
-            <Text>Pt. Graha Sarana Duta</Text>
+            <Text>Kontraktor: {nama_mitra}</Text>
           </View>
           <View style={styles.middleSection}>
             <Text style={styles.boldText}>LAPORAN HARIAN {nama_pekerjaan.toUpperCase()}</Text>
           </View>
           <View style={styles.rightSection}>
-            <Text style={{fontWeight: 'bold'}}>{nama_mitra}</Text>
+            <Text style={{fontWeight: 'bold'}}>PT. Graha Sarana Duta</Text>
           </View>
         </View>
 
@@ -762,68 +768,44 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           })}
         </View>
 
-        {/* Materials Section */}
-        <View wrap={false} style={styles.materialSection}>
-          <View style={styles.materialSection}>
-            <View style={styles.tableRow}>
-              <View style={styles.tableCell}>
-                <Text>Material Diterima</Text>
-              </View>
-              <View style={styles.tableCell}>
-                <Text>Volume</Text>
-              </View>
-              <View style={styles.tableCell}>
-                <Text>Material Ditolak</Text>
-              </View>
-              <View style={styles.tableCellNoBorder}>
-                <Text>Volume</Text>
-              </View>
-            </View>
-            {[1, 2, 3, 4, 5].map((i: number) => (
-              <View key={i} style={styles.tableRow}>
-                <View style={styles.tableCell}>
-                  <Text></Text>
-                </View>
-                <View style={styles.tableCell}>
-                  <Text></Text>
-                </View>
-                <View style={styles.tableCell}>
-                  <Text></Text>
-                </View>
-                <View style={styles.tableCellNoBorder}>
-                  <Text></Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-
         {/* Issues Section */}
         <View wrap={false} style={styles.issuesSection}>
           <View style={styles.tableRow}>
             <View style={[styles.tableCell, { flex: 1 }]}>
               <Text>Permasalahan yang timbul</Text>
             </View>
-            <View style={[styles.tableCellNoBorder, { flex: 1 }]}>
+            <View style={[styles.tableCell, { flex: 1 }]}>
               <Text>Penyelesaian</Text>
             </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={[styles.tableCell, {minHeight : 124}]}/>
+            <View style={[styles.tableCell, {minHeight : 1}]}/>
           </View>
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.footerColumn}>
-            <Text>Dilaporkan Oleh,</Text>
-            <Text>Kontraktor Pelaksana</Text>
-            <Text>PT Graha Sarana Duta</Text>
-            <Text style={{ marginTop: 40 }}>___________________</Text>
-            <Text style={{ marginTop: 5 }}>Site Manager</Text>
+        <View wrap={false} style={styles.footer}>
+          <View style={styles.footerRow}>
+            <View style={styles.footerCell}>
+              <Text>Kontraktor Pelaksana</Text>
+              <Text>PT Graha Sarana Duta</Text>
+            </View>
+            <View style={[styles.footerCell, {paddingLeft: '17px'}]}>
+              <Text>Dilaporkan Oleh,</Text>
+              <Text>Konsultan Pengawas</Text>
+              <Text>{nama_mitra}</Text>
+            </View>
           </View>
-          <View style={styles.footerColumn}>
-            <Text>Konsultan Pengawas</Text>
-            <Text>{nama_mitra}</Text>
-            <Text style={{ marginTop: 40 }}>___________________</Text>
-            <Text style={{ marginTop: 5 }}>{metaData.nama_mitra ? pencetak_laporan : pembuat_laporan}</Text>
+          <View style={styles.footerRow}>
+            <View style={[styles.footerCell, {paddingRight: '17px'}]}>
+              <Text style={{ marginTop: 40, textAlign: 'center' }}>___________________</Text>
+              <Text style={{ marginTop: 5, textAlign: 'center' }}>Site Manager</Text>
+            </View>
+            <View style={styles.footerCell}>
+              <Text style={{ marginTop: 40 }}>___________________</Text>
+              <Text style={{ marginTop: 5 }}>{metaData.nama_mitra ? pencetak_laporan : pembuat_laporan}</Text>
+            </View>
           </View>
         </View>
       </Page>
@@ -837,7 +819,7 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           {laporan.map((shift, shiftIndex) =>
             shift.peran_tenaga_kerja_arr.map((tenagaKerja, tenagaIndex) =>
               tenagaKerja.aktivitas_arr.map((aktivitas, aktivitasIndex) => (
-                <View key={`shift-${shiftIndex}-tenaga-${tenagaIndex}-aktivitas-${aktivitasIndex}`}>
+                <View wrap={false} key={`shift-${shiftIndex}-tenaga-${tenagaIndex}-aktivitas-${aktivitasIndex}`}>
                   <Text style={{ fontSize: 10, marginBottom: 10 }}>
                     Aktivitas: {aktivitas.nama}
                   </Text>

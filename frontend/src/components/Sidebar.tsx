@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { getAccessToken } from "@/lib/utils"
+import { formatMitraInitials, getAccessToken } from "@/lib/utils"
 import { CustomJwtPayload } from "@/types"
 import { jwtDecode } from "jwt-decode"
 import { useSignOutUser } from "@/api/AuthApi"
@@ -69,17 +69,6 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       console.error("Failed to log out:", error) //Debug.
     }
   }
-
-  function formatMitraInitials(name: string) {
-
-    const nameParts = name.split(' ');  // Pisahkan nama berdasarkan spasi
-    const initials = nameParts
-      .map(part => part.charAt(0).toUpperCase())  // Ambil huruf pertama dari setiap kata
-      .join('');  // Gabungkan menjadi satu string
-  
-    return initials.substring(0, 1)+initials.substring(initials.length-1, initials.length);  // Ambil tiga huruf pertama
-  }
-
   
   return (
     <div 
@@ -129,7 +118,6 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       isActive ? 'bg-primary text-white' : 'text-primary bg-transparent hover:bg-opacitynav/85'
                     }`
                   }
-                  reloadDocument
                 >
                   <span className="flex items-center justify-center">
                     {item.icon}
