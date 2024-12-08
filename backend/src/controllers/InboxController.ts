@@ -15,47 +15,63 @@ async function createInbox(req: Request, res: Response) {
         // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const sender_id = metaData.user_id
-        const nama_mitra: string | undefined = metaData.nama_mitra
 
         // Check the user permission
         if (permissions.includes('create_inbox')) {
-            // Get request parameter.
-            const {email_receiver, subject, content} = req.body
+            const isAdmin = !metaData.nama_mitra
             
-            // Check if chatters exist.
-            const [existingChatters] = await pool.execute<RowDataPacket[]>('SELECT id, email, nama_lengkap FROM users WHERE id = ? OR email = ?', [sender_id, email_receiver])
-            console.log(existingChatters) //Debug.
-            if (existingChatters.length !== 2) {
-                res.status(409).json({message: "Communication cannot be started, invalid sender or receiver."})
-                return
-            }
+            // Get request parameter.
+            const {nama_mitra, email_receiver, subject, content} = req.body
+            
+            const inboxId = uuidv4()
             
             // Checking chatters rules
-            if (nama_mitra) {
-                const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.email = ?', [email_receiver!])
+            if (!isAdmin) {
+                
+                if (!email_receiver || nama_mitra) {
+                    res.status(400).json({message: "Bad request!"})
+                    return
+                }
+                
+                const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE mitra.nama = ?', [email_receiver!])
                 if (existingMitra.length > 0) {
                     res.status(401).json({message: "Mitra is not allowed to send message to another mitra."})
                     return
                 }
-            } else {
-                const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT mitra.nama FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id INNER JOIN users ON mitra_users.user_id = users.id WHERE users.email = ?', [email_receiver!])
-                if (existingMitra.length === 0) {
-                    res.status(401).json({message: "Admin is not allowed to send message to another admin."})
+                
+                const [admin_receiver] = await pool.execute<RowDataPacket[]>('SELECT id FROM users WHERE email = ?', [email_receiver!])
+                if (admin_receiver.length === 0) {
+                    res.status(409).json({message: "Failed to find user admin!"})
                     return
                 }
+                const receiver_id = admin_receiver[0].id
+                await pool.execute('INSERT INTO inbox (id, sender_id, receiver_id, receiver_type, judul, isi, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)', [inboxId, sender_id, receiver_id, 'admin', subject.toLowerCase(), content, sender_id])
+                
+            } else {
+                
+                if (!nama_mitra || email_receiver) {
+                    res.status(400).json({message: "Bad request (admin)!"})
+                    return
+                }
+                
+                const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra!])
+                if (existingMitra.length === 0) {
+                    res.status(409).json({message: "Failed to find mitra."})
+                    return
+                }
+                
+                const receiver_id = existingMitra[0].id
+                await pool.execute('INSERT INTO inbox (id, sender_id, receiver_id, receiver_type, judul, isi, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)', [inboxId, sender_id, receiver_id, 'mitra', subject.toLowerCase(), content, sender_id])
+                
             }
-            
-            // Insert the inbox
-            const inboxId = uuidv4()
-            const receiver_id = existingChatters.filter((user) => user.email === email_receiver)[0].id
-            await pool.execute('INSERT INTO inbox (id, sender_id, receiver_id, judul, isi, created_by) VALUES (?, ?, ?, ?, ?, ?)', [inboxId, sender_id, receiver_id, subject, content, sender_id])
-            
+                        
             // Debug.
             res.status(201).json({
                 message: "Inbox created successfully.",
                 created_inbox: {
                     sender_id,
                     email_receiver,
+                    nama_mitra,
                     subject,
                     content
                 },
@@ -100,10 +116,18 @@ async function getInboxes(req: Request, res: Response) {
             let inboxes
             
             const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT user_id FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])
+            const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
+            
+            if (existingMitra.length === 0) {
+                res.status(409).json({message: "Failed to find mitra!"})
+                return
+            }
+            
             if (existingMitraUsers.length > 0) {
                 // Get inboxes
-                const existingMitraUsersId = existingMitraUsers.map(user => user.user_id);
-                const placeholders = existingMitraUsersId.map(() => '?').join(', ');
+                const existingMitraUsersId = existingMitraUsers.map(user => user.user_id)
+                existingMitraUsersId.push(existingMitra[0].id)
+                const placeholders = existingMitraUsersId.map(() => '?').join(', ')
                 const dynamicQuery = `
                     WITH latest_message AS (
                         SELECT judul, MAX(created_at) AS latest_created_at
@@ -115,6 +139,7 @@ async function getInboxes(req: Request, res: Response) {
                     FROM inbox i
                     INNER JOIN latest_message lm
                     ON i.judul = lm.judul AND i.created_at = lm.latest_created_at
+                    ORDER BY lm.latest_created_at DESC
                 `;
                 const [rows] = await pool.execute<RowDataPacket[]>(dynamicQuery, [...existingMitraUsersId, ...existingMitraUsersId]);
                 inboxes = rows
@@ -128,7 +153,7 @@ async function getInboxes(req: Request, res: Response) {
             
             // Debug.
             res.status(201).json({
-                message: "Inbox created successfully.",
+                message: "Inboxes retrieved successfully.",
                 inboxes,
                 newAccessToken
             })
@@ -178,16 +203,51 @@ async function getInbox(req: Request, res: Response) {
             let inboxMessages
             
             const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT user_id FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])
+            const [existingMitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
+            
+            if (existingMitra.length === 0) {
+                res.status(409).json({message: "Failed to find mitra!"})
+                return
+            }
+            
             if (existingMitraUsers.length > 0) {
                 // Get inboxes
                 const existingMitraUsersId = existingMitraUsers.map(user => user.user_id);
+                existingMitraUsersId.push(existingMitra[0].id);
                 const placeholders = existingMitraUsersId.map(() => '?').join(', ');
                 const dynamicQuery = `
-                    SELECT i.judul AS subject, i.isi AS message, i.sender_id, i.receiver_id, i.created_at
+                    SELECT 
+                        i.judul AS subject, 
+                        i.isi AS content, 
+                        i.sender_id, 
+                        mitra.nama AS sender_nama_mitra,
+                        sender.email AS sender_email,  
+                        sender.nama_lengkap AS sender_nama_lengkap, 
+                        i.receiver_id, 
+                        -- Check if receiver_id is a mitra (match against mitra table)
+                        CASE 
+                            WHEN mitra.id IS NOT NULL THEN mitra.nama  -- If receiver is a mitra, fetch mitra's name
+                            ELSE NULL  -- If receiver is a user, return NULL for mitra-specific fields
+                        END AS receiver_nama_mitra,  
+                        -- Check if receiver_id is a user (match against users table)
+                        CASE 
+                            WHEN receiver.id IS NOT NULL THEN receiver.email  -- If receiver is a user, fetch their email
+                            ELSE NULL  -- If receiver is a mitra, return NULL for user-specific fields
+                        END AS receiver_email,  
+                        CASE 
+                            WHEN receiver.id IS NOT NULL THEN receiver.nama_lengkap  -- If receiver is a user, fetch their full name
+                            ELSE NULL  -- If receiver is a mitra, return NULL for user-specific fields
+                        END AS receiver_nama_lengkap,
+                        i.created_at
                     FROM inbox i
-                    WHERE i.sender_id IN (${placeholders}) OR i.receiver_id IN (${placeholders}) 
+                    INNER JOIN users sender ON i.sender_id = sender.id  -- Sender is always a user
+                    -- If receiver_id corresponds to a user, fetch user details
+                    LEFT JOIN users receiver ON i.receiver_id = receiver.id  -- Join with users for the receiver (if it's a user)
+                    -- If receiver_id corresponds to a mitra, fetch mitra details
+                    LEFT JOIN mitra ON i.receiver_id = mitra.id  -- Join mitra table to get mitra details (if receiver is a mitra)
+                    WHERE (i.sender_id IN (${placeholders}) OR i.receiver_id IN (${placeholders})) 
                     AND i.judul = ?
-                    ORDER BY i.created_at ASC
+                    ORDER BY i.created_at ASC;
                 `;
                 const [rows] = await pool.execute<RowDataPacket[]>(dynamicQuery, [...existingMitraUsersId, ...existingMitraUsersId, subject]);
                 inboxMessages = rows
@@ -201,7 +261,7 @@ async function getInbox(req: Request, res: Response) {
             
             // Debug.
             res.status(201).json({
-                message: "Inbox created successfully.",
+                message: "Inbox messages retrieved successfully.",
                 inboxMessages,
                 newAccessToken
             })
