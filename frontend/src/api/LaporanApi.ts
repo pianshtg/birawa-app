@@ -39,7 +39,7 @@ export function useCreateLaporan() {
         mutateAsync: createLaporan,
         isLoading,
         isSuccess,
-        isError,
+        error,
         // reset
     } = useMutation(useCreateLaporanRequest)
 
@@ -50,9 +50,9 @@ export function useCreateLaporan() {
         })
     }
 
-    if (isError) {
+    if (error) {
         toast({
-            title: Error.toString(),
+            title: error.toString(),
             variant: 'danger'
         }) //Debug.
         // reset()
