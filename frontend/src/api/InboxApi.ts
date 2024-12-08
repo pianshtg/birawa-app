@@ -1,18 +1,17 @@
-import { useToast } from "@/hooks/use-toast"
 import { useMutation, useQuery } from "react-query"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 type CreateInboxRequest = {
-    email_receiver: string,
+    nama_mitra?: string,
+    email_receiver?: string,
     subject: string,
     content: string
-    
 }
 
 export function useCreateInbox() {
-    const {toast} = useToast()
     async function useCreateInboxRequest(inbox: CreateInboxRequest) {
+        console.log(JSON.stringify(inbox)) //Debug.
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/inbox`, {
             method: 'POST',
@@ -40,23 +39,8 @@ export function useCreateInbox() {
         error,
         // reset
     } = useMutation(useCreateInboxRequest)
-
-    if (isSuccess) {
-        toast({
-            title: "Mitra berhasil dibuat!",
-            variant: "success"
-        })
-    }
-
-    if (error) {
-        toast({
-            title: error.toString(),
-            variant: "danger"
-        }) //Debug.
-        // reset()
-    }
-
-    return {createInbox, isLoading}
+    
+    return {createInbox, isLoading, isSuccess, error}
 }
 
 export function useGetInboxes(nama_mitra: string | undefined, options: {enabled?: boolean} = {enabled: true}) {
@@ -74,7 +58,7 @@ export function useGetInboxes(nama_mitra: string | undefined, options: {enabled?
             credentials: 'include'
         })
         if (!response.ok) {
-            throw new Error("Failed to get kontrak's pekerjaan(s).")
+            throw new Error("Failed to get inbox(es).")
         }
         return response.json()
     }
@@ -85,7 +69,7 @@ export function useGetInboxes(nama_mitra: string | undefined, options: {enabled?
 }
 
 type GetInboxRequest = {
-    nama_mitra: string,
+    nama_mitra?: string,
     subject: string
 }
 
@@ -104,7 +88,7 @@ export function useGetInbox(inbox: GetInboxRequest | undefined, options: {enable
             credentials: 'include'
         })
         if (!response.ok) {
-            throw new Error("Failed to get kontrak's pekerjaan(s).")
+            throw new Error("Failed to get inbox's message(s).")
         }
         return response.json()
     }
