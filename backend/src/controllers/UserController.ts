@@ -199,10 +199,11 @@ async function updateUser(req: Request, res: Response) {
             const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [userId])
             if (existingUser.length > 0) {
                 
-                await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE id = ?", [nama_lengkap, nomor_telepon, userId, userId])
+                const [updatedUser] = await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE id = ?", [nama_lengkap, nomor_telepon, userId, userId])
                 
-                res.status(200).json({
+                res.status(201).json({
                     message: "Successfully updated user.",
+                    updatedUser,
                     newAccessToken
                 })
                 return
