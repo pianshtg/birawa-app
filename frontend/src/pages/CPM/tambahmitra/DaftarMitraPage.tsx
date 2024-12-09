@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
-import { Edit2 } from 'lucide-react';
+import { Edit2, Eye } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,12 @@ import { useUpdateMitra } from '@/api/MitraApi';
 import { useToast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
 import LoadingScreen from '@/components/LoadingScreen';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const formSchema = z.object({
   nama_mitra : z.string().optional(),
@@ -179,10 +185,10 @@ const DaftarMitra = () => {
                 }}
                 className="border border-gray-300 rounded px-2 py-1 text-sm mr-6"
               >
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
                 <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
               </select>
             </div>
 
@@ -214,14 +220,39 @@ const DaftarMitra = () => {
                   <td className="p-4 text-sm font-normal border-b">{mitra.alamat}</td>
                   <td className="p-4 text-sm font-normal border-b">
                     <div className="flex gap-x-2">
-                    <button
-                        onClick={(e) => handleEditClick(e,mitra)}
-                        className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
-                      >
-                        <Edit2 color="blue" size={18} />
-                      </button>
-                      
+                    <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <button
+                              onClick={(e) => handleEditClick(e,mitra)}
+                              className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
+                            >
+                              <Edit2 color="blue" size={18} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Edit Mitra</p>
+                          </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+          
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <button
+                              onClick={() => onclickdetail(mitra.nama)}
+                              className="flex justify-center items-center p-1.5 cursor-pointer rounded-full hover:bg-gray-200"
+                            >
+                              <Eye color="green" size={21} />
+                          </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Lihat Detail Mitra</p>
+                          </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
                     </div>
+                    
                   </td>
                 </tr>
               ))}
