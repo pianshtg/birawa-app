@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect,useMemo} from 'react';
 import {z} from "zod";
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -15,7 +15,7 @@ import { useGetMitras } from '@/api/MitraApi';
 import LoadingButton from '@/components/LoadingButton';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useToast } from '@/hooks/use-toast';
-
+import { HiOutlineInbox } from "react-icons/hi"
 const InboxComponent = () => {
   
   const {toast} = useToast()
@@ -126,6 +126,15 @@ const InboxComponent = () => {
       messageForm.setValue('subject', selectedInbox)
     }
   }, [selectedInbox])
+
+   // Ensure filteredInboxes is always an array
+   const filteredInboxes = useMemo(() => {
+    if (!mitraInboxes || mitraInboxes.length === 0) return [];
+    
+    return mitraInboxes.filter((inbox: Inbox) => 
+      inbox.subject.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, mitraInboxes]);
   
   function handleOpenChat(subject: string) {
     if (selectedInbox === subject) {
@@ -192,13 +201,15 @@ const InboxComponent = () => {
   if (isInboxesLoading || isInboxMessagesLoading) {
     return <LoadingScreen/>
   }
+
+
   
   return (
     <div className="flex min-h-screen">
       <div className="w-1/3 border-r bg-white rounded-l-md">
         <div className="p-4 border-b space-y-4">
           <div className='flex w-full items-center justify-between'>
-            <h2  className="font-bold text-lg">{mitraInboxes?.length} Percakapan Aktif</h2>
+            <h2  className="font-bold text-lg">{filteredInboxes?.length} Percakapan </h2>
             <button
               onClick={() => {
                 setShowNewMessage(true)
@@ -250,28 +261,43 @@ const InboxComponent = () => {
           )
           }
         </div>
-        <div className="divide-y overflow-y-auto max-h-[42em] custom-scrollbar">
-          {(isAdmin ? selectedMitra : true) && mitraInboxes && mitraInboxes?.map((inbox: Inbox) => (
-            <div
-              key={inbox.subject}
-              className={`p-4 cursor-pointer transition-all duration-100 ease-in-out 
-                ${selectedInbox === inbox.subject && isChatOpened ? 'bg-gray-200 border-l-4 border-l-red-500' : ''} 
-                hover:bg-gray-100 hover:border-l-4 hover:border-l-red-500 `}
-              onClick={() => handleOpenChat(inbox.subject)}
-            >
-              <div className="flex items-center space-x-3">
-                {/* <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-sm">
-                  BNS
-                </div> */}
-                <div className="flex-1 truncate">
-                  <h3 className="font-medium text-sm">{inbox.subject}</h3>
-                  <p className="text-sm text-gray-500 truncate">{inbox.last_message}</p>
-                  <p className="text-xs text-gray-400 mt-1">{formatDate(inbox.created_at!)}</p>
+        <div className={`divide-y overflow-y-auto max-h-[35em] custom-scrollbar ${ filteredInboxes.length === 0 && "flex flex=c items-center justify-center h-[50vh]"}`}>
+        {(!selectedMitra && isAdmin ) ? (
+          <div className="text-center text-gray-500 p-4">
+            Pilih Mitra Dahulu...
+          </div>
+        ) : (
+          filteredInboxes && filteredInboxes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
+              <HiOutlineInbox size={36} color='grey'/>
+              <h2 className="text-xl font-semibold text-gray-600">
+                Inbox Kosong
+              </h2>
+              <p className="text-gray-500 text-sm">
+                Tidak ada pesan untuk mitra yang dipilih
+              </p>
+            </div>
+          ) : (
+            filteredInboxes?.map((inbox: Inbox) => (
+              <div
+                key={inbox.subject}
+                className={`p-4 cursor-pointer transition-all duration-100 ease-in-out 
+                  ${selectedInbox === inbox.subject && isChatOpened ? 'bg-gray-200 border-l-4 border-l-red-500' : ''} 
+                  hover:bg-gray-100 hover:border-l-4 hover:border-l-red-500`}
+                onClick={() => handleOpenChat(inbox.subject)}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="flex-1 truncate">
+                    <h3 className="font-medium text-sm">{inbox.subject}</h3>
+                    <p className="text-sm text-gray-500 truncate">{inbox.last_message}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(inbox.created_at!)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))
+          )
+        )}
+      </div>
       </div>
       <div className="w-2/3 p-6 bg-white rounded-r-md">
         {/* Chat */}
@@ -309,7 +335,7 @@ const InboxComponent = () => {
 
             <div className="space-y-3 overflow-y-auto h-[505px] custom-scrollbar px-1 pr-5">
               {mitraInboxMessages && mitraInboxMessages?.slice(1).map((reply: Inbox) => (
-                <div key={reply.created_at} className="bg-opacitynav p-6 rounded-lg ml-12">
+                <div key={reply.created_at} className="p-6 rounded-lg ml-12 shadow border">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-sm flex-shrink-0">
                       {formatMitraInitials(reply.sender_nama_lengkap!)}
