@@ -220,7 +220,8 @@ async function getInbox(req: Request, res: Response) {
                         i.judul AS subject, 
                         i.isi AS content, 
                         i.sender_id, 
-                        mitra.nama AS sender_nama_mitra,
+                        -- Get sender's mitra name from mitra_users table
+                        COALESCE(mitra_sender.nama, NULL) AS sender_nama_mitra, 
                         sender.email AS sender_email,  
                         sender.nama_lengkap AS sender_nama_lengkap, 
                         i.receiver_id, 
@@ -240,11 +241,20 @@ async function getInbox(req: Request, res: Response) {
                         END AS receiver_nama_lengkap,
                         i.created_at
                     FROM inbox i
-                    INNER JOIN users sender ON i.sender_id = sender.id  -- Sender is always a user
+                    INNER JOIN users sender 
+                        ON i.sender_id = sender.id  -- Sender is always a user
+                    -- Join with mitra_users to find the mitra associated with the sender
+                    LEFT JOIN mitra_users 
+                        ON sender.id = mitra_users.user_id  
+                    -- Join with mitra to fetch mitra details for the sender
+                    LEFT JOIN mitra mitra_sender 
+                        ON mitra_users.mitra_id = mitra_sender.id  
                     -- If receiver_id corresponds to a user, fetch user details
-                    LEFT JOIN users receiver ON i.receiver_id = receiver.id  -- Join with users for the receiver (if it's a user)
+                    LEFT JOIN users receiver 
+                        ON i.receiver_id = receiver.id  -- Join with users for the receiver (if it's a user)
                     -- If receiver_id corresponds to a mitra, fetch mitra details
-                    LEFT JOIN mitra ON i.receiver_id = mitra.id  -- Join mitra table to get mitra details (if receiver is a mitra)
+                    LEFT JOIN mitra 
+                        ON i.receiver_id = mitra.id  -- Join mitra table to get mitra details (if receiver is a mitra)
                     WHERE (i.sender_id IN (${placeholders}) OR i.receiver_id IN (${placeholders})) 
                     AND i.judul = ?
                     ORDER BY i.created_at ASC;
