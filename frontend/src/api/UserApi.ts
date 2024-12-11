@@ -34,20 +34,10 @@ export function useCreateUser() {
         mutateAsync: createUser,
         isLoading,
         isSuccess,
-        error,
-        reset
+        error
     } = useMutation(useCreateUserRequest)
 
-    if (isSuccess) {
-        // toast.success("User berhasil dibuat. Silahkan cek email untuk verifikasi akun.")
-    }
-
-    if (error) {
-        // toast.error(error.toString()) .debug
-        reset()
-    }
-
-    return {createUser, isLoading}
+    return {createUser, isLoading, isSuccess, error}
 }
 
 export function useGetUser() {
@@ -93,7 +83,7 @@ export function useGetUsers() {
     
     const { data: allUser, isLoading, refetch } = useQuery( "fetchMitra", useGetUsersRequest )
     
-    return { allUser, isLoading ,refetch}
+    return { allUser, isLoading , refetch}
 }
 
 type UpdateUserRequest = {
@@ -159,20 +149,8 @@ export function useDeleteUser() {
         mutateAsync: deleteUser,
         isLoading,
         isSuccess,
-        error,
-        reset
+        error
     } = useMutation(useDeleteUserRequest)
 
-    if (isSuccess) {
-        // Uncomment and replace with your toast library if needed
-        // toast.success("User successfully deleted")
-    }
-
-    if (error) {
-        // Uncomment and replace with your toast library if needed
-        // toast.error(error.toString())
-        reset()
-    }
-
-    return { deleteUser, isLoading }
+    return { deleteUser, isLoading, isSuccess, error }
 }
