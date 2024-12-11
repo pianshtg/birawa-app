@@ -36,6 +36,7 @@ const InboxComponent = () => {
   
   const isAdmin = metaData.nama_mitra ? false : true
   
+  
   const messageFormSchema = z.object({
     nama_mitra: isAdmin ? z.string().min(1, "Nama mitra wajib diisi").max(50, "Nama mitra terlalu panjang") : z.string().max(50, "Nama mitra terlalu panjang").optional(),
     email_receiver: isAdmin ? z.string().optional() : z.string().email("Email tidak valid"),
@@ -67,9 +68,11 @@ const InboxComponent = () => {
   
   const {inboxes, isLoading: isInboxesLoading, refetch: refetchInboxes} = useGetInboxes(isAdmin ? selectedMitra : metaData.nama_mitra, {enabled: isAdmin ? !!selectedMitra : true})
   const mitraInboxes = inboxes?.inboxes
-  
+
   const {inboxMessages, isLoading: isInboxMessagesLoading, refetch: refetchInboxMessages} = useGetInbox({nama_mitra: isAdmin ? selectedMitra : metaData.nama_mitra, subject: selectedInbox}, {enabled: isAdmin ? !!selectedMitra && !!selectedInbox : !!selectedInbox})
   const mitraInboxMessages = inboxMessages?.inboxMessages
+
+ 
 
   // Ref for the reply section
   const replyRef = useRef<HTMLDivElement>(null);
@@ -186,12 +189,13 @@ const InboxComponent = () => {
         return
       }
       
-      console.log(data) //Debug.
-      await createInbox({
+      console.log("datafirst",data); //Debug.
+      const datafull = await createInbox({
         ...data,
         nama_mitra: isAdmin ? selectedMitra : undefined,
         email_receiver: isAdmin ? undefined : 'birawaprj@gmail.com'
       })
+      console.log("data submit",datafull);
       messageForm.reset()
     } catch (error) {
       console.error(error) //Debug.
@@ -202,6 +206,9 @@ const InboxComponent = () => {
     return <LoadingScreen/>
   }
 
+
+  const hasReplied = mitraInboxMessages && mitraInboxMessages.length > 2;
+  console.log("replied", hasReplied);
 
   
   return (
@@ -320,7 +327,8 @@ const InboxComponent = () => {
                 </div>
               </div>
 
-              <div className="mt-6">
+              {mitraInboxMessages.length <= 1 && (
+                <div className="mt-6">
                 <button
                   onClick={handleReplyClick}
                   className="flex items-center px-4 py-2 text-red-600 border border-red-600 rounded-lg space-x-2 bg-white hover:bg-red-50"
@@ -331,10 +339,12 @@ const InboxComponent = () => {
                   </svg>
                 </button>
               </div>
+              )}
+              
             </div>
 
             <div className="space-y-3 overflow-y-auto h-[505px] custom-scrollbar px-1 pr-5">
-              {mitraInboxMessages && mitraInboxMessages?.slice(1).map((reply: Inbox) => (
+              {mitraInboxMessages && mitraInboxMessages?.slice(1).map((reply: Inbox, index:number) => (
                 <div key={reply.created_at} className="p-6 rounded-lg ml-12 shadow border">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-sm flex-shrink-0">
@@ -345,6 +355,19 @@ const InboxComponent = () => {
                       <p className="text-xs text-gray-500 mb-2">{reply.sender_nama_mitra ? reply.sender_nama_mitra : "Admin CPM"}</p>
                       <p className="text-sm text-gray-600">{reply.content}</p>
                       <p className="text-xs text-gray-400 mt-2">{formatDate(reply.created_at!)}</p>
+                      {index === mitraInboxMessages.length - 2 && (
+                          <div className="mt-6 flex justify-end">
+                          <button
+                            onClick={handleReplyClick}
+                            className="flex items-center px-4 py-2 text-red-600 border border-red-600 rounded-lg space-x-2 bg-white hover:bg-red-50"
+                          >
+                            <span>Balas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600 rotate-180 mt-[1px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
