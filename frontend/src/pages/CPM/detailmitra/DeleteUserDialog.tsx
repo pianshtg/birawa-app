@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { User } from '@/types';
+import LoadingButton from '@/components/LoadingButton';
 
 interface DeleteUserDialogProps {
   isOpen: boolean;
@@ -11,10 +12,20 @@ interface DeleteUserDialogProps {
 }
 
 const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ isOpen, onClose, user, onSubmit }) => {
+  const [isLoading,setIsLoading] = useState(false);
+  
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault(); // Prevent default form submission
     if (user) {
-      onSubmit();  // Now calling onSubmit without arguments
+      setIsLoading(true);
+      try{
+        await onSubmit()
+        onClose();
+      } catch(error){
+        console.error("Error Deletting User:", error)
+      } finally{
+        setIsLoading(false);
+      }
     }
   };
 
@@ -34,9 +45,13 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ isOpen, onClose, us
                 <Button variant="outline" type="button" onClick={onClose}>
                   Batal
                 </Button>
-                <Button className="bg-red-500 text-white" type="submit">
-                  Hapus
-                </Button>
+                {isLoading ? 
+                  <LoadingButton/>
+                  :
+                  <Button className="bg-red-500 text-white" type="submit">
+                    Hapus
+                  </Button>
+                }
               </div>
             </form>
           ) : (
