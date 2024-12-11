@@ -65,7 +65,7 @@ export function useGetMitra(nama_mitra: string) {
     return { mitra, isLoading }
 }
 
-export function useGetMitraUsers(nama_mitra: string) {
+export function useGetMitraUsers(nama_mitra: string | undefined, options: {enabled: boolean}) {
     async function useGetMitraUsersRequest () {
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/mitra/users`, {
@@ -84,9 +84,9 @@ export function useGetMitraUsers(nama_mitra: string) {
         return response.json()
     }
     
-    const { data: mitraUsers, isLoading } = useQuery( "fetchMitraUsers", useGetMitraUsersRequest )
+    const { data: mitraUsers, isLoading, refetch } = useQuery( ["fetchMitraUsers", nama_mitra], useGetMitraUsersRequest, {enabled: options.enabled && !!nama_mitra} )
     
-    return { mitraUsers, isLoading }
+    return { mitraUsers, isLoading, refetch }
 }
 
 export function useGetMitraKontraks(nama_mitra: string | undefined, options: {enabled: boolean}) {
