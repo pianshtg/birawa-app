@@ -1,36 +1,22 @@
 // AddContractDialog.tsx
 import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useFormContext } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { z } from "zod";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Kontrak } from '@/types'
-
-//Tambah Kontrak
-const formEditContractSchema = z.object({
-    nama: z.string().min(1, "Nama kontrak wajib diisi").max(40, "Nama kontrak terlalu panjang"),
-    nomor: z.string().min(1, "Nomor kontrak wajib diisi").max(20, "Nomor kontrak terlalu panjang"),
-    tanggal: z.string().min(1, "Tanggal kontrak wajib diisi").max(10, "Format tanggal tidak valid"), // Asumsi format YYYY-MM-DD,
-    nilai: z.coerce.number().min(1, "Nilai kontrak wajib diisi").max(1000000000000, "Nilai kontrak terlalu panjang"),
-    jangka_waktu: z.coerce.number().min(1, "Jangka waktu wajib diisi").max(100000, "Jangka waktu terlalu panjang")
-  })
-  export type EditContractSchema = z.infer<typeof formEditContractSchema>;
 
 interface AddContractDialogProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: EditContractSchema) => void
+  onSubmit: () => void
   contract: Kontrak | null;  // Accept user data as prop
 }
 
 const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose, onSubmit,contract }) => {
-  const form = useForm<EditContractSchema>({
-    resolver: zodResolver(formEditContractSchema),
-
-  })
+  
+  const {control} = useFormContext()
 
   console.log(contract);
 
@@ -41,14 +27,13 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
           <DialogTitle>Edit Kontrak</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-         {contract ?  
-            <Form {...form}>
+         {contract ? (
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={control.handleSubmit(onSubmit)}
               className="grid grid-cols-2 gap-4"
             >
               <FormField
-                control={form.control}
+                control={control}
                 name="nama"
                 render={({ field }) => (
                   <FormItem>
@@ -66,7 +51,7 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
               />
               
               <FormField
-                control={form.control}
+                control={control}
                 name="nomor"
                 render={({ field }) => (
                   <FormItem>
@@ -84,7 +69,7 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name="nilai"
                 render={({ field }) => (
                   <FormItem>
@@ -102,7 +87,7 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name="tanggal"
                 render={({ field }) => (
                   <FormItem>
@@ -120,7 +105,7 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name="jangka_waktu"
                 render={({ field }) => (
                   <FormItem>
@@ -147,9 +132,9 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
                 </Button>
               </div>
             </form>
-          </Form>
-           : 
-           <p>Data Kontrak tidak tersedia.</p>
+          ) : (
+              <p>Data Kontrak tidak tersedia.</p>
+            )
           }
         </DialogDescription>
       </DialogContent>
