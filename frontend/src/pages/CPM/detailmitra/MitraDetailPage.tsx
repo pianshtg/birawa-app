@@ -6,14 +6,10 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
 import { useState } from "react";
 import {z} from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button";
 import AddUserDialog from "./AddUserDialog";
 import AddContractDialog from "./AddContractDialog";
 import EditUserDialog from "./EditUserDialog";
-import EditContractDialog from "./EditContractDialog";
-import DeleteContractDialog from "./DeleteContractDialog";
 import DeleteUserDialog from "./DeleteUserDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateKontrak } from "@/api/KontrakApi";
