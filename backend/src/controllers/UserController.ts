@@ -194,12 +194,12 @@ async function updateUser(req: Request, res: Response) {
 
         
         if (permissions.includes('update_user')) {
-            const {nama_lengkap, nomor_telepon} = req.body
+            const {nama_lengkap, email, nomor_telepon} = req.body
             
             const [existingUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [userId])
             if (existingUser.length > 0) {
                 
-                const [updatedUser] = await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE id = ?", [nama_lengkap, nomor_telepon, userId, userId])
+                const [updatedUser] = await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE email = ?", [nama_lengkap, nomor_telepon, userId, email])
                 
                 res.status(201).json({
                     message: "Successfully updated user.",
