@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetMitraUsers, useGetMitraKontraks } from "@/api/MitraApi";
 import { Kontrak, Pekerjaan, User } from "@/types";
@@ -20,6 +20,7 @@ import { useCreateKontrak } from "@/api/KontrakApi";
 import { useCreateUser } from "@/api/UserApi";
 import { useUpdateUser } from "@/api/UserApi";
 import { useDeleteUser } from "@/api/UserApi";
+import LoadingScreen from "@/components/LoadingScreen";
 
 //Tambah Kontrak
 const formAddContractSchema = z.object({
@@ -27,17 +28,14 @@ const formAddContractSchema = z.object({
   nomor: z.string().min(1, "Nomor kontrak wajib diisi").max(20, "Nomor kontrak terlalu panjang"),
   tanggal: z.string().min(1, "Tanggal kontrak wajib diisi").max(10, "Format tanggal tidak valid"), // Asumsi format YYYY-MM-DD,
   nilai: z.coerce.number().min(1, "Nilai kontrak wajib diisi").max(1000000000000, "Nilai kontrak terlalu panjang"),
-  jangka_waktu: z.coerce.number().min(1, "Jangka waktu wajib diisi").max(100000, "Jangka waktu terlalu panjang")
+  jangka_waktu: z.coerce.number().min(1, "Jangka waktu wajib diisi").max(100000, "Jangka waktu terlalu panjang"),
+  pekerjaan_arr : z.array(z.object({
+    nama: z.string().min(6,"Nama Pekerjaan terlalu Sedikit"),
+    lokasi: z.string().min(2,"Lokasi Pekerjaan Wajib diisi"),
+  }))
 })
-export type AddContractSchema = z.infer<typeof formAddContractSchema>;
 
-// Tambah Pengguna
-const formAddUserSchema = z.object({
-  nama_lengkap: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang"),
-  email: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi"),
-  nomor_telepon: z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
-})
-export type AddUserSchema = z.infer<typeof formAddUserSchema>;
+export type AddContractSchema = z.infer<typeof formAddContractSchema>;
 
 // Edit Kontrak
 const formEditContractSchema = z.object({
@@ -49,77 +47,116 @@ const formEditContractSchema = z.object({
 })
 export type EditContractSchema = z.infer<typeof formEditContractSchema>;
 
+// Tambah Pengguna
+const formAddUserSchema = z.object({
+  nama_lengkap: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang"),
+  email: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi"),
+  nomor_telepon: z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
+})
+export type AddUserSchema = z.infer<typeof formAddUserSchema>;
+
 // Edit Pengguna
 const formEditUserSchema = z.object({
   nama_lengkap: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang").optional(),
   email: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi").optional(),
   nomor_telepon: z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas").optional(),
-  // is_active: z.boolean(),
 });
 
 export type EditUserSchema = z.infer<typeof formEditUserSchema>;
 
-const MitraDetailPage: React.FC = () => {
-  // Detail Dialog Create
+const MitraDetailPage = () => {
+  // Toast
+  const {toast} = useToast();
+  
+  // Detail Dialog Create User
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const [isAddContractDialogOpen, setIsAddContractDialogOpen] = useState(false);
-
+  
   // Detail Dialog User Edit
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
-
-  // Detail Dialog Contract Edit
-  const [isEditContractDialogOpen, setIsEditContractDialogOpen] = useState(false);
-  const [contractToEdit, setContractToEdit] = useState<Kontrak | null>(null);
-
+  
   // Detail Dialog Delete User
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-
-  // Detail Dialog Delete Contract
-  const [isDeleteContractDialogOpen, setIsDeleteContractDialogOpen] = useState(false);
-  const [contractToDelete, setContractToDelete] = useState<Kontrak | null>(null); 
   
-  // Toast
-  const {toast} = useToast();
+  // Detail Dialog Create Contract
+  const [isAddContractDialogOpen, setIsAddContractDialogOpen] = useState(false);
 
   // Dapetin nama_mitra refers nya
   const { nama_mitra } = useParams<{ nama_mitra: string }>();
   const navigate = useNavigate();
+  
+  // Create Kontrak 
+  const { createKontrak, isLoading: isCreatingKontrakLoading, isSuccess: isSuccessCreatingKontrak, error: isErrorCreatingKontrak } = useCreateKontrak()
+
+  // Create User 
+  const { createUser, isLoading: isCreatingUserLoading, isSuccess: isSuccessCreatingUser, error: isErrorCreatingUser } = useCreateUser();
+
+  // Update User
+  const { updateUser, isLoading: isUpdatingUserLoading, isSuccess: isSuccessUpdatingUser, error: isErrorUpdatingUser} = useUpdateUser();
+
+  // Delete User
+  const { deleteUser, isLoading: isDeletingUserLoading, isSuccess: isSuccessDeletingUser, error: isErrorDeletingUser } = useDeleteUser();
 
   // Get Users
-  const { mitraUsers, isLoading: usersLoading } = useGetMitraUsers(nama_mitra || "");
+  const { mitraUsers, isLoading: isUsersLoading, refetch: refetchMitraUsers } = useGetMitraUsers(nama_mitra, {enabled: !!nama_mitra});
   const users = mitraUsers?.mitra_users || [];
+  
+  const getStatus = (is_verified: number, is_active: number) => {
+    if (is_verified === 0 && is_active === 1) {
+      return { status: 'Belum Terverifikasi', color: 'text-yellow-500' , sortOrder:0};
+    } else if (is_verified === 1 && is_active === 1)  {
+      return { status: 'Terverifikasi', color: 'text-green-500'  , sortOrder:1};
+    } 
+      return { status: 'Terblokir', color: 'text-red-500'  , sortOrder:2};
+  };
+  
+  const sortedUsers = useMemo(() => {
+    return [...users].sort((a,b) => {
+    const statusA = getStatus(a.is_verified || 0,a.is_active || 0).sortOrder;
+    const statusB = getStatus(b.is_verified || 0,b.is_active || 0).sortOrder;
+    return statusA - statusB;
+  })}, [users])
 
   // Get Kontraks
-  const { mitraKontraks, isLoading: kontraksLoading } = useGetMitraKontraks(nama_mitra || "", {
+  const { mitraKontraks, isLoading: isKontraksLoading, refetch: refetchMitraKontraks } = useGetMitraKontraks(nama_mitra, {
     enabled: !!nama_mitra,
   });
   const contracts = mitraKontraks?.mitra_kontraks || [];
+  
+  const sortedContracts = useMemo(() => {
+    return [...contracts].sort((a, b) => {
+      return a.nama.localeCompare(b.nama, undefined, { numeric: true, sensitivity: 'base' });
+    });
+  }, [contracts]);
 
-  // Create Kontrak 
-  const { createKontrak } = useCreateKontrak()
-
-  // Create User 
-  const { createUser } = useCreateUser();
-
-  // Update User
-  const { updateUser} = useUpdateUser();
-
-  // Delete User
-  const { deleteUser } = useDeleteUser();
-
-
-  const formEditUser = useForm<EditUserSchema>({
-    resolver: zodResolver(formEditUserSchema),
-    defaultValues: {
-      nama_lengkap: "",
-      email: "",
-      nomor_telepon: "",
+  async function handleAddContractSubmit (data: AddContractSchema) {
+    try {
+      // Prepare the contract data
+      const kontrakData = {
+        nama_mitra: nama_mitra || "", 
+        nama: data.nama,
+        nomor: data.nomor,
+        tanggal: data.tanggal,
+        nilai: data.nilai,
+        jangka_waktu: data.jangka_waktu,
+        pekerjaan_arr: data.pekerjaan_arr.map((pekerjaan:Pekerjaan) => ({
+          nama: pekerjaan.nama,
+          lokasi: pekerjaan.lokasi
+        }))
+      };
+      
+      await createKontrak(kontrakData);
+      console.log(kontrakData) //Debug.
+  
+      setIsAddContractDialogOpen(false);
+  
+    } catch (error) {
+      console.error("Error creating contract:", error);
     }
-  });
+  };
 
-  const handleAddUserSubmit = async (data: AddUserSchema) => {
+  async function handleAddUserSubmit (data: AddUserSchema) {
     try {
       const userData = {
         nama_mitra: nama_mitra || "",  // Ensure the correct field name
@@ -133,6 +170,7 @@ const MitraDetailPage: React.FC = () => {
       // console.log('User data yang akan dikirim:', userData);
 
       await createUser(userData);  // Create user
+      console.log("User successfully created:", userData) //Debug.
   
       // Invalidate and refetch the users query
 
@@ -140,63 +178,20 @@ const MitraDetailPage: React.FC = () => {
       setIsAddUserDialogOpen(false);  // Close the dialog after successful submission
   
       // Show a success toast
-      toast({
-        title: "User Baru berhasil ditambah",
-        description: "Mohon Refresh halaman page",
-        variant: "success",
-      });
+      // toast({
+      //   title: "User Baru berhasil ditambah",
+      //   description: "Mohon Refresh halaman page",
+      //   variant: "success",
+      // });
   
       // Optionally, fetch the updated list of users if necessary
       // Example: await refetchUsers(); (if you have a refetch method from the API)
   
     } catch (error) {
-      console.error("Error creating user:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create user",
-        variant: "destructive",
-      });
+      console.error("Error creating user:", error) //Debug.
     }
   };
   
-  const handleAddContractSubmit = async (data: AddContractSchema) => {
-    try {
-      // Prepare the contract data
-      const kontrakData = {
-        nama_mitra: nama_mitra || "", 
-        nama: data.nama,
-        nomor: data.nomor,
-        tanggal: data.tanggal,
-        nilai: data.nilai,
-        jangka_waktu: data.jangka_waktu,
-        pekerjaan_arr: data.pekerjaan.map((pekerjaan:Pekerjaan) => ({
-          nama: pekerjaan.nama,
-          lokasi: pekerjaan.lokasi
-        }))
-      };
-      
-      await createKontrak(kontrakData);
-      console.log(kontrakData);
-  
-      setIsAddContractDialogOpen(false);
-  
-      toast({
-        title: "Kontrak Berhasil Dibuat",
-        description: "Kontrak baru telah ditambahkan.",
-        variant: "success",
-      });
-  
-    } catch (error) {
-      console.error("Error creating contract:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Gagal membuat kontrak",
-        variant: "destructive",
-      });
-    }
-  };
-
-
   const handleEditUserSubmit = async (data: EditUserSchema) => {
     if (!userToEdit) return;
   
@@ -210,38 +205,16 @@ const MitraDetailPage: React.FC = () => {
         // is_active: data.is_active || userToEdit.is_active, // Fallback to current status
       };
       
-      console.log(updatedUserData);
       await updateUser(updatedUserData);  // Call the API to update the user
-      // console.log("Backend Response:",response);
+      console.log("User successfully updated:", updatedUserData) //Debug.
+
       setIsEditUserDialogOpen(false);  // Close the dialog after submission
-      toast({
-        title: "User berhasil diperbarui",
-        description: "Data pengguna telah berhasil diperbarui.",
-        variant: "success",
-      });
   
     } catch (error) {
       console.error("Error updating user:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update user",
-        variant: "danger",
-      });
     }
   };
   
-
-  const handleEditContractSubmit = async () => {
-
-  }
-
-  // Fungsi untuk membuka dialog dan mengatur kontrak yang akan dihapus
-  const handleDeleteContract = (contract: Kontrak) => {
-    setContractToDelete(contract);  // Menyimpan kontrak yang dipilih untuk dihapus
-    setIsDeleteContractDialogOpen(true);  // Menampilkan dialog
-  };
-
-
   const handleDeleteUser = async (user: User) => {
     try{
       await deleteUser({ email: user.email });
@@ -261,24 +234,89 @@ const MitraDetailPage: React.FC = () => {
     }
     
   };
+  
+  useEffect(() => {
+    if (isSuccessCreatingKontrak) {
+      toast({
+        title: "Berhasil menambahkan kontrak!",
+        variant: 'success'
+      })
+      refetchMitraKontraks()
+    }
+  }, [isSuccessCreatingKontrak])
+  
+  useEffect(() => {
+    if (isErrorCreatingKontrak) {
+      toast({
+        title: isErrorCreatingKontrak.toString(),
+        variant: 'danger'
+    })
+    }
+  }, [isErrorCreatingKontrak])
+  
+  useEffect(() => {
+    if (isSuccessCreatingUser) {
+      toast({
+        title: "Berhasil menambahkan user!",
+        variant: 'success'
+      })
+      refetchMitraUsers()
+    }
+  }, [isSuccessCreatingUser])
+  
+  useEffect(() => {
+    if (isErrorCreatingUser) {
+      toast({
+        title: isErrorCreatingUser.toString(),
+        variant: 'danger'
+    })
+    }
+  }, [isErrorCreatingUser])
+  
+  useEffect(() => {
+    if (isSuccessUpdatingUser) {
+      toast({
+        title: "Berhasil update user!",
+        variant: 'success'
+      })
+      refetchMitraUsers()
+    }
+  }, [isSuccessUpdatingUser])
+  
+  useEffect(() => {
+    if (isErrorUpdatingUser) {
+      toast({
+        title: isErrorUpdatingUser.toString(),
+        variant: 'danger'
+    })
+    }
+  }, [isErrorUpdatingUser])
+  
+  useEffect(() => {
+    if (isSuccessDeletingUser) {
+      toast({
+        title: "Berhasil delete user!",
+        variant: 'success'
+      })
+      refetchMitraUsers()
+    }
+  }, [isSuccessDeletingUser])
+  
+  useEffect(() => {
+    if (isErrorDeletingUser) {
+      toast({
+        title: isErrorDeletingUser.toString(),
+        variant: 'danger'
+    })
+    }
+  }, [isErrorDeletingUser])
 
   
-  if (usersLoading || kontraksLoading) {
+  if (isUsersLoading || isKontraksLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
-      </div>
+      <LoadingScreen/>
     );
   }
-
-  const getStatus = (is_verified: number, is_active: number) => {
-    if (is_verified === 0 && is_active === 1) {
-      return { status: 'Belum Terverifikasi', color: 'text-yellow-500' };
-    } else if (is_verified === 1 && is_active === 1) {
-      return { status: 'Terverifikasi', color: 'text-green-500' };
-    } 
-      return { status: 'Terblokir', color: 'text-red-500' };
-  };
 
   return (
     <div className="  h-screen py-4 px-8">
@@ -289,10 +327,10 @@ const MitraDetailPage: React.FC = () => {
           >
            <ChevronLeft size={18}/> <span>Kembali</span>
           </button>
-        <h1 className="text-2xl font-bold">Detail Mitra {nama_mitra}</h1>
+        <h1 className="text-2xl font-bold">{nama_mitra}</h1>
       </div>
 
-      <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 py-4">
+      <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 pb-4">
         {/* Mitra Contracts Section */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-4 flex justify-between items-center h-20">
@@ -318,30 +356,12 @@ const MitraDetailPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {contracts.map((contract: Kontrak, index: number) => (
+                    {sortedContracts.map((contract: Kontrak, index: number) => (
                       <tr key={index} className="border-b">
                         <td className="p-3">{contract.nama}</td>
                         <td className="p-3">{contract.nomor}</td>
                         <td className="p-3  text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-blue-600 hover:text-blue-700"
-                            onClick={() => {
-                              setContractToEdit(contract);
-                              setIsEditContractDialogOpen(true);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => handleDeleteContract(contract)} 
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          Action
                         </td>
                       </tr>
                     ))}
@@ -377,8 +397,8 @@ const MitraDetailPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user: User) => {
-                      const {status, color} = getStatus(user.is_verified, user.is_active);
+                    {sortedUsers.map((user: User) => {
+                      const {status, color} = getStatus(user.is_verified || 0, user.is_active || 0);
                       return(
                         <tr key={user.email} className="border-b">
                           <td className="p-3">
@@ -434,12 +454,22 @@ const MitraDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Dialogs */}
+      {/* Dialog Tambah Kontrak */}
+      <AddContractDialog
+        isOpen={isAddContractDialogOpen}
+        onClose={() => setIsAddContractDialogOpen(false)}
+        onSubmit={handleAddContractSubmit}
+        isLoading={isCreatingKontrakLoading}
+      />
 
-       {/* Dialog Tambah Pengguna */}
-       <AddUserDialog
+      {/* Dialog Tambah Pengguna */}
+      <AddUserDialog
         isOpen={isAddUserDialogOpen}
         onClose={() => setIsAddUserDialogOpen(false)}
         onSubmit={handleAddUserSubmit}
+        isCreatingUserLoading={isCreatingUserLoading}
       />
 
       {/* Dialog Edit Pengguna */}
@@ -448,10 +478,11 @@ const MitraDetailPage: React.FC = () => {
         onClose={() => setIsEditUserDialogOpen(false)}
         onSubmit={handleEditUserSubmit}
         user={userToEdit}
+        isLoading={isUpdatingUserLoading}
       />
 
-       {/* Dialog Delete Pengguna */}
-       <DeleteUserDialog
+      {/* Dialog Delete Pengguna */}
+      <DeleteUserDialog
         isOpen={isDeleteUserDialogOpen}
         onClose={() => setIsDeleteUserDialogOpen(false)}
         onSubmit={() => {
@@ -461,29 +492,7 @@ const MitraDetailPage: React.FC = () => {
         }}
         user={userToDelete}  // Mengoper data user
       />
-
-      {/* Dialog Tambah Kontrak */}
-      <AddContractDialog
-        isOpen={isAddContractDialogOpen}
-        onClose={() => setIsAddContractDialogOpen(false)}
-        onSubmit={handleAddContractSubmit}
-      />
-
-      {/* Dialog Edit Contract */}
-      <EditContractDialog
-        isOpen={isEditContractDialogOpen}
-        onClose={() => setIsEditContractDialogOpen(false)}
-        onSubmit={handleEditContractSubmit}
-        contract={contractToEdit}
-      />
-
-       {/* Dialog Delete Contract */}
-       <DeleteContractDialog
-        isOpen={isDeleteContractDialogOpen}
-        onClose={() => setIsDeleteContractDialogOpen(false)}
-        contract={contractToDelete}  // Mengoper data kontrak
-      />
-
+      
     </div>
   );
 };
