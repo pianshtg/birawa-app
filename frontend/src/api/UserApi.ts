@@ -126,14 +126,14 @@ type DeleteUserRequest = {
 }
 
 export function useDeleteUser() {
-    async function useDeleteUserRequest(request: DeleteUserRequest) {
+    async function useDeleteUserRequest(email: DeleteUserRequest) {
         const response = await fetch(`${API_BASE_URL}/api/user/soft-delete`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
                 "X-Client-Type": "web"
             },
-            body: JSON.stringify(request),
+            body: JSON.stringify(email),
             credentials: 'include'
         })
 
