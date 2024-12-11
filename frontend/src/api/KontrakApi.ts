@@ -39,20 +39,10 @@ export function useCreateKontrak() {
         mutateAsync: createKontrak,
         isLoading,
         isSuccess,
-        error,
-        reset
+        error
     } = useMutation(useCreateKontrakRequest)
 
-    if (isSuccess) {
-        // toast.success("Kontrak berhasil dibuat!")
-    }
-
-    if (error) {
-        // toast.error(error.toString()) .debug
-        reset()
-    }
-
-    return {createKontrak, isLoading}
+    return {createKontrak, isLoading, isSuccess, error}
 }
 
 type GetKontrakPekerjaansRequest = {
