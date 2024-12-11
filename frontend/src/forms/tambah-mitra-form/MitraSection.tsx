@@ -126,9 +126,12 @@ const MitraSection = () => {
                                                 {/* Input field for phone number */}
                                                 <Input
                                                     className="flex-1 border rounded-md p-2"
-                                                    {...field}
+                                                    type="tel"
                                                     value={localPhoneNumber}
-                                                    onChange={(e) => setLocalPhoneNumber(e.target.value)}
+                                                    onChange={(e) => {
+                                                    const numericValue = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+                                                    setLocalPhoneNumber(numericValue);
+                                                    }}
                                                     placeholder="Nomor Telepon"
                                                 />
                                             </div>

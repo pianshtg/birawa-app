@@ -91,41 +91,6 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
                     </FormItem>
                   )} 
                 />
-
-                {/* <FormField control={form.control} name="is_active" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status Pengguna</FormLabel>
-                    <FormControl>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            className="w-full text-left flex  justify-start gap-2 border rounded-md px-3 py-2 bg-gray-100 text-black hover:bg-gray-200"
-                            variant="outline"
-                          >
-                            {user?.is_active === 1 ? 'Aktif' : 'Tidak Aktif'}
-                            <ChevronDown className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" align="start" className="w-64">
-                          <DropdownMenuItem
-                            onClick={() => field.onChange('Aktif')}
-                            className="text-sm cursor-pointer"
-                          >
-                            Aktif
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => field.onChange('Tidak Aktif')}
-                            className="text-sm cursor-pointer"
-                          >
-                            Tidak Aktif
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} /> */}
-
                 
                 <FormField
                   control={form.control}
@@ -224,7 +189,6 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
                     );
                   }}
                 />
-
 
                 <div className="flex justify-end gap-4">
                   <Button type="button" variant="outline" onClick={onClose}>

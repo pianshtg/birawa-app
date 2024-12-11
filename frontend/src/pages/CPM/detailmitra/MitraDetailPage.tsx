@@ -188,7 +188,7 @@ const MitraDetailPage = () => {
     }
   };
   
-  const handleEditUserSubmit = async (data: EditUserSchema) => {
+  async function handleEditUserSubmit (data: EditUserSchema) {
     if (!userToEdit) return;
   
     try {
@@ -260,7 +260,7 @@ const MitraDetailPage = () => {
   useEffect(() => {
     if (isErrorCreatingUser) {
       toast({
-        title: isErrorCreatingUser.toString(),
+        title: isErrorCreatingUser.toString().split(' ')[1] ? isErrorCreatingUser.toString() : 'Invalid phone number',
         variant: 'danger'
     })
     }
@@ -279,7 +279,7 @@ const MitraDetailPage = () => {
   useEffect(() => {
     if (isErrorUpdatingUser) {
       toast({
-        title: isErrorUpdatingUser.toString(),
+        title: isErrorUpdatingUser.toString().split(' ')[1] ? isErrorUpdatingUser.toString() : 'Invalid phone number',
         variant: 'danger'
     })
     }
@@ -291,6 +291,7 @@ const MitraDetailPage = () => {
         title: "Berhasil delete user!",
         variant: 'success'
       })
+      console.log("Successfully delete user!") //Debug.
       refetchMitraUsers()
     }
   }, [isSuccessDeletingUser])
@@ -303,7 +304,6 @@ const MitraDetailPage = () => {
     })
     }
   }, [isErrorDeletingUser])
-
   
   if (isUsersLoading || isKontraksLoading) {
     return (
