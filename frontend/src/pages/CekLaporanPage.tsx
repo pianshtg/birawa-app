@@ -105,6 +105,7 @@ const CekLaporan = () => {
   
   useEffect(() => {
     setLaporanDates([])
+    setShowPDF(false)
   }, [selectedPekerjaan])
   
   useEffect(() => {
@@ -192,9 +193,9 @@ const CekLaporan = () => {
   
   const {user, isLoading: isUserLoading} = useGetUser()
   
-  useEffect(() => {
-    console.log('Fetched user:', user)
-  }, [user])
+  // useEffect(() => {
+  //   console.log('Fetched user:', user)
+  // }, [user]) //Debug.
   
   const pencetak_laporan = user?.user?.nama_lengkap || ''
 
