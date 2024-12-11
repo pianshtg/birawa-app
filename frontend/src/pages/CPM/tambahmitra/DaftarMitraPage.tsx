@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
-import { Edit2 } from 'lucide-react';
+import { ChevronDown, Edit2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,17 +23,20 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useGetMitras } from '@/api/MitraApi';
-import { Mitra } from '@/types';
+import { Country, Mitra } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { useUpdateMitra } from '@/api/MitraApi';
 import { useToast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
 import LoadingScreen from '@/components/LoadingScreen';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
+
 
 const formSchema = z.object({
   nama_mitra : z.string().optional(),
-  alamat_Mitra: z.string().min(2, 'alamat Mitra terlalu kecil').max(32, 'Alamat Mitra terlalu panjang').optional(),
-  nomor_Telephone_Mitra: z.string().min(4, 'Nomor Telephone terlalu sedikit').max(16, 'Nomor Telephone melebih batas').optional(),
+  alamat: z.string().min(2, 'alamat Mitra terlalu kecil').max(32, 'Alamat Mitra terlalu panjang').optional(),
+  nomor_telepon: z.string().min(4, 'Nomor Telephone terlalu sedikit').max(16, 'Nomor Telephone melebih batas').optional(),
 });
 
 export type EditFormSchema = z.infer<typeof formSchema>;
@@ -43,18 +46,13 @@ const DaftarMitra = () => {
   const { allMitra, isLoading , refetch } = useGetMitras({enabled: true})
   const { updateMitra, isLoading: isUpdating } = useUpdateMitra();
 
-
   // Dialog Needed
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
   const [selectedMitra, setSelectedMitra] = useState<Mitra | null>(null);
 
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
-    const savedItemsPerPage = localStorage.getItem('itemsPerPageMitra');
-    return savedItemsPerPage ? parseInt(savedItemsPerPage, 10) : 1;
-  });
+  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -63,14 +61,17 @@ const DaftarMitra = () => {
     localStorage.setItem('itemsPerPageMitra', itemsPerPage.toString());
   }, [itemsPerPage]);
 
-  
-
   const formEditMitra = useForm<EditFormSchema>({
     resolver: zodResolver(formSchema),
   });
 
   // Memoize the dataMitra initialization
-  const dataMitra = useMemo(() => allMitra?.mitras || [], [allMitra]);
+  const dataMitra = useMemo(() => {
+    const mitras = allMitra?.mitras || [];
+    return [...mitras].sort((a, b) => {
+      return a.nama.localeCompare(b.nama, undefined, { numeric: true, sensitivity: 'base' });
+    });
+  }, [allMitra]);
 
   // Memoized search filter logic
   const filteredMitra = useMemo(() => {
@@ -82,7 +83,7 @@ const DaftarMitra = () => {
     });
   }, [dataMitra, searchQuery]);
 
-  const onclickdetail = (namaMitra: string) => {
+  function showDetailMitra(namaMitra: string) {
     navigate(`/daftarmitra/detailmitra/${namaMitra}`);
   };
 
@@ -94,32 +95,32 @@ const DaftarMitra = () => {
 
   const totalPages = Math.ceil(filteredMitra.length / itemsPerPage);
 
-  const handlePageChange = (page: number) => {
+  function handlePageChange(page: number) {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  const handleEditClick = (e:React.MouseEvent, mitra: Mitra) => 
+  function handleEditClick(e:React.MouseEvent, mitra: Mitra)  
   {
     e.stopPropagation();
     setSelectedMitra(mitra);
     setIsEditDialogOpen(true);
   }
 
-   const handleDelete = () => {
-    console.log('delete dilakukan');
-    setIsDeleteDialogOpen(false);
-  };
+  // function handleDelete()  {
+  //   console.log('delete dilakukan');
+  //   setIsDeleteDialogOpen(false);
+  // };
 
-  const handleEditSubmit = async (data: EditFormSchema) => {
+  async function handleEditSubmit(data: EditFormSchema)  {
     if (!selectedMitra) return;
 
     try {
       const updatedMitra = {
         nama_mitra: selectedMitra.nama, // Nama Mitra tetap tidak berubah
-        alamat: data.alamat_Mitra || selectedMitra.alamat,  // Use the updated address, fallback to existing
-        nomor_telepon: data.nomor_Telephone_Mitra || selectedMitra.nomor_telepon,
+        alamat: data.alamat || selectedMitra.alamat,  // Use the updated address, fallback to existing
+        nomor_telepon: data.nomor_telepon || selectedMitra.nomor_telepon,
       };
 
       await updateMitra(updatedMitra); // Update mitra via API
@@ -147,6 +148,12 @@ const DaftarMitra = () => {
   if (isLoading) {
     return <LoadingScreen/>;
   }
+  
+  const countries: Country[] = getCountries().map(country => ({
+    code: country,
+    dialCode: `+${getCountryCallingCode(country)}`,
+    name: new Intl.DisplayNames(['id'], { type: 'region' }).of(country) || country
+  })).sort((a, b) => a.name.localeCompare(b.name)); 
 
   return (
     <div className="py-8 lg:p-8 flex-1 min-h-screen">
@@ -179,10 +186,9 @@ const DaftarMitra = () => {
                 }}
                 className="border border-gray-300 rounded px-2 py-1 text-sm mr-6"
               >
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
                 <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
               </select>
             </div>
 
@@ -207,8 +213,8 @@ const DaftarMitra = () => {
             </thead>
             <tbody>
               {paginatedData.map((mitra: Mitra, index: number) => (
-                <tr key={mitra.nama} aria-label="button detail mitra" onDoubleClick={() => onclickdetail(mitra.nama)}  className="hover:bg-gray-50 cursor-pointer">
-                  <td  className="p-4 text-sm font-normal border-b">{index + 1}</td>
+                <tr key={mitra.nama} aria-label="button detail mitra" onDoubleClick={() => showDetailMitra(mitra.nama)}  className="hover:bg-gray-50 cursor-pointer">
+                  <td  className="p-4 text-sm font-normal border-b">{(index + 1) + ((currentPage-1) * itemsPerPage)}</td>
                   <td  className="p-4 text-sm font-normal border-b">{mitra.nama}</td>
                   <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon.slice(0, 3)} {mitra.nomor_telepon.slice(3)}</td>
                   <td className="p-4 text-sm font-normal border-b">{mitra.alamat}</td>
@@ -263,30 +269,6 @@ const DaftarMitra = () => {
         </div>
       </div>
 
-      {/* Delete Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Hapus Mitra</DialogTitle>
-          </DialogHeader>
-          <DialogDescription >
-            <div className="space-y-6">
-              <p className="text-center">
-                Apakah Anda yakin ingin menghapus mitra <strong className='text-black'>{selectedMitra?.nama}</strong> ?
-              </p>
-              <div className="flex gap-x-3">
-                <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                  Batal
-                </Button>
-                <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={handleDelete}>
-                  Hapus
-                </Button>
-              </div>
-            </div>
-          </DialogDescription>
-        </DialogContent>
-      </Dialog>
-
       {/* Edit Dialog */}
       {isEditDialogOpen && selectedMitra && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -299,7 +281,10 @@ const DaftarMitra = () => {
               <Form {...formEditMitra}>
                 <form onSubmit={formEditMitra.handleSubmit(handleEditSubmit)} className="space-y-3">
 
-                <FormField control={formEditMitra.control} name="nama_mitra" render={({ field }) => (
+                <FormField 
+                  control={formEditMitra.control} 
+                  name="nama_mitra" 
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nama Mitra</FormLabel>
                       <FormControl>
@@ -312,9 +297,13 @@ const DaftarMitra = () => {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )} 
+                />
 
-                  <FormField control={formEditMitra.control} name="alamat_Mitra" render={({ field }) => (
+                <FormField 
+                  control={formEditMitra.control} 
+                  name="alamat" 
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Alamat Mitra</FormLabel>
                       <FormControl>
@@ -327,22 +316,102 @@ const DaftarMitra = () => {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )} 
+                />
 
-                  <FormField control={formEditMitra.control} name="nomor_Telephone_Mitra" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nomor Telepon Mitra</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          defaultValue={selectedMitra?.nomor_telepon}
-                          {...field}
-                          
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                <FormField
+                  control={formEditMitra.control}
+                  name="nomor_telepon"
+                  render={({ field }) => {
+                    // Extract the selectedDialCode and localPhoneNumber from the user data
+                    const mitraPhoneNumber = selectedMitra?.nomor_telepon || '';
+                    const initialDialCode = countries.find(country => mitraPhoneNumber.startsWith(country.dialCode))?.dialCode || '+62';
+                    const initialLocalPhoneNumber = mitraPhoneNumber.replace(initialDialCode, '');
+
+                    // States for phone number management
+                    const [localPhoneNumber, setLocalPhoneNumber] = useState(initialLocalPhoneNumber);
+                    const [selectedDialCode, setSelectedDialCode] = useState(initialDialCode);
+                    const [searchTerm, setSearchTerm] = useState(''); // State for search term
+                    const [filteredCountries, setFilteredCountries] = useState(countries); // Filtered countries list
+
+                    useEffect(() => {
+                      // Combine dial code and local phone number to set the field value
+                      const correctedPhoneNumber = localPhoneNumber.startsWith('0')
+                        ? localPhoneNumber.slice(1)
+                        : localPhoneNumber;
+                      field.onChange(`${selectedDialCode}${correctedPhoneNumber}`);
+                    }, [selectedDialCode, localPhoneNumber, field]);
+
+                    // Filter countries based on search term
+                    useEffect(() => {
+                      setFilteredCountries(
+                        countries.filter((country) =>
+                          country.name.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                      );
+                    }, [searchTerm]);
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Nomor Telepon User</FormLabel>
+                        <FormControl>
+                          <div className="flex items-start gap-2">
+                            {/* Dropdown for country code */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  className="w-1/9 flex items-center gap-2 border rounded-md px-3 py-2 bg-gray-100 text-black hover:bg-gray-200"
+                                  variant="outline"
+                                >
+                                  {selectedDialCode}
+                                  <ChevronDown className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                side="bottom"
+                                align="start"
+                                className="w-64 max-h-60 overflow-y-auto shadow-lg"
+                              >
+                                <div className="p-2">
+                                  <Input
+                                    className="w-full mb-2"
+                                    placeholder="Search country..."
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                  />
+                                </div>
+                                {filteredCountries.length > 0 ? (
+                                  filteredCountries.map((country) => (
+                                    <DropdownMenuItem
+                                      className="flex justify-between text-sm cursor-pointer"
+                                      key={country.code}
+                                      onClick={() => setSelectedDialCode(country.dialCode)}
+                                    >
+                                      <span>{country.name}</span>
+                                      <span className="text-gray-500">{country.dialCode}</span>
+                                    </DropdownMenuItem>
+                                  ))
+                                ) : (
+                                  <div className="text-center text-sm text-gray-500 p-2">
+                                    No countries found
+                                  </div>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Input field for phone number */}
+                            <Input
+                              className="flex-1 border rounded-md p-2"
+                              value={localPhoneNumber} // Show local phone number only
+                              onChange={(e) => setLocalPhoneNumber(e.target.value)}
+                              placeholder="Nomor Telepon"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
 
                   <div className="flex gap-x-3">
                     <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
