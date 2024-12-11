@@ -209,8 +209,12 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
                             {/* Input field for phone number */}
                             <Input
                               className="flex-1 border rounded-md p-2"
-                              value={localPhoneNumber} // Show local phone number only
-                              onChange={(e) => setLocalPhoneNumber(e.target.value)}
+                              type="tel"
+                              value={localPhoneNumber}
+                              onChange={(e) => {
+                                const numericValue = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+                                setLocalPhoneNumber(numericValue);
+                              }}
                               placeholder="Nomor Telepon"
                             />
                           </div>

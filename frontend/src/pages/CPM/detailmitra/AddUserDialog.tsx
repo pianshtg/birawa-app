@@ -42,6 +42,10 @@ const AddUserDialog = ({ isOpen, onClose, onSubmit, isCreatingUserLoading }: Pro
     dialCode: `+${getCountryCallingCode(country)}`,
     name: new Intl.DisplayNames(['id'], { type: 'region' }).of(country) || country
   })).sort((a, b) => a.name.localeCompare(b.name)); 
+  
+  useEffect(() => {
+    form.reset()
+  }, [isOpen])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -152,8 +156,12 @@ const AddUserDialog = ({ isOpen, onClose, onSubmit, isCreatingUserLoading }: Pro
                           {/* Input field for phone number */}
                           <Input
                             className="flex-1 border rounded-md p-2"
+                            type="tel"
                             value={localPhoneNumber}
-                            onChange={(e) => setLocalPhoneNumber(e.target.value)}
+                            onChange={(e) => {
+                              const numericValue = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+                              setLocalPhoneNumber(numericValue);
+                            }}
                             placeholder="Nomor Telepon"
                           />
                         </div>
@@ -171,7 +179,7 @@ const AddUserDialog = ({ isOpen, onClose, onSubmit, isCreatingUserLoading }: Pro
                 {isCreatingUserLoading ? (
                   <LoadingButton/>
                 ) : (
-                  <Button type="submit" className="bg-red-500 text-white">
+                  <Button type="submit" className="bg-red-500 text-white" disabled={!form.formState.isValid}>
                     Simpan
                   </Button>
                 )}

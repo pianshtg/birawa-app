@@ -142,7 +142,7 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
                 <FormItem>
                   <FormLabel>Nilai Kontrak</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" placeholder="Masukkan Nilai Kontrak"  />
+                    <Input {...field} type="number" placeholder="Masukkan Nilai Kontrak" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -232,7 +232,7 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
             {/* Pekerjaan Modal */}
             {showPekerjaanModal && (
               <Dialog open={showPekerjaanModal} onOpenChange={setShowPekerjaanModal}>
-                <DialogContent aria-describedby='Dialog For Pekerjaan Modal'>
+                <DialogContent aria-describedby='Dialog For Pekerjaan Modal' className='w-[400px]'>
                   <DialogHeader>
                     <DialogTitle>Tambah Pekerjaan</DialogTitle>
                   </DialogHeader>
