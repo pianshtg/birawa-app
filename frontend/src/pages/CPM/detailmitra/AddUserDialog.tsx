@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,22 +10,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { getCountries, getCountryCallingCode } from "libphonenumber-js"
 import { Country } from '@/types'
 import { ChevronDown } from "lucide-react"
+import LoadingButton from '@/components/LoadingButton'
 
 const formAddUserSchema = z.object({
     nama_lengkap: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang"),
-    email: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi"),
-    nomor_telepon: z.string().min(4, "Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
+    email: z.string().email().min(1, "Email pengguna wajib diisi"),
+    nomor_telepon: z.string().min(12, "Nomor Telepon tidak valid").max(20, "Nomor Telepon tidak valid"),
 })
   
 export type AddUserSchema = z.infer<typeof formAddUserSchema>
 
-interface AddUserDialogProps {
+type Props = {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: AddUserSchema) => void
+  isCreatingUserLoading: boolean
 }
 
-const AddUserDialog: React.FC<AddUserDialogProps> = ({ isOpen, onClose, onSubmit }) => {
+const AddUserDialog = ({ isOpen, onClose, onSubmit, isCreatingUserLoading }: Props) => {
   const form = useForm<AddUserSchema>({
     resolver: zodResolver(formAddUserSchema),
     defaultValues: {
@@ -39,7 +41,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ isOpen, onClose, onSubmit
     code: country,
     dialCode: `+${getCountryCallingCode(country)}`,
     name: new Intl.DisplayNames(['id'], { type: 'region' }).of(country) || country
-  })).sort((a, b) => a.name.localeCompare(b.name));    
+  })).sort((a, b) => a.name.localeCompare(b.name)); 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -60,7 +62,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ isOpen, onClose, onSubmit
                   <FormItem>
                     <FormLabel>Nama Pengguna</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Masukkan Nama Pengguna" required />
+                      <Input {...field} placeholder="Masukkan Nama Pengguna" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -74,7 +76,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ isOpen, onClose, onSubmit
                   <FormItem>
                     <FormLabel>Email Pengguna</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" placeholder="Masukkan Email Pengguna" required />
+                      <Input {...field} type="email" placeholder="Masukkan Email Pengguna" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -91,17 +93,18 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ isOpen, onClose, onSubmit
                   const [filteredCountries, setFilteredCountries] = useState(countries); // Filtered countries list
                   
                   useEffect(() => {
-                    field.onChange(`${selectedDialCode}${localPhoneNumber}`);
+                    const correctedPhoneNumber = localPhoneNumber.startsWith('0') ? localPhoneNumber.slice(1) : localPhoneNumber
+                    field.onChange(`${selectedDialCode}${correctedPhoneNumber}`);
                   }, [selectedDialCode, localPhoneNumber, field]);
                   
                   // Filter countries based on search term
                   useEffect(() => {
-                    setFilteredCountries(
-                      countries.filter((country) =>
-                        country.name.toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                    );
-                  }, [searchTerm, countries]);
+                      setFilteredCountries(
+                          countries.filter((country) =>
+                              country.name.toLowerCase().includes(searchTerm.toLowerCase())
+                          )
+                      );
+                  }, [searchTerm]);
                   
                   return (
                     <FormItem>
@@ -165,9 +168,13 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ isOpen, onClose, onSubmit
                 <Button type="button" variant="outline" onClick={onClose}>
                   Batal
                 </Button>
-                <Button type="submit" className="bg-red-500 text-white">
-                  Simpan
-                </Button>
+                {isCreatingUserLoading ? (
+                  <LoadingButton/>
+                ) : (
+                  <Button type="submit" className="bg-red-500 text-white">
+                    Simpan
+                  </Button>
+                )}
               </div>
             </form>
           </Form>
