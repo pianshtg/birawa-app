@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Edit2, Eye } from 'lucide-react';
+import { ChevronDown, Edit2, Eye, Eye } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,12 @@ import { Search } from 'lucide-react';
 import LoadingScreen from '@/components/LoadingScreen';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   Tooltip,
   TooltipContent,
