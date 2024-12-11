@@ -1,34 +1,18 @@
-import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { User } from '@/types';
 import LoadingButton from '@/components/LoadingButton';
 
-interface DeleteUserDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: () => void;  // Ubah di sini
-  user: User | null;
+type Props = {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: () => void
+  user: User | null
+  isLoading: boolean
 }
 
-const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ isOpen, onClose, user, onSubmit }) => {
-  const [isLoading,setIsLoading] = useState(false);
+const DeleteUserDialog = ({ isOpen, onClose, user, onSubmit, isLoading }: Props) => {
   
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent default form submission
-    if (user) {
-      setIsLoading(true);
-      try{
-        await onSubmit()
-        onClose();
-      } catch(error){
-        console.error("Error Deletting User:", error)
-      } finally{
-        setIsLoading(false);
-      }
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -37,9 +21,14 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ isOpen, onClose, us
         </DialogHeader>
         <DialogDescription>
           {user ? (
-            <form onSubmit={handleSubmit}>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault()
+                onSubmit(); // Call the onSubmit function with user.email
+              }}
+            >
               <p className="text-center">
-                Apakah Anda yakin ingin menghapus User <strong>{user.nama_lengkap}</strong>?
+                Apakah Anda yakin ingin menghapus: <br /><strong>{user.nama_lengkap}<br/>{user.email}</strong>
               </p>
               <div className="flex justify-end gap-4 mt-6">
                 <Button variant="outline" type="button" onClick={onClose}>

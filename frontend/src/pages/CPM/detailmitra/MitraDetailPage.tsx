@@ -211,24 +211,21 @@ const MitraDetailPage = () => {
     }
   };
   
-  const handleDeleteUser = async (user: User) => {
-    try{
-      await deleteUser({ email: user.email });
-      toast({
-        title: "Success",
-        description: "User Berhasil Terblokir",
-        variant: "success",
-      });
-      setIsDeleteUserDialogOpen(false);  // Menampilkan dialog
-    } catch(error){
-      console.error("Error deleting user:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete user",
-        variant: "danger",
-      });
-    }
+  async function handleDeleteUser () {
+    if (!userToDelete) return;
     
+    try{
+      const deletedUserData = {
+        email: userToDelete.email || ''
+      }
+      
+      await deleteUser(deletedUserData)
+      
+      setIsDeleteUserDialogOpen(false)
+      
+    } catch(error){
+      console.error("Error deleting user:", error)
+    }
   };
   
   useEffect(() => {
@@ -408,9 +405,7 @@ const MitraDetailPage = () => {
                           </td>
                           <td className="p-3 text-right">
                             {user.is_active === 0 ? 
-                              <>
-                              <p> </p>
-                              </>
+                              <></>
                             : 
                               <>
                                <Button
@@ -481,12 +476,9 @@ const MitraDetailPage = () => {
       <DeleteUserDialog
         isOpen={isDeleteUserDialogOpen}
         onClose={() => setIsDeleteUserDialogOpen(false)}
-        onSubmit={() => {
-          if (userToDelete) {
-            handleDeleteUser(userToDelete); 
-          }
-        }}
-        user={userToDelete}  // Mengoper data user
+        onSubmit={handleDeleteUser}
+        user={userToDelete} 
+        isLoading={isDeletingUserLoading}
       />
       
     </div>
