@@ -1,9 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCreateLaporan } from "@/api/LaporanApi";
 import BuatLaporanForm from "@/forms/buat-laporan-form/BuatLaporanForm";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function BuatLaporanPage() {
-  const { createLaporan, isLoading } = useCreateLaporan();
+  const {toast} = useToast()
+  const { createLaporan, isLoading, isSuccess, error } = useCreateLaporan();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -40,7 +43,25 @@ export default function BuatLaporanPage() {
       console.error("Error creating laporan:", error) //Debug.
     }
   };
-
+  
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Successfully created laporan!",
+        variant: 'success'
+      })
+    }
+  }, [isSuccess])
+  
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: error.toString(),
+        variant: 'danger'
+      })
+    }
+  }, [error])
+  
   return (
     <div>
       <h1 className="text-2xl font-semibold mb-6">Buat Laporan</h1>

@@ -41,7 +41,7 @@ const AddUserDialog = ({ isOpen, onClose, onSubmit, isCreatingUserLoading }: Pro
     code: country,
     dialCode: `+${getCountryCallingCode(country)}`,
     name: new Intl.DisplayNames(['id'], { type: 'region' }).of(country) || country
-  })).sort((a, b) => a.name.localeCompare(b.name)); 
+  })).sort((a, b) => a.name.localeCompare(b.name))
   
   useEffect(() => {
     form.reset()
