@@ -186,6 +186,7 @@ CREATE TABLE tipe_aktivitas (
 CREATE TABLE aktivitas (
     id CHAR(36) PRIMARY KEY,
     kontrak_ss_pekerjaan_id CHAR(36),
+    shift_id CHAR(36),
     tipe_aktivitas_id CHAR(36),
     nama VARCHAR(100),
     tanggal DATE,
@@ -195,6 +196,7 @@ CREATE TABLE aktivitas (
     created_by CHAR(36),
     updated_by CHAR(36),
     FOREIGN KEY (kontrak_ss_pekerjaan_id) REFERENCES kontrak_ss_pekerjaan(id) ON DELETE SET NULL,
+    FOREIGN KEY (shift_id) REFERENCES shift(id) ON DELETE SET NULL,
     FOREIGN KEY (tipe_aktivitas_id) REFERENCES tipe_aktivitas(id) ON DELETE SET NULL
 );
 CREATE TABLE tipe_cuaca (
@@ -1943,6 +1945,7 @@ VALUES (
 INSERT INTO aktivitas (
         id,
         kontrak_ss_pekerjaan_id,
+        shift_id,
         tipe_aktivitas_id,
         nama,
         tanggal,
@@ -1959,6 +1962,11 @@ VALUES (
             INNER JOIN mitra
             ON kontrak.mitra_id = mitra.id
             WHERE mitra.nama = 'Mitra Company One' AND kontrak.nomor = '1' AND kontrak_ss_pekerjaan.nama = 'pekerjaan_1'
+        ),
+        (
+            SELECT id
+            FROM shift
+            WHERE nama = '1' AND waktu_mulai = '08:00:00' AND waktu_berakhir = '15:00:00'
         ),
         (
             SELECT id
@@ -1983,6 +1991,11 @@ VALUES (
         ),
         (
             SELECT id
+            FROM shift
+            WHERE nama = '1' AND waktu_mulai = '08:00:00' AND waktu_berakhir = '15:00:00'
+        ),
+        (
+            SELECT id
             FROM tipe_aktivitas
             WHERE nama = 'Pekerjaan Arsitektur'
         ),
@@ -2004,6 +2017,11 @@ VALUES (
         ),
         (
             SELECT id
+            FROM shift
+            WHERE nama = '1' AND waktu_mulai = '08:00:00' AND waktu_berakhir = '15:00:00'
+        ),
+        (
+            SELECT id
             FROM tipe_aktivitas
             WHERE nama = 'Pekerjaan Mekanikal Elektrik'
         ),
@@ -2022,6 +2040,11 @@ VALUES (
             INNER JOIN mitra
             ON kontrak.mitra_id = mitra.id
             WHERE mitra.nama = 'Mitra Company One' AND kontrak.nomor = '1' AND kontrak_ss_pekerjaan.nama = 'pekerjaan_1'
+        ),
+        (
+            SELECT id
+            FROM shift
+            WHERE nama = '1' AND waktu_mulai = '08:00:00' AND waktu_berakhir = '15:00:00'
         ),
         (
             SELECT id
