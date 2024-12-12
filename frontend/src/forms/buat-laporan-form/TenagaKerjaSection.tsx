@@ -15,21 +15,42 @@ const shiftSchema = z.object({
   nama: z.string().min(1, "Nama shift wajib diisi").max(2, "Nama shift terlalu panjang"),
   waktu_mulai: z.string().min(1, "Waktu mulai shift wajib diisi").max(50, "Nama pekerjaan terlalu panjang"),
   waktu_berakhir: z.string().min(1, "Waktu berakhir shift wajib diisi").max(50, "Nama pekerjaan terlalu panjang"),
-}).refine(
-  (data) => {
-    const [startHour, startMinute] = data.waktu_mulai.split(":").map(Number);
-    const [endHour, endMinute] = data.waktu_berakhir.split(":").map(Number);
+}).refine((data) => {
+  const [startHour, startMinute] = data.waktu_mulai.split(":").map(Number)
+  const [endHour, endMinute] = data.waktu_berakhir.split(":").map(Number)
 
-    const startTime = startHour * 60 + startMinute;
-    const endTime = endHour * 60 + endMinute;
+  const startTime = startHour * 60 + startMinute
+  const endTime = endHour * 60 + endMinute
 
-    return endTime > startTime; // Ensure end time is greater than start time
-  },
-  {
-    message: "Waktu berakhir harus lebih lama dari waktu mulai",
-    path: ["waktu_berakhir"], // Attach error to waktu_berakhir field
+  return endTime > startTime // Ensure end time is greater than start time
+
+}, {
+  message: "Waktu berakhir harus lebih lama dari waktu mulai",
+  path: ["waktu_berakhir"], // Attach error to waktu_berakhir field
+}).superRefine((data, ctx) => {
+  const [startHour, startMinute] = data.waktu_mulai.split(":").map(Number)
+  const [endHour, endMinute] = data.waktu_berakhir.split(":").map(Number)
+
+  const startTime = startHour * 60 + startMinute
+  const endTime = endHour * 60 + endMinute
+
+  if (startTime < 360) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Waktu mulai shift harus lebih dari 06:00 WIB",
+      path: ["waktu_mulai"], // Attach error to waktu_mulai
+    })
   }
-);
+
+  if (endTime > 1320) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Waktu berakhir shift harus kurang dari 22:00 WIB",
+      path: ["waktu_berakhir"], // Attach error to waktu_berakhir
+    })
+  }
+  
+})
 
 const tenagaKerjaSchema = z.object({
     nama: z.string().min(1, "Peran tenaga kerja wajib diisi"),
