@@ -152,77 +152,76 @@ async function logoutUser (req: Request, res: Response) {
 async function authenticateUser(req: Request, res: Response) {
     console.log("Jwt checking...") // Debug.
     try {
-        const accessToken = req.accessToken;
-        const refreshToken = req.refreshToken;
-
+        const accessToken = req.accessToken
+        
         // If access token exists and is valid, authenticate the user
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
             console.log('Successfully authenticating with access token.') // Debug.
             res.status(201).json({ message: "User successfully authenticated." });
             return;
-        } else if (refreshToken) {
-            // If there's no access token but a refresh token is available, renew the access token
-            console.log("No access token, but refresh token is available. Renewing access token...");
-
-            // Decode the refresh token to get the user information
-            try {
-                const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
-
-                // Check if the refresh token exists in the database
-                const [user_hashed_refresh_token] = await pool.execute<RowDataPacket[]>('SELECT hashed_refresh_token FROM users_hashed_refresh_token WHERE user_id = ?', [decodedRefreshToken.user_id]);
-                if (user_hashed_refresh_token.length === 0) {
-                    res.status(401).json({ message: "Unauthorized. Refresh token not found." });
-                    return
-                }
-
-                // Compare the received refresh token with the one stored in the database
-                const isValidRefreshToken = await bcrypt.compare(refreshToken, user_hashed_refresh_token[0].hashed_refresh_token);
-                if (!isValidRefreshToken) {
-                    res.status(401).json({ message: "Invalid refresh token." });
-                    return
-                }
-
-                // If valid, generate a new access token
-                const user_id = decodedRefreshToken.user_id;
-                const permissions = decodedRefreshToken.permissions;
-                const nama_mitra = decodedRefreshToken.nama_mitra || undefined;
-
-                // Generate the new access token
-                const newAccessToken = generateAccessToken({ user_id, permissions, nama_mitra });
-
-                console.log("Successfully renewed the access token:", newAccessToken); // Debug.
-
-                // If the client is web, set the new access token in the cookie
-                const clientType = req.headers['x-client-type'];
-                if (clientType === 'web') {
-                    res.cookie('accessToken', newAccessToken, {
-                        secure: true,
-                        sameSite: 'none',
-                        maxAge: 15 * 60 * 1000, // 15 minutes
-                        path: '/',
-                    });
-                    res.status(201).json({ message: "User successfully authenticated." });
-                    return;
-                } else {
-                    // If the client is mobile, send the new access token in the response
-                    res.status(201).json({
-                        message: "User successfully authenticated.",
-                        newAccessToken,
-                    });
-                    return;
-                }
-            } catch (error) {
-                console.error("Error verifying or renewing access token:", error); // Debug.
-                res.status(401).json({ message: "Unauthorized. Invalid refresh token." });
-                return
-            }
-        } else {
-            // If no access token and no refresh token are provided, return Unauthorized
-            console.log("No access token or refresh token provided."); // Debug.
-            res.status(401).json({ message: "Unauthorized." });
-            return
-        }
+        } 
+        
     } catch (error) {
+        if (error instanceof jwt.TokenExpiredError) {
+            let refreshToken = req.refreshToken
+            if (refreshToken) {
+                // If there's no access token but a refresh token is available, renew the access token
+                console.log("No access token, but refresh token is available. Renewing access token...");
+    
+                // Decode the refresh token to get the user information
+                try {
+                    const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
+    
+                    // Check if the refresh token exists in the database
+                    const [user_hashed_refresh_token] = await pool.execute<RowDataPacket[]>('SELECT hashed_refresh_token FROM users_hashed_refresh_token WHERE user_id = ?', [decodedRefreshToken.user_id]);
+                    if (user_hashed_refresh_token.length === 0) {
+                        res.status(401).json({ message: "Unauthorized. Refresh token not found." });
+                        return
+                    }
+    
+                    // Compare the received refresh token with the one stored in the database
+                    const isValidRefreshToken = await bcrypt.compare(refreshToken, user_hashed_refresh_token[0].hashed_refresh_token);
+                    if (!isValidRefreshToken) {
+                        res.status(401).json({ message: "Invalid refresh token." });
+                        return
+                    }
+    
+                    // If valid, generate a new access token
+                    const user_id = decodedRefreshToken.user_id;
+                    const permissions = decodedRefreshToken.permissions;
+                    const nama_mitra = decodedRefreshToken.nama_mitra || undefined;
+    
+                    // Generate the new access token
+                    const newAccessToken = generateAccessToken({ user_id, permissions, nama_mitra });
+    
+                    console.log("Successfully renewed the access token:", newAccessToken); // Debug.
+    
+                    // If the client is web, set the new access token in the cookie
+                    const clientType = req.headers['x-client-type'];
+                    if (clientType === 'web') {
+                        res.cookie('accessToken', newAccessToken, {
+                            secure: true,
+                            sameSite: 'none',
+                            maxAge: 15 * 60 * 1000, // 15 minutes
+                            path: '/',
+                        });
+                        res.status(201).json({ message: "User successfully authenticated." });
+                        return;
+                    } else {
+                        // If the client is mobile, send the new access token in the response
+                        res.status(201).json({
+                            message: "User successfully authenticated.",
+                            newAccessToken,
+                        });
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error verifying or renewing access token:", error); // Debug.
+                    res.status(401).json({ message: "Unauthorized." });
+                    return
+                }
+            }
+        }
         console.log("Error in authentication:", error); // Debug.
         res.status(401).json({ message: "Unauthorized." });
         return
