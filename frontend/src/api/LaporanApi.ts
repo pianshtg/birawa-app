@@ -1,4 +1,4 @@
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { Aktivitas, Cuaca, Shift, TenagaKerja } from "@/types";
 import { useMutation, useQuery } from "react-query";
 
@@ -16,7 +16,6 @@ export type CreateLaporanRequest = {
 };
 
 export function useCreateLaporan() {
-    const {toast} = useToast()
     async function useCreateLaporanRequest (formData: FormData) {        
         // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/laporan`, {
@@ -43,22 +42,7 @@ export function useCreateLaporan() {
         // reset
     } = useMutation(useCreateLaporanRequest)
 
-    if (isSuccess) {
-        toast({
-            title: "Laporan berhasil dibuat!",
-            variant: "success"
-        })
-    }
-
-    if (error) {
-        toast({
-            title: error.toString(),
-            variant: 'danger'
-        }) //Debug.
-        // reset()
-    }
-
-    return {createLaporan, isLoading}
+    return {createLaporan, isLoading, isSuccess, error}
 }
 
 export function useGetLaporan(id: string | undefined, options: {enabled: boolean}) {
