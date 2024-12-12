@@ -113,7 +113,7 @@ async function createLaporan(req: Request, res: Response) {
                 
                 // Generate aktivitas_id and insert aktivitas into the database.
                     const aktivitasId = uuidv4()
-                    await connection.execute('INSERT INTO aktivitas (id, kontrak_ss_pekerjaan_id, tipe_aktivitas_id, nama, tanggal, created_by) VALUES (?, ?, (SELECT id FROM tipe_aktivitas WHERE nama = ?), ?, ?, ?)', [aktivitasId, kontrak_ss_pekerjaan_id, aktivitas.tipe, aktivitas.nama, tanggal, creator_id])
+                    await connection.execute('INSERT INTO aktivitas (id, kontrak_ss_pekerjaan_id, shift_id, tipe_aktivitas_id, nama, tanggal, created_by) VALUES (?, ?, ?, (SELECT id FROM tipe_aktivitas WHERE nama = ?), ?, ?, ?)', [aktivitasId, kontrak_ss_pekerjaan_id, shiftId, aktivitas.tipe, aktivitas.nama, tanggal, creator_id])
                     console.log(`Aktivitas "${aktivitas.nama}" berhasil dibuat pada pekerjaan "${nama_pekerjaan}" pada tanggal ${tanggal}`) //Debug.
 
                 // Creating documentation
@@ -263,8 +263,8 @@ async function getLaporan(req: Request, res: Response) {
             const [existingLaporan] = await pool.execute<RowDataPacket[]>('SELECT id, kontrak_ss_pekerjaan_id, tanggal, created_by FROM laporan WHERE id = ?', [laporanId])
             
             if (existingLaporan.length > 0) {
-                const [laporanTenagaKerja] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, s.nama AS shift_nama, s.waktu_mulai AS shift_waktu_mulai, s.waktu_berakhir AS shift_waktu_berakhir, ptk.nama AS peran_tenaga_kerja_nama, tk.jumlah AS tenaga_kerja_jumlah FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN tenaga_kerja tk ON ksp.id = tk.kontrak_ss_pekerjaan_id AND l.tanggal = tk.tanggal JOIN shift s ON tk.shift_id = s.id JOIN peran_tenaga_kerja ptk ON tk.peran_tenaga_kerja_id = ptk.id WHERE l.id = ? AND l.deleted_at IS NULL', [laporanId])
-                const [laporanAktivitasRaw] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, ta.nama AS tipe_aktivitas_nama, a.nama AS aktivitas_nama, d.link AS url, d.deskripsi AS deskripsi FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN aktivitas a ON ksp.id = a.kontrak_ss_pekerjaan_id AND l.tanggal = a.tanggal JOIN tipe_aktivitas ta ON a.tipe_aktivitas_id = ta.id LEFT JOIN dokumentasi d ON a.id = d.aktivitas_id WHERE  l.id = ? AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND k.deleted_at IS NULL AND ksp.deleted_at IS NULL AND a.deleted_at IS NULL AND ta.deleted_at IS NULL', [laporanId])
+                const [laporanTenagaKerja] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, s.nama AS shift_nama, s.waktu_mulai AS shift_waktu_mulai, s.waktu_berakhir AS shift_waktu_berakhir, ptk.nama AS peran_tenaga_kerja_nama, tk.jumlah AS tenaga_kerja_jumlah FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN tenaga_kerja tk ON ksp.id = tk.kontrak_ss_pekerjaan_id AND l.tanggal = tk.tanggal JOIN shift s ON tk.shift_id = s.id JOIN peran_tenaga_kerja ptk ON tk.peran_tenaga_kerja_id = ptk.id WHERE l.id = ? AND l.deleted_at IS NULL ORDER BY l.id, l.tanggal, s.nama, ptk.nama', [laporanId])
+                const [laporanAktivitasRaw] = await pool.execute<RowDataPacket[]>('SELECT m.nama AS mitra_nama, k.nomor AS kontrak_nomor, ksp.nama AS kontrak_ss_pekerjaan_nama, l.tanggal AS laporan_tanggal, ta.nama AS tipe_aktivitas_nama, a.nama AS aktivitas_nama, shift.nama AS shift, d.link AS dokumentasi_url, d.deskripsi AS dokumentasi_deskripsi FROM laporan l JOIN kontrak_ss_pekerjaan ksp ON l.kontrak_ss_pekerjaan_id = ksp.id JOIN kontrak k ON ksp.kontrak_id = k.id JOIN mitra m ON k.mitra_id = m.id JOIN aktivitas a ON ksp.id = a.kontrak_ss_pekerjaan_id AND l.tanggal = a.tanggal JOIN tipe_aktivitas ta ON a.tipe_aktivitas_id = ta.id LEFT JOIN dokumentasi d ON a.id = d.aktivitas_id INNER JOIN shift ON a.shift_id = shift.id WHERE l.id = ? AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND k.deleted_at IS NULL AND ksp.deleted_at IS NULL AND a.deleted_at IS NULL AND ta.deleted_at IS NULL GROUP BY a.nama, shift.nama, d.link, d.deskripsi, m.nama, k.nomor, ksp.nama, l.tanggal, ta.nama ORDER BY a.nama, shift.nama, d.link;', [laporanId])
                 const [laporanCuacaRaw] = await pool.execute<RowDataPacket[]>('SELECT tc.nama AS tipe_cuaca_nama, c.waktu, c.waktu_mulai, c.waktu_berakhir FROM cuaca c JOIN tipe_cuaca tc ON c.tipe_cuaca_id = tc.id WHERE c.kontrak_ss_pekerjaan_id = ? AND c.tanggal = ? AND c.deleted_at IS NULL AND tc.deleted_at IS NULL',[existingLaporan[0].kontrak_ss_pekerjaan_id, existingLaporan[0].tanggal])
                 
                 // Group the laporanTenagaKerja by shift_nama and peran_tenaga_kerja_nama
@@ -293,33 +293,37 @@ async function getLaporan(req: Request, res: Response) {
                 }, {});
                 
                 // Map laporanAktivitasRaw to aktivitas_arr within the corresponding peran_tenaga_kerja
-                laporanAktivitasRaw.forEach((row: any) => {
+                laporanAktivitasRaw.forEach((row) => {
                     const tipeAktivitas = row.tipe_aktivitas_nama.split(' ').slice(1).join(' '); // Extract other than the first word
                     const aktivitasNama = row.aktivitas_nama;
                 
+                    // Iterate through groupedLaporanTenagaKerja
                     Object.values(groupedLaporanTenagaKerja).forEach((shift: any) => {
-                        shift.peran_tenaga_kerja_arr.forEach((ptk: any) => {
-                            const peranTenagaKerja = ptk.nama.split(' ').slice(1).join(' '); // Extract other than the first word
-                            if (tipeAktivitas.toLowerCase() === peranTenagaKerja.toLowerCase()) {
-                                // Find or add the aktivitas
-                                let aktivitas = ptk.aktivitas_arr.find((a: any) => a.nama === aktivitasNama);
-                                if (!aktivitas) {
-                                    aktivitas = {
-                                        nama: aktivitasNama,
-                                        dokumentasi_arr: []
-                                    };
-                                    ptk.aktivitas_arr.push(aktivitas);
-                                }
+                        if (shift.shift_nama === row.shift) { // Only process if the shift matches
+                            shift.peran_tenaga_kerja_arr.forEach((ptk: any) => {
+                                const peranTenagaKerja = ptk.nama.split(' ').slice(1).join(' '); // Extract other than the first word
+                                if (tipeAktivitas.toLowerCase() === peranTenagaKerja.toLowerCase()) {
+                                    // Find or add the aktivitas grouped by shift
+                                    let aktivitas = ptk.aktivitas_arr.find((a: any) => a.nama === aktivitasNama && a.shift === row.shift);
+                                    if (!aktivitas) {
+                                        aktivitas = {
+                                            nama: aktivitasNama,
+                                            shift: row.shift, // Ensure shift is stored for validation
+                                            dokumentasi_arr: []
+                                        };
+                                        ptk.aktivitas_arr.push(aktivitas);
+                                    }
                 
-                                // Add dokumentasi
-                                if (row.deskripsi || row.url) {
-                                    aktivitas.dokumentasi_arr.push({
-                                        deskripsi: row.deskripsi,
-                                        url: row.url
-                                    });
+                                    // Add unique dokumentasi entries only for the matching shift
+                                    if (row.dokumentasi_deskripsi || row.dokumentasi_url) {
+                                        aktivitas.dokumentasi_arr.push({
+                                            deskripsi: row.dokumentasi_deskripsi,
+                                            url: row.dokumentasi_url
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     });
                 });
                 
