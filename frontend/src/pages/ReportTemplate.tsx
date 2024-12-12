@@ -239,9 +239,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   imageRow: {
+    display: 'flex',
     flexDirection: 'row', // Images will be displayed in a row
+    paddingLeft: 24,
     flexWrap: 'wrap', // Allows wrapping to the next line if there are too many images
-    justifyContent: 'flex-start', // Align images to the left
     marginBottom: 10, // Add spacing between rows
   },
   imageCell: {
@@ -253,10 +254,13 @@ const styles = StyleSheet.create({
     width: '100%', // Image will fill the cell width
     height: 'auto', // Maintain the aspect ratio
     aspectRatio: 1.5, // Adjust the aspect ratio as needed
+    borderTopLeftRadius: 4, // Makes the corners rounded, adjust as needed
+    borderTopRightRadius: 4, // Makes the corners rounded, adjust as needed
+    borderWidth: 2, // Sets the thickness of the border
+    borderColor: 'black', // Sets the border color to black
   },
   imageText: {
     fontSize: 10,
-    textAlign: 'center',
     marginBottom: 10
   },
   pageWithBorder: {
@@ -815,34 +819,43 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 20 }}>
             Lampiran: Dokumentasi Lapangan
           </Text>
+          
           {/* Dynamically render images based on the response */}
-          {laporan.map((shift, shiftIndex) =>
-            shift.peran_tenaga_kerja_arr.map((tenagaKerja, tenagaIndex) =>
-              tenagaKerja.aktivitas_arr.map((aktivitas, aktivitasIndex) => (
-                <View wrap={false} key={`shift-${shiftIndex}-tenaga-${tenagaIndex}-aktivitas-${aktivitasIndex}`}>
-                  <Text style={{ fontSize: 10, marginBottom: 10 }}>
-                    Aktivitas: {aktivitas.nama}
-                  </Text>
-
-                  {/* Image Row for the Aktivitas */}
-                  <View style={styles.imageRow}>
-                    {aktivitas.dokumentasi_arr.map((doc, docIndex) => (
-                      <View style={styles.imageCell} key={`doc-${docIndex}`}>
-                        {doc.url ? (
-                          <Image style={styles.image} src={doc.url.replace('.webp', '.jpg')} />
-                        ) : (
-                          <Text style={styles.imageText}>Image not available</Text>
-                        )}
-                        <Link style={[styles.imageText, {textAlign: 'left'}]} src={doc.url}>
-                          Klik di sini untuk beralih ke gambar pada tab ini
-                        </Link>
-                        <Text style={[styles.imageText, {marginTop: 8, fontWeight: 'bold'}]}>{doc.deskripsi}</Text>
+          {laporan.map((shift, shiftIndex) => (
+            <View wrap={false} style={{alignItems: 'center'}}>
+              <Text style={{ fontSize: 16, marginBottom: 20, fontWeight: 'bold', textDecoration: 'underline' }}>
+                SHIFT {shift.shift_nama}
+              </Text>
+              {shift.peran_tenaga_kerja_arr.map((tenagaKerja, tenagaIndex) =>
+                  tenagaKerja.aktivitas_arr.map((aktivitas, aktivitasIndex) => (
+                    <View wrap={false} key={`shift-${shiftIndex}-tenaga-${tenagaIndex}-aktivitas-${aktivitasIndex}`}>
+                      <Text style={{ fontSize: 12, marginBottom: 10, textDecoration: 'underline', fontWeight: 'bold' }}>
+                        Aktivitas: {aktivitas.nama}
+                      </Text>
+    
+                      {/* Image Row for the Aktivitas */}
+                      <View style={styles.imageRow}>
+                        {aktivitas.dokumentasi_arr.map((doc, docIndex) => (
+                          <View style={styles.imageCell} key={`doc-${docIndex}`}>
+                            {doc.url ? (
+                              <Image style={styles.image} src={doc.url.replace('.webp', '.jpg')} />
+                            ) : (
+                              <Text style={styles.imageText}>Image not available</Text>
+                            )}
+                            <View style={{paddingTop: 4, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', borderBottomLeftRadius: 4, borderBottomRightRadius: 4, borderWidth: 1, borderColor: 'black', paddingHorizontal: 4}}>                            
+                              <Link style={[styles.imageText, {fontSize: 6, textAlign: 'left', color: 'black', marginTop: 4}]} src={doc.url}>
+                                Klik di sini untuk beralih ke gambar pada tab ini
+                              </Link>
+                              <Text style={[styles.imageText, {marginTop: 4, fontWeight: 'bold'}]}>{doc.deskripsi}</Text>
+                            </View>
+                          </View>
+                        ))}
                       </View>
-                    ))}
-                  </View>
-                </View>
-              ))
-            )
+                    </View>
+                  ))
+              )}
+            </View>
+          )
           )}
         </View>
       </Page>
