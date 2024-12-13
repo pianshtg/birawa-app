@@ -59,9 +59,9 @@ export function useGetUser() {
         return response.json()
     }
     
-    const { data: user, isLoading } = useQuery( "fetchMitra", useGetUserRequest )
+    const { data: user, isLoading, refetch } = useQuery( "fetchMitra", useGetUserRequest )
     
-    return { user, isLoading }
+    return { user, isLoading, refetch }
 }
 
 export function useGetUsers() {
@@ -89,7 +89,8 @@ export function useGetUsers() {
 
 type UpdateUserRequest = {
     nama_lengkap: string,
-    nomor_telepon: string
+    email: string,
+    nomor_telepon: string,
 }
 
 export function useUpdateUser() {

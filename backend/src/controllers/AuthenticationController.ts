@@ -40,7 +40,6 @@ async function loginUser (req: Request, res: Response) {
             // const isAuthenticated = true
             
             if (isAuthenticated) {
-
                 // Creating user permissions based on user's role
                 const user_id = user[0].id
                 const [permissionsArray] = await pool.execute<RowDataPacket[]>("SELECT nama FROM permissions WHERE role_id = ?", [user[0].role_id])

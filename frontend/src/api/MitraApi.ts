@@ -169,18 +169,8 @@ export function useUpdateMitra() {
         mutateAsync: updateMitra,
         isLoading,
         isSuccess,
-        error,
-        reset
+        error
     } = useMutation(useUpdateMitraRequest)
     
-    if (isSuccess) {
-        // toast.success("Update Mitra Berhasil!")
-    }
-
-    if (error) {
-        // toast.error(error.toString()) .debug
-        reset()
-    }
-    
-    return { updateMitra, isLoading }
+    return { updateMitra, isLoading, isSuccess, error }
 }

@@ -256,7 +256,9 @@ const styles = StyleSheet.create({
     aspectRatio: 1.5, // Adjust the aspect ratio as needed
     borderTopLeftRadius: 4, // Makes the corners rounded, adjust as needed
     borderTopRightRadius: 4, // Makes the corners rounded, adjust as needed
-    borderWidth: 2, // Sets the thickness of the border
+    borderLeftWidth: 1, // Sets the thickness of the border
+    borderTopWidth: 1, // Sets the thickness of the border
+    borderRightWidth: 1, // Sets the thickness of the border
     borderColor: 'black', // Sets the border color to black
   },
   imageText: {
@@ -317,7 +319,6 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
   
   console.log("Pencetak laporan:", pencetak_laporan) //Debug.
   console.log("Pembuat laporan:", pembuat_laporan) //Debug.
-  console.log("Laporan:", laporan) //Debug.
   
   const accessToken = getAccessToken();
   // console.log("Access token:", accessToken) //Debug.
@@ -824,7 +825,7 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           {laporan.map((shift, shiftIndex) => (
             <View wrap={false} style={{alignItems: 'center'}}>
               <Text style={{ fontSize: 16, marginBottom: 20, fontWeight: 'bold', textDecoration: 'underline' }}>
-                SHIFT {shift.shift_nama}
+                {shift.peran_tenaga_kerja_arr.length !== 0 && `SHIFT ${shift.shift_nama}`}
               </Text>
               {shift.peran_tenaga_kerja_arr.map((tenagaKerja, tenagaIndex) =>
                   tenagaKerja.aktivitas_arr.map((aktivitas, aktivitasIndex) => (

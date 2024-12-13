@@ -206,17 +206,15 @@ const InboxComponent = () => {
     return <LoadingScreen/>
   }
 
-
-  const hasReplied = mitraInboxMessages && mitraInboxMessages.length > 2;
-  console.log("replied", hasReplied);
-
+  const hasReplied = mitraInboxMessages && mitraInboxMessages.length > 2
+  console.log("replied", hasReplied)
   
   return (
     <div className="flex min-h-screen">
       <div className="w-1/3 border-r bg-white rounded-l-md">
         <div className="p-4 border-b space-y-4">
           <div className='flex w-full items-center justify-between'>
-            <h2  className="font-bold text-lg">{filteredInboxes?.length} Percakapan </h2>
+            <h2  className="font-bold text-lg">{mitraInboxes?.length} Percakapan </h2>
             <button
               onClick={() => {
                 setShowNewMessage(true)

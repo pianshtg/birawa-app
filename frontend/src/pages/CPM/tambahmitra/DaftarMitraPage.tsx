@@ -210,23 +210,23 @@ const DaftarMitra = () => {
           <table className="min-w-full text-left text-sm border-separate border-spacing-0">
             <thead className="bg-slate-200 text-left">
               <tr>
-                <th className="p-4 font-medium border-b">No</th>
-                <th className="p-4 font-medium border-b">Nama Mitra</th>
-                <th className="p-4 font-medium border-b">Nomor Telephone</th>
-                <th className="p-4 font-medium border-b">Alamat Mitra</th>
-                <th className="p-4 font-medium border-b">Action</th>
+                <th className="p-4 font-medium border-b text-center">No</th>
+                <th className="p-4 font-medium border-b w-[25%]">Nama Mitra</th>
+                <th className="p-4 font-medium border-b w-[25%]">Alamat Mitra</th>
+                <th className="p-4 font-medium border-b w-[25%]">Nomor Telepon</th>
+                <th className="p-4 font-medium border-b text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               {paginatedData.map((mitra: Mitra, index: number) => (
                 <tr key={mitra.nama} aria-label="button detail mitra" onDoubleClick={() => showDetailMitra(mitra.nama)}  className="hover:bg-gray-50 cursor-pointer">
-                  <td  className="p-4 text-sm font-normal border-b">{(index + 1) + ((currentPage-1) * itemsPerPage)}</td>
+                  <td  className="p-4 text-sm font-normal border-b text-center">{(index + 1) + ((currentPage-1) * itemsPerPage)}</td>
                   <td  className="p-4 text-sm font-normal border-b">{mitra.nama}</td>
-                  <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon.slice(0, 3)} {mitra.nomor_telepon.slice(3)}</td>
                   <td className="p-4 text-sm font-normal border-b">{mitra.alamat}</td>
-                  <td className="p-4 text-sm font-normal border-b">
-                    <div className="flex gap-x-2">
-                    <TooltipProvider>
+                  <td className="p-4 text-sm font-normal border-b">{mitra.nomor_telepon.slice(0, 3)} {mitra.nomor_telepon.slice(3)}</td>
+                  <td className="p-4 text-sm font-normal border-b text-center">
+                    <div className="flex gap-x-2 justify-center">
+                      <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
                             <button
@@ -240,7 +240,7 @@ const DaftarMitra = () => {
                             <p>Edit Mitra</p>
                           </TooltipContent>
                         </Tooltip>
-                     </TooltipProvider>
+                      </TooltipProvider>
           
                       <TooltipProvider>
                         <Tooltip>

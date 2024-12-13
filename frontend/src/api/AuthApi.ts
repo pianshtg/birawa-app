@@ -51,8 +51,7 @@ export function useSignInUser() {
         mutateAsync: signInUser,
         isLoading,
         isSuccess,
-        error,
-        reset
+        error
     } = useMutation(useSignInUserRequest)
     
     if (isSuccess) {
@@ -60,11 +59,10 @@ export function useSignInUser() {
     }
     
     if (error) {
-        toast({
-            title: error.toString().split(' ').slice(1).join(' '),
-            variant: "danger"
-        }) //Debug.
-        reset()
+      toast({
+          title: error.toString().split(' ').slice(1).join(' '),
+          variant: "danger"
+      })
     }
     
     return {signInUser, isLoading}

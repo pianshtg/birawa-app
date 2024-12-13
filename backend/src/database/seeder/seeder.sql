@@ -2188,7 +2188,7 @@ VALUES (
             WHERE nama = 'aktivitas_1'
         ),
         'https://www.youtube.com/watch?v=d9aTL0_T_sI',
-        'dokumentasi_1_before',
+        'foto sebelum',
         NULL,
         NULL
     ),
@@ -2200,7 +2200,7 @@ VALUES (
             WHERE nama = 'aktivitas_1'
         ),
         'https://www.youtube.com/watch?v=d9aTL0_T_sI',
-        'dokumentasi_1_after',
+        'foto sesudah',
         NULL,
         NULL
     ),
@@ -2212,7 +2212,7 @@ VALUES (
             WHERE nama = 'aktivitas_2'
         ),
         'https://www.youtube.com/watch?v=d9aTL0_T_sI',
-        'dokumentasi_2_before',
+        'foto sebelum',
         NULL,
         NULL
     ),
@@ -2224,7 +2224,7 @@ VALUES (
             WHERE nama = 'aktivitas_2'
         ),
         'https://www.youtube.com/watch?v=d9aTL0_T_sI',
-        'dokumentasi_2_after',
+        'foto sesudah',
         NULL,
         NULL
     ),
@@ -2236,7 +2236,7 @@ VALUES (
             WHERE nama = 'aktivitas_3'
         ),
         'https://www.youtube.com/watch?v=d9aTL0_T_sI',
-        'dokumentasi_3_before',
+        'foto sebelum',
         NULL,
         NULL
     ),
@@ -2248,7 +2248,7 @@ VALUES (
             WHERE nama = 'aktivitas_3'
         ),
         'https://www.youtube.com/watch?v=d9aTL0_T_sI',
-        'dokumentasi_3_after',
+        'foto sesudah',
         NULL,
         NULL
     );
