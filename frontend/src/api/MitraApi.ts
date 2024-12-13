@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "react-query";
 import { Kontrak, Mitra, Pekerjaan, User } from "../types";
+import { getCsrfToken } from "./AuthApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -12,13 +13,13 @@ export type CreateMitraRequest = {
 
 export function useCreateMitra () {
     async function useCreateMitraRequest (mitra: CreateMitraRequest) {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken() 
         const response = await fetch(`${API_BASE_URL}/api/mitra`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(mitra),
             credentials: 'include'
@@ -43,13 +44,13 @@ export function useCreateMitra () {
 
 export function useGetMitra(nama_mitra: string) {
     async function useGetMitraRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/mitra`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify({nama_mitra}),
             credentials: 'include'
@@ -67,13 +68,13 @@ export function useGetMitra(nama_mitra: string) {
 
 export function useGetMitraUsers(nama_mitra: string | undefined, options: {enabled: boolean}) {
     async function useGetMitraUsersRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/mitra/users`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify({nama_mitra}),
             credentials: 'include'
@@ -91,13 +92,13 @@ export function useGetMitraUsers(nama_mitra: string | undefined, options: {enabl
 
 export function useGetMitraKontraks(nama_mitra: string | undefined, options: {enabled: boolean}) {
     async function useGetMitraKontraksRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/mitra/kontraks`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify({nama_mitra}),
             credentials: 'include'
@@ -115,13 +116,13 @@ export function useGetMitraKontraks(nama_mitra: string | undefined, options: {en
 
 export function useGetMitras(options: {enabled: boolean}) {
     async function useGetMitrasRequest() {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/mitra/all`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             credentials: 'include',
         });
@@ -147,13 +148,13 @@ type UpdateMitraRequest = {
 
 export function useUpdateMitra() {
     async function useUpdateMitraRequest(mitra: UpdateMitraRequest) {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/mitra`, {
             method: 'PATCH',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(mitra),
             credentials: 'include'

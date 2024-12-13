@@ -1,6 +1,7 @@
 import { toast } from "@/hooks/use-toast";
 import { Aktivitas, Cuaca, Shift, TenagaKerja } from "@/types";
 import { useMutation, useQuery } from "react-query";
+import { getCsrfToken } from "./AuthApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -17,12 +18,12 @@ export type CreateLaporanRequest = {
 
 export function useCreateLaporan() {
     async function useCreateLaporanRequest (formData: FormData) {        
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/laporan`, {
             method: 'POST',
             headers: {
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: formData,
             credentials: 'include'
@@ -47,13 +48,13 @@ export function useCreateLaporan() {
 
 export function useGetLaporan(id: string | undefined, options: {enabled: boolean}) {
     async function useGetLaporanRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken() 
         const response = await fetch(`${API_BASE_URL}/api/laporan/${id}`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             credentials: 'include'
         })
@@ -76,13 +77,13 @@ type GetPekerjaanLaporansRequest = {
 
 export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest | null, options: {enabled: boolean}) {
     async function useGetPekerjaanLaporansRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken() 
         const response = await fetch(`${API_BASE_URL}/api/laporan/laporan-pekerjaan`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(pekerjaan),
             credentials: 'include'
@@ -104,13 +105,13 @@ export function useGetPekerjaanLaporans(pekerjaan: GetPekerjaanLaporansRequest |
 
 export function useGetLaporans() {
     async function useGetLaporansRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/laporan/all`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             credentials: 'include'
         })

@@ -26,13 +26,13 @@ type SignInUserRequest = {
 export function useSignInUser() {
     const {toast} = useToast()
     async function useSignInUserRequest (user: SignInUserRequest) {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
             },
             body: JSON.stringify(user),
             credentials: 'include'
@@ -75,13 +75,13 @@ export function useSignOutUser() {
   const navigate = useNavigate()
 
   async function useSignOutUserRequest() {
-    // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+    const csrfToken = await getCsrfToken()
     const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
-        "X-Client-Type": "web"
-        // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+        "X-Client-Type": "web",
+        "X-CSRF-TOKEN": csrfToken
       },
       credentials: 'include',
     });
@@ -119,10 +119,12 @@ export function useAuth() {
   const { toast } = useToast();
 
   async function useAuthRequest() {
+    const csrfToken = await getCsrfToken()
     const response = await fetch(`${API_BASE_URL}/api/auth`, {
       method: "POST",
       headers: {
         "X-Client-Type": "web",
+        "X-CSRF-TOKEN": csrfToken
       },
       credentials: "include",
     });
@@ -154,13 +156,14 @@ export function useAuth() {
       });
     }
 
-    if (error) {
-      toast({
-      title: "Please re-login!",
-        description: error.toString(),
-        variant: "danger",
-      });
-    }
+    // if (error) {
+    //   toast({
+    //     title: "Please re-login!",
+    //     description: error.toString(),
+    //     variant: "danger",
+    //   })
+    // }
+    
   }, [isSuccess, error, toast]);
 
   return { isAuthenticated, isLoading };

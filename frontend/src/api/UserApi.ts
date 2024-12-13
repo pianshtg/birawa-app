@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "react-query"
+import { getCsrfToken } from "./AuthApi"
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 type CreateUserRequest = {
@@ -10,13 +11,13 @@ type CreateUserRequest = {
 
 export function useCreateUser() {
     async function useCreateUserRequest(user: CreateUserRequest) {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/user`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(user),
             credentials: 'include'
@@ -42,13 +43,13 @@ export function useCreateUser() {
 
 export function useGetUser() {
     async function useGetUserRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/user`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             credentials: 'include'
         })
@@ -65,13 +66,13 @@ export function useGetUser() {
 
 export function useGetUsers() {
     async function useGetUsersRequest () {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/user/all`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             credentials: 'include'
         })
@@ -93,13 +94,13 @@ type UpdateUserRequest = {
 
 export function useUpdateUser() {
     async function useUpdateUserRequest(user: UpdateUserRequest) {
-        // const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/user`, {
             method: 'PATCH',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
-                // "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(user),
             credentials: 'include'
@@ -127,11 +128,13 @@ type DeleteUserRequest = {
 
 export function useDeleteUser() {
     async function useDeleteUserRequest(email: DeleteUserRequest) {
+        const csrfToken = await getCsrfToken()
         const response = await fetch(`${API_BASE_URL}/api/user/soft-delete`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
+                "X-Client-Type": "web",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(email),
             credentials: 'include'
