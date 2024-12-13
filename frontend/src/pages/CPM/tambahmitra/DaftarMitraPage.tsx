@@ -311,143 +311,142 @@ const DaftarMitra = () => {
             <div className="space-y-6">
               <Form {...formEditMitra}>
                 <form onSubmit={formEditMitra.handleSubmit(handleEditSubmit)} className="space-y-3">
-
-                <FormField 
-                  control={formEditMitra.control} 
-                  name="nama_mitra" 
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nama Mitra</FormLabel>
-                      <FormControl>
-                        <Input
-                          className='bg-gray-100'
-                          type="text"
-                          defaultValue={selectedMitra?.nama}
-                          {...field}
-                          disabled
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} 
-                />
-
-                <FormField 
-                  control={formEditMitra.control} 
-                  name="alamat" 
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Alamat Mitra</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          defaultValue={selectedMitra?.alamat}
-                          {...field}
-                          
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} 
-                />
-
-                <FormField
-                  control={formEditMitra.control}
-                  name="nomor_telepon"
-                  render={({ field }) => {
-                    // Extract the selectedDialCode and localPhoneNumber from the user data
-                    const mitraPhoneNumber = selectedMitra?.nomor_telepon || '';
-                    const initialDialCode = countries.find(country => mitraPhoneNumber.startsWith(country.dialCode))?.dialCode || '+62';
-                    const initialLocalPhoneNumber = mitraPhoneNumber.replace(initialDialCode, '');
-
-                    // States for phone number management
-                    const [localPhoneNumber, setLocalPhoneNumber] = useState(initialLocalPhoneNumber);
-                    const [selectedDialCode, setSelectedDialCode] = useState(initialDialCode);
-                    const [searchTerm, setSearchTerm] = useState(''); // State for search term
-                    const [filteredCountries, setFilteredCountries] = useState(countries); // Filtered countries list
-
-                    useEffect(() => {
-                      // Combine dial code and local phone number to set the field value
-                      const correctedPhoneNumber = localPhoneNumber.startsWith('0')
-                        ? localPhoneNumber.slice(1)
-                        : localPhoneNumber;
-                      field.onChange(`${selectedDialCode}${correctedPhoneNumber}`);
-                    }, [selectedDialCode, localPhoneNumber, field]);
-
-                    // Filter countries based on search term
-                    useEffect(() => {
-                      setFilteredCountries(
-                        countries.filter((country) =>
-                          country.name.toLowerCase().includes(searchTerm.toLowerCase())
-                        )
-                      );
-                    }, [searchTerm]);
-
-                    return (
+                  <FormField 
+                    control={formEditMitra.control} 
+                    name="nama_mitra" 
+                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nomor Telepon User</FormLabel>
+                        <FormLabel>Nama Mitra</FormLabel>
                         <FormControl>
-                          <div className="flex items-start gap-2">
-                            {/* Dropdown for country code */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  className="w-1/9 flex items-center gap-2 border rounded-md px-3 py-2 bg-gray-100 text-black hover:bg-gray-200"
-                                  variant="outline"
-                                >
-                                  {selectedDialCode}
-                                  <ChevronDown className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                side="bottom"
-                                align="start"
-                                className="w-64 max-h-60 overflow-y-auto shadow-lg"
-                              >
-                                <div className="p-2">
-                                  <Input
-                                    className="w-full mb-2"
-                                    placeholder="Search country..."
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                  />
-                                </div>
-                                {filteredCountries.length > 0 ? (
-                                  filteredCountries.map((country) => (
-                                    <DropdownMenuItem
-                                      className="flex justify-between text-sm cursor-pointer"
-                                      key={country.code}
-                                      onClick={() => setSelectedDialCode(country.dialCode)}
-                                    >
-                                      <span>{country.name}</span>
-                                      <span className="text-gray-500">{country.dialCode}</span>
-                                    </DropdownMenuItem>
-                                  ))
-                                ) : (
-                                  <div className="text-center text-sm text-gray-500 p-2">
-                                    No countries found
-                                  </div>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-
-                            {/* Input field for phone number */}
-                            <Input
-                              className="flex-1 border rounded-md p-2"
-                              type="tel"
-                              value={localPhoneNumber}
-                              onChange={(e) => {
-                                const numericValue = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
-                                setLocalPhoneNumber(numericValue);
-                              }}
-                              placeholder="Nomor Telepon"
-                            />
-                          </div>
+                          <Input
+                            className='bg-gray-100'
+                            type="text"
+                            defaultValue={selectedMitra?.nama}
+                            {...field}
+                            disabled
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    );
-                  }}
-                />
+                    )} 
+                  />
+
+                  <FormField 
+                    control={formEditMitra.control} 
+                    name="alamat" 
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Alamat Mitra</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            defaultValue={selectedMitra?.alamat}
+                            {...field}
+                            
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} 
+                  />
+
+                  <FormField
+                    control={formEditMitra.control}
+                    name="nomor_telepon"
+                    render={({ field }) => {
+                      // Extract the selectedDialCode and localPhoneNumber from the user data
+                      const mitraPhoneNumber = selectedMitra?.nomor_telepon || '';
+                      const initialDialCode = countries.find(country => mitraPhoneNumber.startsWith(country.dialCode))?.dialCode || '+62';
+                      const initialLocalPhoneNumber = mitraPhoneNumber.replace(initialDialCode, '');
+
+                      // States for phone number management
+                      const [localPhoneNumber, setLocalPhoneNumber] = useState(initialLocalPhoneNumber);
+                      const [selectedDialCode, setSelectedDialCode] = useState(initialDialCode);
+                      const [searchTerm, setSearchTerm] = useState(''); // State for search term
+                      const [filteredCountries, setFilteredCountries] = useState(countries); // Filtered countries list
+
+                      useEffect(() => {
+                        // Combine dial code and local phone number to set the field value
+                        const correctedPhoneNumber = localPhoneNumber.startsWith('0')
+                          ? localPhoneNumber.slice(1)
+                          : localPhoneNumber;
+                        field.onChange(`${selectedDialCode}${correctedPhoneNumber}`);
+                      }, [selectedDialCode, localPhoneNumber, field]);
+
+                      // Filter countries based on search term
+                      useEffect(() => {
+                        setFilteredCountries(
+                          countries.filter((country) =>
+                            country.name.toLowerCase().includes(searchTerm.toLowerCase())
+                          )
+                        );
+                      }, [searchTerm]);
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Nomor Telepon User</FormLabel>
+                          <FormControl>
+                            <div className="flex items-start gap-2">
+                              {/* Dropdown for country code */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    className="w-1/9 flex items-center gap-2 border rounded-md px-3 py-2 bg-gray-100 text-black hover:bg-gray-200"
+                                    variant="outline"
+                                  >
+                                    {selectedDialCode}
+                                    <ChevronDown className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  side="bottom"
+                                  align="start"
+                                  className="w-64 max-h-60 overflow-y-auto shadow-lg"
+                                >
+                                  <div className="p-2">
+                                    <Input
+                                      className="w-full mb-2"
+                                      placeholder="Search country..."
+                                      onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                  </div>
+                                  {filteredCountries.length > 0 ? (
+                                    filteredCountries.map((country) => (
+                                      <DropdownMenuItem
+                                        className="flex justify-between text-sm cursor-pointer"
+                                        key={country.code}
+                                        onClick={() => setSelectedDialCode(country.dialCode)}
+                                      >
+                                        <span>{country.name}</span>
+                                        <span className="text-gray-500">{country.dialCode}</span>
+                                      </DropdownMenuItem>
+                                    ))
+                                  ) : (
+                                    <div className="text-center text-sm text-gray-500 p-2">
+                                      No countries found
+                                    </div>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+
+                              {/* Input field for phone number */}
+                              <Input
+                                className="flex-1 border rounded-md p-2"
+                                type="tel"
+                                value={localPhoneNumber}
+                                onChange={(e) => {
+                                  const numericValue = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+                                  setLocalPhoneNumber(numericValue);
+                                }}
+                                placeholder="Nomor Telepon"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
 
                   <div className="flex gap-x-3">
                     <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
