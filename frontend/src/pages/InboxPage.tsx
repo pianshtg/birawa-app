@@ -72,7 +72,7 @@ const InboxComponent = () => {
   const {inboxMessages, isLoading: isInboxMessagesLoading, refetch: refetchInboxMessages} = useGetInbox({nama_mitra: isAdmin ? selectedMitra : metaData.nama_mitra, subject: selectedInbox}, {enabled: isAdmin ? !!selectedMitra && !!selectedInbox : !!selectedInbox})
   const mitraInboxMessages = inboxMessages?.inboxMessages
 
- 
+  const repliesContainerRef = useRef<HTMLDivElement>(null);
 
   // Ref for the reply section
   const replyRef = useRef<HTMLDivElement>(null);
@@ -129,6 +129,13 @@ const InboxComponent = () => {
       messageForm.setValue('subject', selectedInbox)
     }
   }, [selectedInbox])
+  
+  useEffect(() => {
+    if (repliesContainerRef.current) {
+      repliesContainerRef.current.scrollTop = repliesContainerRef.current.scrollHeight;
+    }
+  }, [mitraInboxMessages]);
+  
 
    // Ensure filteredInboxes is always an array
    const filteredInboxes = useMemo(() => {
@@ -312,7 +319,7 @@ const InboxComponent = () => {
               <h2 className="text-lg font-bold">{selectedInbox}</h2>
             </div>
             
-            <div className="bg-red-100 p-6 rounded-lg">
+            <div className="bg-gray-50 p-6 shadow-md rounded-lg">
               <div className="flex items-start space-x-3 mb-4">
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-sm flex-shrink-0 border-1 mt-[1px] border-black">
                   {formatMitraInitials(mitraInboxMessages[0]?.sender_nama_lengkap!)}
@@ -341,7 +348,10 @@ const InboxComponent = () => {
               
             </div>
 
-            <div className="space-y-3 overflow-y-auto h-[505px] custom-scrollbar px-1 pr-5">
+            <div
+              ref={repliesContainerRef} 
+              className="space-y-3 overflow-y-auto h-[505px] custom-scrollbar px-1 pr-5"
+            >
               {mitraInboxMessages && mitraInboxMessages?.slice(1).map((reply: Inbox, index:number) => (
                 <div key={reply.created_at} className="p-6 rounded-lg ml-12 shadow border">
                   <div className="flex items-start space-x-3">
