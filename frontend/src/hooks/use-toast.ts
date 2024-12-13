@@ -10,7 +10,6 @@ import type {
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 2000 // Sesuaikan dengan durasi yang Anda inginkan
-const TOAST_COOLDOWN = 2000 // Waktu tunggu sebelum toast bisa muncul lagi
 
 type ToasterToast = ToastProps & {
   id: string
@@ -80,42 +79,28 @@ const addToRemoveQueue = (toastId: string) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST": {
-      const currentTime = Date.now()
-      
-      // Cek apakah sudah cukup waktu sejak toast terakhir
-      if (
-        state.lastToastTimestamp && 
-        currentTime - state.lastToastTimestamp < TOAST_COOLDOWN
-      ) {
-        return state // Tolak toast baru
-      }
+      const currentTime = Date.now();
 
-      // Jika tidak ada toast atau sudah cukup waktu, tambahkan toast baru
+      // Ensure only one toast is active at a time
+      const newToasts = [{ ...action.toast, timestamp: currentTime }];
+
       return {
         ...state,
-        toasts: [{ ...action.toast, timestamp: currentTime }, ...state.toasts].slice(0, TOAST_LIMIT),
-        lastToastTimestamp: currentTime
-      }
+        toasts: newToasts.slice(0, TOAST_LIMIT), // Replace existing toasts
+        lastToastTimestamp: currentTime,
+      };
     }
 
-    case "UPDATE_TOAST":
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
-        ),
-      }
-
     case "DISMISS_TOAST": {
-      const { toastId } = action
+      const { toastId } = action;
 
       // Side effects
       if (toastId) {
-        addToRemoveQueue(toastId)
+        addToRemoveQueue(toastId);
       } else {
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
-        })
+          addToRemoveQueue(toast.id);
+        });
       }
 
       return {
@@ -128,19 +113,23 @@ export const reducer = (state: State, action: Action): State => {
               }
             : t
         ),
-      }
+      };
     }
+
     case "REMOVE_TOAST":
       if (action.toastId === undefined) {
         return {
           ...state,
           toasts: [],
-        }
+        };
       }
       return {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      }
+      };
+
+    default:
+      return state;
   }
 }
 
@@ -158,14 +147,17 @@ function dispatch(action: Action) {
 type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
-  const id = genId()
+  const id = genId();
+
+  // Dismiss all existing toasts before adding a new one
+  dispatch({ type: "DISMISS_TOAST" });
 
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
-    })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+    });
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
   dispatch({
     type: "ADD_TOAST",
@@ -174,16 +166,16 @@ function toast({ ...props }: Toast) {
       id,
       open: true,
       onOpenChange: (open) => {
-        if (!open) dismiss()
+        if (!open) dismiss();
       },
     },
-  })
+  });
 
   return {
     id: id,
     dismiss,
     update,
-  }
+  };
 }
 
 function useToast() {

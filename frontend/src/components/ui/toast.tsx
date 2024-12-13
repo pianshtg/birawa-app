@@ -19,7 +19,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed bottom-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-2 sm:right-6  sm:flex-col md:max-w-[420px]",
+      "fixed bottom-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-2 sm:right-6 sm:flex-col md:max-w-[420px]",
       className
     )}
     {...props}
@@ -60,26 +60,33 @@ const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants> & {
-      icon? : boolean
+      icon?: boolean
+      index?: number // Add index prop to control the stacking order
     }
->(({ className, variant = "default", icon = true, children,  ...props }, ref) => {
-  const iconKey = (variant && variant in toastIconMap) ? variant : "default";
+>(({ className, variant = "default", icon = true, index = 0, children, ...props }, ref) => {
+  const iconKey = variant && variant in toastIconMap ? variant : "default";
+
+  // Dynamic styles for overlapping
+  const toastStyles = {
+    zIndex: 100 + index, // Increment z-index based on the index
+    transform: `translateY(-${index * 10}px)`, // Offset each toast slightly upward
+  };
+
   return (
     <ToastPrimitives.Root
       ref={ref}
+      style={toastStyles} // Apply dynamic styles
       className={cn(toastVariants({ variant }), className)}
       {...props}
     >
-     <div className="flex items-center w-full">
-       {icon && toastIconMap[iconKey as keyof typeof toastIconMap ] }
-        <div className="flex-1">
-          {children}
-        </div>
+      <div className="flex items-center w-full">
+        {icon && toastIconMap[iconKey as keyof typeof toastIconMap]}
+        <div className="flex-1">{children}</div>
       </div>
     </ToastPrimitives.Root>
-  )
-})
-Toast.displayName = ToastPrimitives.Root.displayName
+  );
+});
+Toast.displayName = ToastPrimitives.Root.displayName;
 
 const ToastAction = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Action>,

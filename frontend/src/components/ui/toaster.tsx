@@ -13,10 +13,18 @@ export function Toaster() {
 
   return (
     // Durasi Toast 4detik
-    <ToastProvider duration={2000}>  
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+    <ToastProvider duration={2000}>
+      {toasts.map(function ({ id, title, description, action, ...props }, index) {
+        // Pass `index` as a prop to control overlapping behavior
         return (
-          <Toast key={id} {...props}>
+          <Toast
+            key={id}
+            {...props}
+            style={{
+              zIndex: 100 + index, // Higher z-index for newer toasts
+              transform: `translateY(-${index * 10}px)`, // Slight upward shift for overlapping
+            }}
+          >
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
