@@ -152,7 +152,7 @@ const DaftarPekerjaan = () => {
   const handleBuatLaporanClick = () => {
     if (selectedRow !== null) {
       const selectedJob = paginatedData[selectedRow]
-      navigate('/daftarpekerjaan/buatlaporan-test', {
+      navigate('/daftarpekerjaan/buatlaporan', {
         state: {
           nama_mitra: metaData.nama_mitra,
           nomor_kontrak: selectedJob.nomor_kontrak,

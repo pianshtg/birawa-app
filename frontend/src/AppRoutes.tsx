@@ -15,7 +15,6 @@ import ProtectedRoute from "@/auth/ProtectedRoute"
 import DaftarMitraPage from "@/pages/CPM/tambahmitra/DaftarMitraPage"
 import MitraDetailPage from "@/pages/CPM/detailmitra/MitraDetailPage"
 import BuatLaporanPage from "@/pages/Mitra/buatlaporan/BuatLaporanPage"
-import BuatLaporanPageTest from "@/pages/Mitra/buatlaporan-jeki/BuatLaporanPageTest.tsx"
 
 function AppRoutes() {
   const isMobile = useDetection(620)
@@ -106,14 +105,6 @@ function AppRoutes() {
           element={
             <Layout>
               <BuatLaporanPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/daftarpekerjaan/buatlaporan-test"
-          element={
-            <Layout>
-              <BuatLaporanPageTest />
             </Layout>
           }
         />

@@ -25,6 +25,7 @@ export type User = {
     nomor_telepon: string ,
     is_verified?:number,
     is_active?:number,
+    status?: number
 }
 
 export type Shift = {
