@@ -166,3 +166,38 @@ export function useAuth() {
 
   return { isAuthenticated, isLoading };
 }
+
+type ChangePasswordRequest = {
+  old_password: string,
+  new_password: string
+}
+
+export function useChangePassword() {
+  async function useChangePasswordRequest(credentials: ChangePasswordRequest) {
+    const csrfToken = await getCsrfToken()
+    const response = await fetch(`${API_BASE_URL}/api/auth/pass`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Client-Type": "web",
+        "X-CSRF-TOKEN": csrfToken
+      },
+      body: JSON.stringify(credentials),
+      credentials: "include",
+    })
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message)
+    }
+    return response.ok;
+  }
+
+  const {
+    mutateAsync: changePassword,
+    isLoading,
+    isSuccess,
+    error,
+  } = useMutation(useChangePasswordRequest)
+
+  return { changePassword, isLoading, isSuccess, error };
+}
