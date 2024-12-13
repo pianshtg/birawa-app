@@ -14,7 +14,7 @@ async function loginUser (req: Request, res: Response) {
         
         if (clientType) {
 
-            const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
+            const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ? AND is_active = 1', [email])
     
             // Check if user existed
             if (user.length === 0) {
@@ -315,9 +315,73 @@ async function verifyEmail(req: Request, res: Response) {
     }
 }
 
+async function changePassword(req: Request, res: Response) {
+    console.log(req.body)
+    try {
+        const accessToken = req.accessToken
+        // console.log("Access token received:", accessToken) // Debug.
+        const newAccessToken = req.newAccessToken
+        // console.log("New access token received:", newAccessToken) // Debug.
+        const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
+        // console.log(metaData) // Debug.
+        const userId = metaData.user_id
+        const permissions = metaData.permissions
+        
+        if (permissions.includes('update_user')) {
+            const {old_password, new_password} = req.body
+            console.log("Old:", old_password) //Debug.
+            console.log("New:", new_password) //Debug.
+            
+            if (!old_password || !new_password) {
+                res.status(400).json({message: "Missing password!"})
+                return
+            }
+            
+            const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [userId])
+            if (user.length === 0) {
+                res.status(409).json({message: "Failed to find user!"})
+                return
+            }
+            
+            const [hashed_password] = await pool.execute<RowDataPacket[]>("SELECT hashed_password FROM users_hashed_password WHERE user_id = ?", [userId])
+            if (hashed_password.length === 0) {
+                res.status(500).json({ message: "Password not found for user." });
+                return;
+            }
+            
+            // Check the password
+            const isAuthenticated = await bcrypt.compare(old_password, hashed_password[0].hashed_password)
+            
+            if (isAuthenticated) {
+                let new_hashed_password = await bcrypt.hash(new_password, 10)
+                await pool.execute<RowDataPacket[]>('UPDATE users_hashed_password SET hashed_password = ? WHERE user_id = ?', [new_hashed_password, userId])
+            
+                res.status(201).json({
+                    message: "Successfully changed password!",
+                    newAccessToken
+                })
+                return
+                
+            } else {
+                res.status(409).json({message: 'Wrong old password!'})
+                return
+            }
+            
+        } else {
+            res.status(401).json({message: "Unauthorized."})
+            return
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Failed to change password.' })
+        return
+    }
+}
+
 export default {
     loginUser,
     logoutUser,
     authenticateUser,
-    verifyEmail
+    verifyEmail,
+    changePassword
 }
