@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -7,6 +7,8 @@ import {z} from "zod";
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useToast } from "@/hooks/use-toast"
+import { useChangePassword } from '@/api/AuthApi';
+import LoadingButton from '@/components/LoadingButton';
 
 const formResetSchema = z.object({
     currentPassword: z.string().min(1, "Sandi lama wajib diisi"),
@@ -20,43 +22,47 @@ const formResetSchema = z.object({
 }).refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "Konfirmasi sandi tidak cocok dengan sandi baru",
     path: ["confirmNewPassword"], // Path menentukan di field mana error akan ditampilkan
-});
+}).refine((data) => data.currentPassword !== data.newPassword, {
+    message: "Sandi baru tidak boleh sama dengan sandi lama",
+    path: ["currentPassword"], // Path menentukan di field mana error akan ditampilkan
+})
 
 export type ResetPasswordSchema = z.infer<typeof formResetSchema>
 
 const Reset = () => {
+    
+    const {changePassword, isLoading: isChangingPassword, isSuccess: isChangePasswordSuccess, error: isChangePasswordError} = useChangePassword()
+    
     const { toast } = useToast()
     const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState<boolean>(false);
     const [isEditing,setIsEditing] = useState<boolean>(false);
 
- 
-
     const formResetPassword = useForm<ResetPasswordSchema>({
     resolver: zodResolver(formResetSchema),
     defaultValues:{
-        currentPassword:"aaa",
-        newPassword:"A1!D",
-        confirmNewPassword:"A1!D",
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword:"",
     }
     })
 
-    const handleEditPassword = () => {
+    function handleEditPassword () {
         if (!isEditing) {
             // When entering edit mode
             formResetPassword.reset();
             toast({
-                title: "Edit Mode Diaktifikan",
+                title: "Edit Mode Diaktifkan",
                 description: "Anda Bisa Mengubah data di form",
                 variant: "warning"
             });
         } else {
             // When canceling edit mode
             formResetPassword.reset({
-                currentPassword: "aaa",
-                newPassword: "A1!D",
-                confirmNewPassword: "A1!D"
+                currentPassword: "",
+                newPassword: "",
+                confirmNewPassword: ""
             });
             toast({
                 title: "Edit Mode Dibatalkan",
@@ -67,15 +73,35 @@ const Reset = () => {
         setIsEditing((prev) => !prev);
     };
 
-    const handleResetPassword = (data:ResetPasswordSchema) => {
-
-    console.log("data adalah :",data);
-    toast({
-        title: "Sandi Anda telah diubah",
-        description: "Cek kembali dengan login ulang",
-        variant: "success",
-      })
-    };
+    async function handleResetPassword (data: ResetPasswordSchema) {
+        try {
+            console.log("Credentials:", data)
+            await changePassword({
+              old_password: data.currentPassword,
+              new_password: data.newPassword,
+            })
+          } catch (error) {
+            console.error("Error editing user (profile):", error) //Debug.
+          }
+    }
+    
+    useEffect(() => {
+        if (isChangePasswordSuccess) {
+            toast({
+                title: 'Successfully change password!',
+                variant: 'success'
+            })
+        }
+    }, [isChangePasswordSuccess])
+    
+    useEffect(() => {
+        if (isChangePasswordError) {
+            toast({
+                title: isChangePasswordError.toString(),
+                variant: 'danger'
+            })
+        }
+    }, [isChangePasswordError])
 
     return (
     <div className='flex flex-col gap-y-7'>
@@ -96,21 +122,22 @@ const Reset = () => {
                     control={formResetPassword.control}
                     name='currentPassword'
                     render={({field}) => (
-                        <FormItem >
+                        <FormItem>
                             <FormLabel className='w-48'>Sandi Lama</FormLabel>
                             <div className="relative w-full">
                                 <FormControl className="relative top-[-4px] mb-7">
                                     <Input
-                                    type={showOldPassword ? "text" : "password"}
-                                    placeholder="Masukkan Sandi Lama Anda"
-                                    className="w-full pr-10 mb-0"
-                                    disabled={!isEditing}
-                                    {...field} required/>
+                                        type={showOldPassword ? "text" : "password"}
+                                        placeholder="Masukkan Sandi Lama Anda"
+                                        className="w-full pr-10 mb-0 font-sans"
+                                        disabled={!isEditing}
+                                        {...field} required
+                                    />
                                 </FormControl>
                                 <button
                                     type="button"
                                     onClick={() => setShowOldPassword(!showOldPassword)}
-                                    className="absolute right-3 top-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    className={`absolute right-3 top-4 -translate-y-1/2 text-gray-500 ${isEditing && 'hover:text-gray-700'}`}
                                     disabled={!isEditing}
                                     >
                                     {showOldPassword ? (
@@ -136,14 +163,14 @@ const Reset = () => {
                                 <Input
                                     type={showNewPassword ? "text" : "password"}
                                     placeholder="Masukkan Sandi Baru Anda"
-                                    className="w-full pr-10 mb-0"
+                                    className="w-full pr-10 mb-0 font-sans"
                                     disabled={!isEditing}
                                     {...field} required/>
                                 </FormControl>
                                 <button
                                     type="button"
                                     onClick={() => setShowNewPassword(!showNewPassword)}
-                                    className="absolute right-3 top-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    className={`absolute right-3 top-4 -translate-y-1/2 text-gray-500 ${isEditing && 'hover:text-gray-700'}`}
                                     disabled={!isEditing}
                                     >
                                     {showNewPassword ? (
@@ -169,7 +196,7 @@ const Reset = () => {
                                 <Input
                                     type={showConfirmNewPassword? "text" : "password"}
                                     placeholder="Masukkan Konfimasi Sandi Baru Anda"
-                                    className="w-full pr-10 mb-0"
+                                    className="w-full pr-10 mb-0 font-sans"
                                     disabled={!isEditing}
                                     {...field} required/>
                                 </FormControl>
@@ -177,7 +204,7 @@ const Reset = () => {
                                     type="button"
                                     disabled={!isEditing}
                                     onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                                    className="absolute right-3 top-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    className={`absolute right-3 top-4 -translate-y-1/2 text-gray-500 ${isEditing && 'hover:text-gray-700'}`}
                                     >
                                     {showConfirmNewPassword ? (
                                         <EyeOff size={18}/>
@@ -191,12 +218,16 @@ const Reset = () => {
                     )}
                     />  
                 <div className='flex justify-end py-3 w-fit'>
-                    <Button 
-                        type='submit'
-                        disabled={!isEditing}
-                        >
-                        Simpan
-                    </Button>
+                    {isChangingPassword ? (
+                        <LoadingButton/>
+                    ) : (
+                        <Button 
+                            type='submit'
+                            disabled={!isEditing}
+                            >
+                            Simpan
+                        </Button>
+                    )}
                 </div>    
             </form>
         </Form>
