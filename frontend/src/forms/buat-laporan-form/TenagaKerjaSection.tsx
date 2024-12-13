@@ -37,7 +37,7 @@ const shiftSchema = z.object({
   if (startTime < 360) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Waktu mulai shift harus lebih dari 06:00 WIB",
+      message: "Waktu mulai shift harus lebih dari pukul 06:00",
       path: ["waktu_mulai"], // Attach error to waktu_mulai
     })
   }
@@ -45,7 +45,7 @@ const shiftSchema = z.object({
   if (endTime > 1320) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Waktu berakhir shift harus kurang dari 22:00 WIB",
+      message: "Waktu berakhir shift harus kurang dari pukul 22:00",
       path: ["waktu_berakhir"], // Attach error to waktu_berakhir
     })
   }
@@ -236,7 +236,16 @@ export default function TenagaKerjaSection() {
           <FormItem>
             <FormLabel>Jumlah</FormLabel>
             <FormControl>
-              <Input {...field} type='number' placeholder="Nama Pekerjaan" />
+              <Input 
+                {...field} 
+                type='number' 
+                placeholder="Nama Pekerjaan" 
+                onInput={(e) => {
+                  const input = e.currentTarget.value;
+                  e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                  field.onChange(e); // Update form state with valid value
+                }}
+              />
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </FormItem>
@@ -280,7 +289,17 @@ export default function TenagaKerjaSection() {
                         <FormItem>
                           <FormLabel>{field.peran}</FormLabel>
                           <FormControl>
-                            <Input {...jumlahField} type="number" min={0} className="w-full border rounded p-2 text-center" />
+                            <Input 
+                              {...jumlahField} 
+                              type="number" 
+                              min={0} 
+                              className="w-full border rounded p-2 text-center"
+                              onInput={(e) => {
+                                const input = e.currentTarget.value;
+                                e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                                jumlahField.onChange(e); // Update form state with valid value
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -334,6 +353,11 @@ export default function TenagaKerjaSection() {
                             className="w-full border rounded p-2 text-center"
                             type="number" 
                             min={0}
+                            onInput={(e) => {
+                              const input = e.currentTarget.value;
+                              e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                              jumlahField.onChange(e); // Update form state with valid value
+                            }}
                           />
                         </FormControl>
                         <FormMessage />

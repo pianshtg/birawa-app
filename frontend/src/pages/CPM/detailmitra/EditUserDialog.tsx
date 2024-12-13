@@ -18,7 +18,7 @@ const formEditUserSchema = z.object({
   nama_lengkap: z.string().min(1, "Nama pengguna wajib diisi").max(40, "Nama pengguna terlalu panjang").optional(),
   email: z.string().email("Format email tidak valid").min(1, "Email pengguna wajib diisi").optional(),
   nomor_telepon: z.string().min(4,"Nomor Telephone terlalu sedikit").max(16, "Nomor Telephone melebih batas"),
-  // is_active: z.boolean(),
+  status: z.coerce.number().min(0).max(2).optional(),
 });
 
 export type EditUserSchema = z.infer<typeof formEditUserSchema>;
@@ -35,6 +35,9 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
   // Initialize the form with user data, always call useForm
   const form = useForm<EditUserSchema>({
     resolver: zodResolver(formEditUserSchema),
+    defaultValues: {
+      status: user?.status || 0, // Default to 0 if not provided
+    }
   });
 
   const countries: Country[] = getCountries().map(country => ({
@@ -42,7 +45,25 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
     dialCode: `+${getCountryCallingCode(country)}`,
     name: new Intl.DisplayNames(['id'], { type: 'region' }).of(country) || country
   })).sort((a, b) => a.name.localeCompare(b.name));    
+  
+  const [status, setStatus] = useState(user?.status || 0);
 
+  // Synchronize the status with form state when it's updated
+  useEffect(() => {
+    console.log('Status:', status)
+    form.setValue('status', status)
+  }, [status]);
+  
+  useEffect(() => {
+    if (!isOpen) {
+      setStatus(0)
+    }
+  }, [isOpen])
+
+  // Handle the "Verifikasi Pengguna" button click
+  const handleVerifyUser = () => {
+    setStatus((prevStatus) => (prevStatus === 0 ? 1 : 0)); // Toggle between 0 and 1
+  };
 
   // Render the dialog if user data is available, otherwise show a fallback message
   return (
@@ -58,14 +79,15 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
                 <FormField 
                   control={form.control} 
                   name="nama_lengkap" 
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormLabel>Nama Pengguna</FormLabel>
                       <FormControl>
                         <Input 
-                        {...field} 
-                        placeholder="Masukkan Nama Pengguna"
-                        defaultValue={user.nama_lengkap}/>
+                          placeholder="Masukkan Nama Pengguna"
+                          defaultValue={user.nama_lengkap}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -75,16 +97,17 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
                 <FormField 
                   control={form.control} 
                   name="email" 
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormLabel>Email Pengguna</FormLabel>
                       <FormControl>
                         <Input 
-                          {...field} 
+                          className='bg-gray-100'
                           type="email" 
                           placeholder="Masukkan Email Pengguna" 
                           defaultValue={user.email}
-                          disabled={true}
+                          disabled
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -189,9 +212,44 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
                     );
                   }}
                 />
+                
+                {user.is_active && (
+                  user.is_verified ? (
+                    <div className='flex items-center space-x-4 shadow-md rounded-md p-1 pl-4 border-gray-200 border-[1px]'>
+                      <div className={`flex bg-[#008450] opacity-70 w-[12px] h-[12px] rounded-full border-[1px] border-black`}/>
+                      <p className='text-[#003822] mb-[2px] font-bold'>Aktif</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className='flex items-center space-x-4 shadow-md rounded-md p-1 pl-4 border-gray-200 border-[1px]'>
+                        {status === 0 ? (
+                          <div className='flex w-full items-center space-x-4'>
+                            <div className={`flex bg-[#EFB700] opacity-70 w-[12px] h-[12px] rounded-full border-[1px] border-black`}/>
+                            <p className='text-[#EFB700] mb-[2px] font-bold'>Belum Verifikasi</p>
+                          </div>
+                        ) : (
+                          <div className='flex w-full items-center space-x-4'>
+                            <div className={`flex bg-[#008450] opacity-70 w-[12px] h-[12px] rounded-full border-[1px] border-black`}/>
+                            <p className='text-[#003822] mb-[2px] font-bold'>Aktif</p>
+                          </div>
+                        )}
+                        <Button 
+                          className='max-w-[40%] text-wrap active:bg-red-700' 
+                          type='button'
+                          onClick={handleVerifyUser}
+                        >
+                          {status === 0 ? 'Verifikasi Manual' : 'Batalkan'}
+                        </Button>
+                      </div>
+                      {status === 1 && (
+                        <p className='text-red-500'>* Status verifikasi pengguna akan baru diubah ketika form disubmit.</p>
+                      )}
+                    </>
+                  )
+                )}
 
                 <div className="flex justify-end gap-4">
-                  <Button type="button" variant="outline" onClick={onClose}>
+                  <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                     Batal
                   </Button>
                   {isLoading ? (

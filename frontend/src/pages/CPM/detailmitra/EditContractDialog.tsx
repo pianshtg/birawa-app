@@ -79,7 +79,12 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
                         {...field} 
                         type="number"   
                         defaultValue={contract.nilai}  
-                        />
+                        onInput={(e) => {
+                          const input = e.currentTarget.value;
+                          e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                          field.onChange(e); // Update form state with valid value
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -116,7 +121,12 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
                         type="number" 
                         placeholder="Masukkan Jangka Waktu"  
                         defaultValue={contract.jangka_waktu}
-                        />
+                        onInput={(e) => {
+                          const input = e.currentTarget.value;
+                          e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                          field.onChange(e); // Update form state with valid value
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

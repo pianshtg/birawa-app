@@ -7,9 +7,9 @@ import { useState } from "react";
 import { useForm, useFormContext, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import CustomDatePicker from "@/components/CustomDatePicker";
 import Accordion from "@/components/custom/atom/Accordion";
 import ShadowContainer from "@/components/custom/atom/ShadowContainer";
+import { Pekerjaan } from "@/types";
 
 
 const pekerjaanSchema = z.object({
@@ -46,7 +46,7 @@ const KontrakSection = () => {
     setIsDialogOpen(true)
   };
 
-  const handleSavePekerjaan = pekerjaanForm.handleSubmit((data) => {
+  const handleSavePekerjaan = (data: Pekerjaan) => {
     if (currentPekerjaanIndex === null) {
       // Add new pekerjaan
       append(data)
@@ -56,7 +56,7 @@ const KontrakSection = () => {
     }
     setIsDialogOpen(false)
     setCurrentPekerjaanIndex(null)
-  })
+  }
 
   return (
     <Accordion title="Detail Kontrak">
@@ -97,7 +97,16 @@ const KontrakSection = () => {
                 <FormItem>
                   <FormLabel>Nilai Kontrak</FormLabel>
                   <FormControl>
-                    <Input placeholder="Masukan Nilai Kontrak" type="number" {...field} />
+                    <Input 
+                      {...field} 
+                      type="number" 
+                      placeholder="Masukan Nilai Kontrak" 
+                      onInput={(e) => {
+                        const input = e.currentTarget.value;
+                        e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                        field.onChange(e); // Update form state with valid value
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,11 +115,11 @@ const KontrakSection = () => {
             <FormField
               control={control}
               name="kontrak.tanggal"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tanggal Kontrak</FormLabel>
                   <FormControl>
-                    <CustomDatePicker name="kontrak.tanggal" control={control} placeholder="dd/mm/yyyy" />
+                    <Input {...field} type='date' placeholder='dd/mm/yyyy' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,7 +132,16 @@ const KontrakSection = () => {
                 <FormItem>
                   <FormLabel>Jangka Waktu</FormLabel>
                   <FormControl>
-                    <Input placeholder="Masukan Jangka Waktu Kontrak" type="number" {...field} />
+                    <Input 
+                      {...field} 
+                      type="number" 
+                      placeholder="Masukan Jangka Waktu Kontrak" 
+                      onInput={(e) => {
+                        const input = e.currentTarget.value;
+                        e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                        field.onChange(e); // Update form state with valid value
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,7 +163,13 @@ const KontrakSection = () => {
                 <DialogTitle>{currentPekerjaanIndex !== null ? "Edit Pekerjaan" : "Tambah Pekerjaan"}</DialogTitle>
               </DialogHeader>
               <DialogDescription>
-                <form onSubmit={handleSavePekerjaan}>
+                <form 
+                  onSubmit={(e) =>{
+                    e.preventDefault()
+                    e.stopPropagation()
+                    pekerjaanForm.handleSubmit(handleSavePekerjaan)(e)
+                  }}
+                >
                   <FormField
                     control={pekerjaanForm.control}
                     name="nama"

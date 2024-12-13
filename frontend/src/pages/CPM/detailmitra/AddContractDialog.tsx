@@ -8,7 +8,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { z } from "zod";
 import { DeleteIcon } from 'lucide-react'
 import LoadingButton from '@/components/LoadingButton'
-import CustomDatePicker from '@/components/CustomDatePicker'
 
 // Define schema for contract form
 const formAddContractSchema = z.object({
@@ -142,7 +141,16 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
                 <FormItem>
                   <FormLabel>Nilai Kontrak</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" placeholder="Masukkan Nilai Kontrak" />
+                    <Input 
+                      {...field} 
+                      type="number" 
+                      placeholder="Masukkan Nilai Kontrak" 
+                      onInput={(e) => {
+                        const input = e.currentTarget.value;
+                        e.currentTarget.value = input.replace(/[^0-9]/g, ''); // Allow only numbers
+                        field.onChange(e); // Update form state with valid value
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -152,11 +160,11 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
             <FormField
               control={formAddContract.control}
               name="tanggal"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tanggal Kontrak</FormLabel>
                   <FormControl>
-                    <CustomDatePicker name="tanggal" control={formAddContract.control} placeholder="dd/mm/yyyy" />
+                    <Input {...field} type='date' placeholder='dd/mm/yyyy' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +178,17 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
                 <FormItem>
                   <FormLabel>Jangka Waktu (Hari)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" placeholder="Masukkan Jangka Waktu"  />
+                    <Input 
+                      {...field} 
+                      type='number' 
+                      placeholder="Masukkan Jangka Waktu"  
+                      onInput={(e) => {
+                        const input = e.currentTarget.value;
+                        e.currentTarget.value = input.replace(/[^0-9]/g, '')
+                        field.onChange(e)
+                      }}
+                      defaultValue={0}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -299,13 +317,13 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
             )}
 
             <div className="col-span-2 flex justify-end gap-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                 Batal
               </Button>
               {isLoading ? (
                 <LoadingButton/>
               ) : (
-                <Button type="submit" className="bg-red-500 text-white" disabled={!formAddContract.formState.isValid}>
+                <Button type="submit" className="bg-red-600 text-white" disabled={!formAddContract.formState.isValid}>
                   Simpan
                 </Button>
               )}

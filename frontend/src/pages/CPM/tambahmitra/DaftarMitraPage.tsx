@@ -320,6 +320,7 @@ const DaftarMitra = () => {
                       <FormLabel>Nama Mitra</FormLabel>
                       <FormControl>
                         <Input
+                          className='bg-gray-100'
                           type="text"
                           defaultValue={selectedMitra?.nama}
                           {...field}

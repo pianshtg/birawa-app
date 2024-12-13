@@ -173,7 +173,7 @@ const AddUserDialog = ({ isOpen, onClose, onSubmit, isCreatingUserLoading }: Pro
               /> 
 
               <div className="flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={onClose} disabled={isCreatingUserLoading}>
                   Batal
                 </Button>
                 {isCreatingUserLoading ? (

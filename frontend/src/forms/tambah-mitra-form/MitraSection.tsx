@@ -141,45 +141,6 @@ const MitraSection = () => {
                                 )
                             }}
                         />
-                        {/* <div>
-                            <label className="block text-sm font-medium mb-1">Nomor Telepon Perusahaan</label>
-                            <div className="flex">
-                                <div className="relative">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCompanyPhoneOpen(!isCompanyPhoneOpen)}
-                                    className="flex items-center border rounded-l px-3 py-2 bg-gray-50 hover:bg-gray-100"
-                                >
-                                    {selectedDialCode}
-                                    <ChevronDown className="w-4 h-4 ml-1" />
-                                </button>
-                                
-                                {isCompanyPhoneOpen && (
-                                    <div className="absolute  z-50 left-28 -top-12  mt-1 w-56 max-h-60 overflow-auto  bg-white border rounded-lg shadow-lg">
-                                        {countries.map((country) => (
-                                            <button
-                                                type="button"
-                                                key={country.code}
-                                                onClick={() => handleCountryChange(country, true)}
-                                                className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center space-x-2"
-                                            >
-                                            <span>{country.name}</span>
-                                            <span className="text-gray-500">{country.dialCode}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                                </div>
-                                <input
-                                    type="tel"
-                                    value={companyPhoneNumber}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyPhoneNumber(e.target.value)}
-                                    placeholder="Nomor Telepon"
-                                    className="flex-1 border border-l-0 rounded-r p-2"
-                                    name='NomorTelpPerusahaan'
-                                />
-                            </div>
-                        </div> */}
                     </div>
                 </div>
             </ShadowContainer>

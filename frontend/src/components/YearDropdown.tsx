@@ -24,6 +24,7 @@ const YearDropdown = ({ date, changeYear, minYear, maxYear }: Props) => {
     <div className="relative w-auto">
       <div
         className="flex cursor-pointer font-normal tracking-[1px] text-[12.6px] bg-gray-200 items-center"
+        style={{backgroundColor: 'transparent'}}
         onClick={toggleDropdown}
       >
         {date?.getFullYear()}
@@ -36,7 +37,7 @@ const YearDropdown = ({ date, changeYear, minYear, maxYear }: Props) => {
           {Array.from({ length: maxYear - minYear + 1 }, (_, i) => (
             <div
               key={i}
-              className="px-2 py-1 cursor-pointer hover:bg-gray-200 text-[12px] rounded-xs"
+              className="px-2 py-1 cursor-pointer hover:bg-gray-200 hover:font-bold text-[12px] rounded-xs"
               onClick={() => handleOptionClick(maxYear - i)}
             >
               {maxYear - i}

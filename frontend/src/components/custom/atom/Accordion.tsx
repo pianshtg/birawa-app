@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
-interface AccordionProps {
-  title: string;
-  children: React.ReactNode;
+type Props = {
+  title: string
+  children: React.ReactNode
 }
 
-export const Accordion: React.FC<AccordionProps> = ({ title, children }) => {
+export const Accordion = ({ title, children }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 

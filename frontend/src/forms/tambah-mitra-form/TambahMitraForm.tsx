@@ -89,7 +89,7 @@ const TambahMitraForm = ({onSubmit, isLoading}: Props) => {
                     <Button type='reset' className='w-1/3' variant="outline" asChild >
                         <Link to="/daftarmitra">Back</Link>
                     </Button>
-                    {isLoading ? <div className="w-1/3"><LoadingButton/></div> : <Button type='submit' className='w-2/3'>Submit</Button>}
+                    {isLoading ? <div className="w-1/3"><LoadingButton/></div> : <Button type='submit' className='w-2/3' disabled={!form.formState.isValid}>Submit</Button>}
                 </div>
             </form>
         </Form>

@@ -320,8 +320,8 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
       cuaca_arr: rawData.cuaca_arr,
       image_arr: rawData.image_arr
     }
-    console.log("Raw Form Data (before validation):", rawData)
-    console.log("Raw Form Data (after data processing):", formDataPayload)
+    console.log("Raw Form Data (before validation):", rawData) //Debug.
+    console.log("Raw Form Data (after data processing):", formDataPayload) //Debug.
   
     // Now trigger validation
     form.handleSubmit(handleSubmit)();
@@ -335,7 +335,7 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
         <AktivitasSection />
         <CuacaSection />
         <div className="flex justify-end mt-6 gap-x-3">
-          <Button type="reset" variant="outline">
+          <Button type="reset" variant="outline" disabled={isLoading}>
             Reset
           </Button>
           {isLoading ? <LoadingButton /> : <Button type="submit" disabled={!form.formState.isValid}>Submit</Button>}
