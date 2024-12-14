@@ -42,7 +42,7 @@ export async function uploadImages(
             uploadedImageUrls.push(uploadResult.secure_url)
                 
         } catch (error) {
-            console.error(`Failed to process or upload image: ${error}`) // Debug.
+            console.error("Failed to process or upload image:", error instanceof Error ? error.message : error) //Debug.
             throw new Error("Failed to upload images.")
         }
     }
