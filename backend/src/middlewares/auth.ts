@@ -116,7 +116,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
                             secure: process.env.ENVIRONMENT as string === 'production',
-                            sameSite: 'none',  // Required for cross-site cookies (e.g., with CORS)
+                            sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
                             maxAge: 15 * 60 * 1000,  // 15 minutes
                             path: '/'
                         });
@@ -177,7 +177,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
                             secure: process.env.ENVIRONMENT as string === 'production',
-                            sameSite: 'none',  // Required for cross-site cookies (e.g., with CORS)
+                            sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
                             maxAge: 15 * 60 * 1000,  // 15 minutes
                             path: '/'
                         });

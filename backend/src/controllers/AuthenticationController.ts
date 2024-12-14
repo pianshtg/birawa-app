@@ -77,7 +77,7 @@ async function loginUser (req: Request, res: Response) {
                     
                     res.cookie('accessToken', accessToken, {
                         secure: process.env.ENVIRONMENT as string === 'production',
-                        sameSite: 'none',
+                        sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
                         maxAge: 15 * 60 * 1000,
                         path: '/'
                     })
@@ -133,9 +133,9 @@ async function logoutUser (req: Request, res: Response) {
                 sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
             })
             res.clearCookie('accessToken', {
-                httpOnly: true,
+                httpOnly: false,
                 secure: process.env.ENVIRONMENT as string === 'production',
-                sameSite: 'none',
+                sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
             })
         }
         
@@ -197,7 +197,7 @@ async function authenticateUser(req: Request, res: Response) {
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
                             secure: process.env.ENVIRONMENT as string === 'production',
-                            sameSite: 'none',
+                            sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
                             maxAge: 15 * 60 * 1000, // 15 minutes
                             path: '/',
                         });
@@ -262,7 +262,7 @@ async function authenticateUser(req: Request, res: Response) {
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
                             secure: process.env.ENVIRONMENT as string === 'production',
-                            sameSite: 'none',
+                            sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
                             maxAge: 15 * 60 * 1000, // 15 minutes
                             path: '/',
                         });
