@@ -12,8 +12,8 @@ declare global {
 const csrfConfig = csrf({
     cookie: {
         httpOnly: false, // Allow JavaScript access to the CSRF token
-        secure: true,
-        sameSite: 'strict'
+        secure: false, // don't forget to set this to true
+        sameSite: 'none' // don't forget to set this to strict
     }
 })
 
