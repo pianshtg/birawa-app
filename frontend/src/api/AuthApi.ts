@@ -15,10 +15,10 @@ export async function getCsrfToken() {
   });
   if (response.ok) {
       const data = await response.json();
-      console.log("CSRF Token fetched:", data.csrfToken); // Debug
+      // console.log("CSRF Token fetched:", data.csrfToken); // Debug
       return data.csrfToken;
   } else {
-      console.error("Failed to retrieve CSRF token:", await response.text());
+      // console.error("Failed to retrieve CSRF token:", await response.text());
       throw new Error("Failed to retrieve CSRF token");
   }
 }

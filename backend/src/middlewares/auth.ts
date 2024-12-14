@@ -24,7 +24,7 @@ export function generateRefreshToken (data: any) {
     return jwt.sign(data, process.env.REFRESH_TOKEN_SECRET_KEY as string, {expiresIn: '7d'})
 }
 
-export async function clientType(req: Request, res:Response, next: NextFunction) {
+export async function clientType(req: Request, res: Response, next: NextFunction) {
     
     console.log("\nChecking the client type...") // Debug.
     
@@ -38,7 +38,7 @@ export async function clientType(req: Request, res:Response, next: NextFunction)
             refreshToken = req.cookies.refreshToken
         } else if (clientType === 'mobile') {
             // Fetch refresh token from header and checking the request input
-            const refreshTokenHeader = req.headers['x-refresh-token'];
+            const refreshTokenHeader = req.headers['x-refresh-token']
             if (Array.isArray(refreshTokenHeader)) {
                 refreshToken = refreshTokenHeader[0]; // Use the first value if it's an array
             } else {
@@ -78,12 +78,12 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
         // If there's an access token, validate it normally
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
             console.log('Successfully authenticating with access token. Proceeding to the controller...'); // Debug.
-            next();
+            next()
         } else {
             let refreshToken = req.refreshToken
             if (refreshToken) {
                 // If no access token but there is a refresh token, we try to renew the access token
-                console.log("Access token is expired or missing, but refresh token is present. Renewing access token...");
+                console.log("Access token is expired or missing, but refresh token is present. Renewing access token...")
     
                 // Decode the refresh token
                 try {
@@ -127,6 +127,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
     
                     console.log("Successfully renewed access token:", newAccessToken); // Debug.
                     next(); // Proceed to the next middleware or controller
+                    
                 } catch (error) {
                     console.log("Error while renewing access token:", error); // Debug.
                     res.status(401).json({ message: "Unauthorized." });
@@ -187,6 +188,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
     
                     console.log("Successfully renewed access token:", newAccessToken); // Debug.
                     next(); // Proceed to the next middleware or controller
+                    
                 } catch (error) {
                     console.log("Error while renewing access token:", error); // Debug.
                     res.status(401).json({ message: "Unauthorized." });

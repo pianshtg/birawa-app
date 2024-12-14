@@ -31,6 +31,7 @@ app.use(cors({
     credentials: true
 }))
 app.use(cookieParser())
+app.use(csrfProtection)
 
 // Health Check
 app.get("/", async (req: Request, res: Response) => {
@@ -41,12 +42,12 @@ app.get("/", async (req: Request, res: Response) => {
 app.use("/api/test", testRoute)
 
 // Routes
-app.use("/api/auth", csrfProtection, authenticationRoute)
-app.use("/api/mitra", csrfProtection, clientType, jwtCheck, mitraRoute)
-app.use("/api/kontrak", csrfProtection, clientType, jwtCheck, kontrakRoute)
-app.use("/api/user", csrfProtection, clientType, jwtCheck, userRoute)
-app.use("/api/laporan", csrfProtection, clientType, jwtCheck, laporanRoute)
-app.use("/api/inbox", csrfProtection, clientType, jwtCheck, inboxRoute)
+app.use("/api/auth", authenticationRoute)
+app.use("/api/mitra", clientType, jwtCheck, mitraRoute)
+app.use("/api/kontrak", clientType, jwtCheck, kontrakRoute)
+app.use("/api/user", clientType, jwtCheck, userRoute)
+app.use("/api/laporan", clientType, jwtCheck, laporanRoute)
+app.use("/api/inbox", clientType, jwtCheck, inboxRoute)
 
 // Start Server
 async function startServer() {
