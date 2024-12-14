@@ -392,7 +392,7 @@ const InboxComponent = () => {
 
                         {/* Message Bubble */}
                         <div
-                          className={`relative rounded-md p-2 shadow-md max-w-xs overflow-hidden min-w-[200px] ${
+                          className={`relative rounded-md p-2 shadow-md max-w-xs overflow-visible min-w-[200px] ${
                             isOutgoing
                               ? 'bg-red-100 text-gray-800'
                               : 'bg-gray-100 text-gray-800'
@@ -408,19 +408,30 @@ const InboxComponent = () => {
                               </p>
                             </div>
                           )}
-                          <p className={`text-sm break-words ${isFirstFromUser && 'mt-2'}`}>
+                          <p className={`text-sm break-words ${isFirstFromUser && !isOutgoing && 'mt-2'}`}>
                             {message.content}
                           </p>
                           <p
-                            className={`text-xs text-gray-400 mt-2 ${
-                              isOutgoing ? 'text-left' : 'text-right'
-                            }`}
+                            className={`text-xs text-gray-400 mt-0 text-right`}
                           >
                             {new Date(message.created_at!).toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
                           </p>
+                          {/* Tail */}
+                          {isFirstFromUser && (
+                            <div
+                              className={`absolute w-0 h-0 border-l-[12px] border-r-[12px] border-b-[12px] rounded-full ${
+                                isOutgoing
+                                  ? 'border-l-transparent border-r-red-200 border-b-red-100 top-[0px] right-[-8px] rotate-[315deg]'
+                                  : 'border-l-gra-100 border-r-transparent border-b-gray-100 top-[0px] left-[-8px] rotate-[45deg]'
+                              }`}
+                              style={{
+                                borderTop: 'none', // Ensure the top border is removed
+                              }}
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
