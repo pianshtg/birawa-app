@@ -59,7 +59,7 @@ export function useSignInUser() {
         error
     } = useMutation(useSignInUserRequest)
     
-    useEffect(() => {    
+    useEffect(() => {
       if (isSuccess) {
           window.location.href = '/dashboard'
       }
@@ -101,22 +101,27 @@ export function useSignOutUser() {
     return response.json();
   }
 
-  const { mutateAsync: signOutUser, isLoading } = useMutation(useSignOutUserRequest, {
-    onSuccess: () => {
+  const { mutateAsync: signOutUser, isLoading, isSuccess, error } = useMutation(useSignOutUserRequest)
+  
+  useEffect(() => {
+    if (isSuccess) {
       toast({
         title: "Successfully logged out",
         variant: "success",
       });
       navigate("/") // Redirect after logout
-    },
-    onError: (err: Error) => {
+    }
+  }, [isSuccess])
+  
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Failed to log out",
-        description: err.message,
+        description: error.toString(),
         variant: "danger",
       });
-    },
-  });
+    }
+  }, [error])
 
   return { signOutUser, isLoading };
 }

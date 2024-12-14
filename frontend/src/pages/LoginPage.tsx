@@ -10,7 +10,7 @@ import { z } from "zod"
 import { Eye, EyeOff } from 'lucide-react';
 // import LoginForm from "@/components/custom/organism/LoginForm"
 import LogoTelkom from "@/assets/BirawaLogo.png"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -24,9 +24,11 @@ const Login = () => {
   
   const {isAuthenticated} = useAuth()
   
-  if (isAuthenticated) (
-    navigate('/dashboard')
-  )
+  useEffect(() => {
+    if (isAuthenticated) (
+      navigate('/dashboard')
+    )
+  }, [isAuthenticated])
   
   const {signInUser, isLoading } = useSignInUser()
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +45,7 @@ const Login = () => {
     try {
       await signInUser(data)
     } catch (error) {
-      console.error(error)
+      console.error(error) //Debug.
     }
   }
   
