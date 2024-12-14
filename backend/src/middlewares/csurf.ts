@@ -27,7 +27,7 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
     console.log('Applying CSRF protection for web client.') // Debug
     csrfConfig(req, res, next) // Apply CSRF protection for web clients
   } else {
-    res.status(401).json({message: 'Unauthorized (here).'})
+    res.status(401).json({message: 'Unauthorized.'})
     return
   }
 }
