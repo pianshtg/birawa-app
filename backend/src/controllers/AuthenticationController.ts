@@ -85,7 +85,7 @@ async function loginUser (req: Request, res: Response) {
                     res.cookie('refreshToken', refreshToken, {
                         httpOnly: true,
                         secure: process.env.ENVIRONMENT as string === 'production',
-                        sameSite: 'none',
+                        sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
                         maxAge: 7 * 24 * 60 * 60 * 1000,
                         path: '/'
                     })
@@ -130,7 +130,7 @@ async function logoutUser (req: Request, res: Response) {
             res.clearCookie('refreshToken', {
                 httpOnly: true,
                 secure: process.env.ENVIRONMENT as string === 'production',
-                sameSite: 'none',
+                sameSite: process.env.ENVIRONMENT as string === 'production' ? 'none' : 'lax',
             })
             res.clearCookie('accessToken', {
                 httpOnly: true,
