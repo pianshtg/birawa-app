@@ -76,7 +76,7 @@ async function loginUser (req: Request, res: Response) {
                 } else {
                     
                     res.cookie('accessToken', accessToken, {
-                        secure: true,
+                        secure: process.env.ENVIRONMENT as string === 'production',
                         sameSite: 'none',
                         maxAge: 15 * 60 * 1000,
                         path: '/'
@@ -84,7 +84,7 @@ async function loginUser (req: Request, res: Response) {
     
                     res.cookie('refreshToken', refreshToken, {
                         httpOnly: true,
-                        secure: true,
+                        secure: process.env.ENVIRONMENT as string === 'production',
                         sameSite: 'none',
                         maxAge: 7 * 24 * 60 * 60 * 1000,
                         path: '/'
@@ -129,12 +129,12 @@ async function logoutUser (req: Request, res: Response) {
         if (clientType === 'web') {
             res.clearCookie('refreshToken', {
                 httpOnly: true,
-                secure: true,
+                secure: process.env.ENVIRONMENT as string === 'production',
                 sameSite: 'none',
             })
             res.clearCookie('accessToken', {
                 httpOnly: true,
-                secure: true,
+                secure: process.env.ENVIRONMENT as string === 'production',
                 sameSite: 'none',
             })
         }
@@ -196,7 +196,7 @@ async function authenticateUser(req: Request, res: Response) {
                     const clientType = req.headers['x-client-type'];
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
-                            secure: true,
+                            secure: process.env.ENVIRONMENT as string === 'production',
                             sameSite: 'none',
                             maxAge: 15 * 60 * 1000, // 15 minutes
                             path: '/',
@@ -261,7 +261,7 @@ async function authenticateUser(req: Request, res: Response) {
                     const clientType = req.headers['x-client-type'];
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
-                            secure: true,
+                            secure: process.env.ENVIRONMENT as string === 'production',
                             sameSite: 'none',
                             maxAge: 15 * 60 * 1000, // 15 minutes
                             path: '/',

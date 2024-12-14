@@ -115,7 +115,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                     const clientType = req.headers['x-client-type'];
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
-                            secure: true,
+                            secure: false, // don't forget to change this to true
                             sameSite: 'none',  // Required for cross-site cookies (e.g., with CORS)
                             maxAge: 15 * 60 * 1000,  // 15 minutes
                             path: '/'
@@ -176,7 +176,7 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                     const clientType = req.headers['x-client-type'];
                     if (clientType === 'web') {
                         res.cookie('accessToken', newAccessToken, {
-                            secure: true,
+                            secure: false, // don't forget to change this to true
                             sameSite: 'none',  // Required for cross-site cookies (e.g., with CORS)
                             maxAge: 15 * 60 * 1000,  // 15 minutes
                             path: '/'
