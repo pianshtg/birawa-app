@@ -141,7 +141,6 @@ const CekLaporan = () => {
       setDateToLaporanIdMap({})
     }
   }, [pekerjaanLaporans]);
-  
 
   const daysInMonth = getDaysInMonth(currentMonth);
 
@@ -211,7 +210,21 @@ const CekLaporan = () => {
                 <div className="flex items-center text-red-600 font-semibold mb-2">
                   <DatePicker
                     selected={selectedDate}
-                    onChange={(date: Date | null) => setSelectedDate(date)}
+                    onChange={(date: Date | null) => {
+                      if (date) {
+                        setSelectedDate(date); // Update the selected date
+                        setCurrentMonth(date); // Ensure the calendar shows the correct month
+                  
+                        const dateKey = format(date, 'yyyy-MM-dd');
+                        setTimeout(() => {
+                          dateRefs.current[dateKey]?.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'center',
+                          });
+                        }, 200); // Scroll to the clicked date in the calendar
+                      }
+                    }}
                     dateFormat="dd/MM/yyyy"
                     popperPlacement="bottom-start"
                     popperClassName="react-datepicker-popper"
