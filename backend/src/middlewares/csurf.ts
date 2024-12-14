@@ -23,12 +23,15 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   if (clientType === 'mobile') {
       console.log('Skipping CSRF protection for mobile client.'); // Debug
       return next() // Skip CSRF protection for mobile clients
+  } else if (clientType === 'web') {
+    console.log('Applying CSRF protection for web client.') // Debug
+    csrfConfig(req, res, next) // Apply CSRF protection for web clients
+  } else {
+    res.status(401).json({message: 'Unauthorized (here).'})
+    return
   }
-
-  console.log('Applying CSRF protection for web client.') // Debug
-  csrfConfig(req, res, next) // Apply CSRF protection for web clients
-};
+}
 
 export const csrfToken = (req: Request, res: Response) => {
-    res.json({csrfToken: req.csrfToken()})
+  res.json({csrfToken: req.csrfToken()})
 }
