@@ -6,16 +6,21 @@ import { useNavigate } from "react-router-dom";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export async function getCsrfToken() {
-    const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token`, {
-        method: "GET",
-        credentials: "include"
-    });
-    if (response.ok) {
-        const data = await response.json();
-        return data.csrfToken;
-    } else {
-        throw new Error("Failed to retrieve CSRF token");
-    }
+  const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token`, {
+      method: "GET",
+      headers: {
+        "X-Client-Type": "web", // Explicitly set the client type
+      },
+      credentials: "include", // Includes cookies
+  });
+  if (response.ok) {
+      const data = await response.json();
+      console.log("CSRF Token fetched:", data.csrfToken); // Debug
+      return data.csrfToken;
+  } else {
+      console.error("Failed to retrieve CSRF token:", await response.text());
+      throw new Error("Failed to retrieve CSRF token");
+  }
 }
 
 type SignInUserRequest = {
@@ -54,16 +59,20 @@ export function useSignInUser() {
         error
     } = useMutation(useSignInUserRequest)
     
-    if (isSuccess) {
-        window.location.href = '/dashboard'
-    }
+    useEffect(() => {    
+      if (isSuccess) {
+          window.location.href = '/dashboard'
+      }
+    }, [isSuccess])
     
-    if (error) {
-      toast({
-          title: error.toString().split(' ').slice(1).join(' '),
-          variant: "danger"
-      })
-    }
+    useEffect(() => {
+      if (error) {
+        toast({
+            title: error.toString().split(' ').slice(1).join(' '),
+            variant: "danger"
+        })
+      }
+    }, [error])
     
     return {signInUser, isLoading}
 }
@@ -115,7 +124,6 @@ export function useSignOutUser() {
 
 export function useAuth() {
   const { toast } = useToast();
-
   async function useAuthRequest() {
     const csrfToken = await getCsrfToken()
     const response = await fetch(`${API_BASE_URL}/api/auth`, {
