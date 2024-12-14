@@ -8,6 +8,7 @@ import { Kontrak, Laporan } from '@/types'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import LoadingScreen from '@/components/LoadingScreen'
+import { getCsrfToken } from '@/api/AuthApi'
 type TableFormattedPekerjaan = {
   nama_kontrak: string
   nomor_kontrak: string
@@ -41,12 +42,14 @@ const DaftarPekerjaan = () => {
     enabled: !!metaData.nama_mitra,
   })
 
-  const fetchKontrakPekerjaans = async (namaMitra: string, nomorKontrak: string) => {
+  async function fetchKontrakPekerjaans (namaMitra: string, nomorKontrak: string) {
+    const csrfToken = await getCsrfToken()
     const response = await fetch(`${API_BASE_URL}/api/kontrak/pekerjaans`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Client-Type': 'web',
+        'X-CSRF-TOKEN': csrfToken
       },
       body: JSON.stringify({ nama_mitra: namaMitra, nomor_kontrak: nomorKontrak }),
       credentials: 'include',
@@ -71,11 +74,13 @@ const DaftarPekerjaan = () => {
               await Promise.all(
                 kontrak_pekerjaans.map(async (pekerjaan: any) => {
                   try {
+                    const csrfToken = await getCsrfToken()
                     const { pekerjaan_laporans } = await fetch(`${API_BASE_URL}/api/laporan/laporan-pekerjaan`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
                         'X-Client-Type': 'web',
+                        'X-CSRF-TOKEN': csrfToken
                       },
                       body: JSON.stringify({
                         nama_mitra: metaData.nama_mitra!,
