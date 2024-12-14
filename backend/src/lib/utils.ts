@@ -21,7 +21,7 @@ export async function uploadImages(
                 .toBuffer()
             // Uploading the optimized image into the cloudinary with WEBP format.
                 // Creating the folder path
-            const folderPath = `Mitra Telkom Property/${namaMitra}/Nomor_Kontrak[${nomorKontrak}]/Nama_Pekerjaan[${namaPekerjaan}]/${tanggal}/${namaAktivitas}/`
+            const folderPath = `Mitra_Telkom_Property/${namaMitra}/Nomor_Kontrak_[${nomorKontrak}]/Nama_Pekerjaan_[${namaPekerjaan}]/${tanggal}/${namaAktivitas}/`
             const uploadResult = await new Promise<cloudinary.UploadApiResponse>((resolve, reject) => {
                 const uploadStream = cloudinary.v2.uploader.upload_stream({
                     folder: folderPath,
