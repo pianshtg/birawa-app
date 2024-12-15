@@ -25,7 +25,8 @@ export async function uploadImages(
             const uploadResult = await new Promise<cloudinary.UploadApiResponse>((resolve, reject) => {
                 const uploadStream = cloudinary.v2.uploader.upload_stream({
                     folder: folderPath,
-                    format: 'webp'
+                    format: 'webp',
+                    timeout: 10000 // 10 seconds
                 }, (error, result) => {
                     if (error) {
                         reject(error)

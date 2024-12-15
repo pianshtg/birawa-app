@@ -85,7 +85,8 @@ async function createMitra (req: Request, res: Response) {
                 auth: {
                     user: process.env.TRANSPORTER_EMAIL as string,
                     pass: process.env.TRANSPORTER_PASSWORD as string
-                }
+                },
+                connectionTimeout: 10000 //10 seconds
             })
                 // Creating the verification token and url
             const verificationUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${verificationToken}`
