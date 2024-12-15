@@ -38,6 +38,7 @@ export default function BuatLaporanPage() {
       await createLaporan(formData);
 
       console.log("Laporan created successfully!");
+      navigate("/daftarpekerjaan")
     } catch (error) {
       console.error("Error creating laporan:", error) //Debug.
     }
@@ -50,7 +51,6 @@ export default function BuatLaporanPage() {
         variant: 'success'
       })
     }
-    navigate("/daftarpekerjaan")
   }, [isSuccess])
   
   useEffect(() => {
