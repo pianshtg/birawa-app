@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+
+  mysql:
+    image: mysql:8.0.39  # Using official MySQL 8.0.39 image
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # Set the root password for MySQL
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"  # Exposing MySQL port
+    volumes:
+      - mysql-data:/var/lib/mysql  # Persisting MySQL data across restarts
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend  # The folder where your backend Dockerfile is located
+    container_name: backend
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # Set the root password for MySQL
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3030:3030"  # Exposing backend port
+    depends_on:
+      - mysql  # Backend depends on MySQL to start first
+    volumes:
+      - ./backend:/usr/src/app  # Mount the backend folder to the container for live updates
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend  # The folder where your frontend Dockerfile is located
+    container_name: frontend
+    ports:
+      - "5173:5173"  # Exposing frontend port
+    networks:
+      - app-network
+    depends_on:
+      - backend  # Frontend depends on backend to be running first
+
+networks:
+  app-network:
+    driver: bridge  # Create a bridge network for the services to communicate
+
+volumes:
+  mysql-data:  # Create a volume to store MySQL data

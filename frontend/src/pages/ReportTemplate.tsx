@@ -823,7 +823,7 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           
           {/* Dynamically render images based on the response */}
           {laporan.map((shift, shiftIndex) => (
-            <View wrap={false} style={{alignItems: 'center'}}>
+            <View style={{alignItems: 'center'}}>
               <Text style={{ fontSize: 16, marginBottom: 20, fontWeight: 'bold', textDecoration: 'underline' }}>
                 {shift.peran_tenaga_kerja_arr.length !== 0 && `SHIFT ${shift.shift_nama}`}
               </Text>
