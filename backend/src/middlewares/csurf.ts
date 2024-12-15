@@ -18,6 +18,13 @@ const csrfConfig = csrf({
 })
 
 export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  
+    // Skip CSRF protection for specific routes
+    if (req.path === '/api/auth/verify-email') {
+      console.log('Skipping CSRF protection for /api/auth/verify-email route.');
+      return next(); // Skip CSRF protection for this route
+    }
+  
   const clientType = req.headers['x-client-type'] // Get client type from headers
 
   if (clientType === 'mobile') {

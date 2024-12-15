@@ -309,7 +309,7 @@ async function verifyEmail(req: Request, res: Response) {
         return
 
     } catch (error) {
-        console.error(error)
+        console.error(error) //Debug.
         res.status(500).json({ message: 'Failed to verify email.' })
         return
     }

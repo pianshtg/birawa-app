@@ -51,6 +51,7 @@ export default function BuatLaporanPage() {
         variant: 'success'
       })
     }
+    navigate("/daftarpekerjaan")
   }, [isSuccess])
   
   useEffect(() => {
