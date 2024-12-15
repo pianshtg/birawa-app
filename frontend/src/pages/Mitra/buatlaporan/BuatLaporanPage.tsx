@@ -38,7 +38,6 @@ export default function BuatLaporanPage() {
       await createLaporan(formData);
 
       console.log("Laporan created successfully!");
-      navigate("/daftarpekerjaan"); // Redirect on success
     } catch (error) {
       console.error("Error creating laporan:", error) //Debug.
     }
