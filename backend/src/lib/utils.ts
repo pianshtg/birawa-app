@@ -26,7 +26,7 @@ export async function uploadImages(
                 const uploadStream = cloudinary.v2.uploader.upload_stream({
                     folder: folderPath,
                     format: 'webp',
-                    timeout: 10000 // 10 seconds
+                    timeout: 30000 // 10 seconds
                 }, (error, result) => {
                     if (error) {
                         reject(error)
@@ -50,3 +50,4 @@ export async function uploadImages(
     return uploadedImageUrls
 }
 
+export async function logger() {}
