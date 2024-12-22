@@ -6,6 +6,7 @@ import {v4 as uuidv4} from 'uuid'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 import bcrypt from 'bcrypt'
+import { logger } from '../lib/utils';
 
 async function createUser(req: Request, res: Response) {
     const connection = await pool.getConnection()
@@ -90,6 +91,15 @@ async function createUser(req: Request, res: Response) {
                     newAccessToken
                 }
             })
+            
+            await logger({
+                rekaman_id: user_id, 
+                user_id: creator_id, 
+                nama_tabel: 'users', 
+                perubahan: {email, nama_lengkap, nomor_telepon}, 
+                aksi: 'insert'
+            })
+            
             return
 
         } else {
@@ -202,14 +212,23 @@ async function updateUser(req: Request, res: Response) {
                 
                 let updatedUser;
                 if (!metaData.nama_mitra && status && status === 1) {
-                    [updatedUser] = await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, is_verified = ?, updated_by = ? WHERE email = ?", [nama_lengkap, nomor_telepon, true, userId, email])
+                    await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, is_verified = ?, updated_by = ? WHERE email = ?", [nama_lengkap, nomor_telepon, true, userId, email])
                 } else {
-                    [updatedUser] = await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE email = ?", [nama_lengkap, nomor_telepon, userId, email])
+                    await pool.execute("UPDATE users SET nama_lengkap = ?, nomor_telepon = ?, updated_by = ? WHERE email = ?", [nama_lengkap, nomor_telepon, userId, email])
                 }
+                
+                [updatedUser] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
+                
+                await logger({
+                    rekaman_id: updatedUser[0].id,
+                    user_id: userId,
+                    nama_tabel: 'users',
+                    perubahan: !metaData.nama_mitra && status && status === 1 ? {nama_lengkap, nomor_telepon, status} : {nama_lengkap, nomor_telepon},
+                    aksi: 'update'
+                })
                 
                 res.status(201).json({
                     message: "Successfully updated user.",
-                    updatedUser,
                     status: status,
                     newAccessToken
                 })
@@ -249,6 +268,16 @@ async function deleteUser(req: Request, res: Response) {
             if (existingUser.length > 0) {
                 
                 await pool.execute("UPDATE users SET is_active = ?, deleted_at = CURRENT_TIMESTAMP, updated_by = ? WHERE email = ?", [false, userId, email])
+                
+                const [deletedUser] = await pool.execute<RowDataPacket[]>('SELECT id FROM users WHERE email = ?', [email])
+                
+                await logger({
+                    rekaman_id: deletedUser[0].id,
+                    user_id: userId,
+                    nama_tabel: 'users',
+                    perubahan: {},
+                    aksi: 'delete'
+                })
                 
                 res.status(201).json({
                     message: "Successfully deleted user.",

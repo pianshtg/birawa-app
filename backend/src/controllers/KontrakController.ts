@@ -4,6 +4,7 @@ import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
 import jwt from 'jsonwebtoken'
 import { Pekerjaan } from "../types";
+import { logger } from "../lib/utils";
 
 async function createKontrak(req: Request, res: Response) {
     try {
@@ -49,6 +50,14 @@ async function createKontrak(req: Request, res: Response) {
                 })
             )
             console.log("Pekerjaan successfully created:", pekerjaan_arr) //Debug.
+            
+            await logger({
+                rekaman_id: kontrakId,
+                user_id: creator_id,
+                nama_tabel: 'kontrak',
+                perubahan: {nama_mitra, nama, nomor, tanggal, nilai, jangka_waktu, pekerjaan_arr},
+                aksi: 'insert' 
+            })
             
             // Debug.
             res.status(201).json({

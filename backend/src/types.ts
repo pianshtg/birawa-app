@@ -36,3 +36,11 @@ export type laporanAktivitas = {
     aktivitas_nama: string,
     dokumentasi_arr: Dokumentasi[]
 }
+
+export type Log = {
+    rekaman_id: string
+    user_id: string
+    nama_tabel: string
+    perubahan: {}
+    aksi: 'insert' | 'update' | 'delete'
+}

@@ -6,6 +6,7 @@ import {v4 as uuidv4} from 'uuid'
 import bcrypt from 'bcrypt'
 import nodemailer from 'nodemailer'
 import { Pekerjaan } from "../types"
+import { logger } from "../lib/utils"
 
 async function createMitra (req: Request, res: Response) {
     const connection = await pool.getConnection()
@@ -97,6 +98,14 @@ async function createMitra (req: Request, res: Response) {
                 to: user.email,
                 subject: "Email Verification",
                 html: `<h1>Please verify your email by clicking on the following link:<br></h1><a href="${verificationUrl}"><h2>Verify Email</h2></a><h3>Password: <b>${password}</b></h3>`
+            })
+            
+            await logger({
+                rekaman_id: mitraId,
+                user_id: creator_id,
+                nama_tabel: 'mitra',
+                perubahan: {mitra, kontrak, pekerjaan_arr, user},
+                aksi: 'insert'
             })
     
             res.status(201).json({
@@ -278,6 +287,7 @@ async function updateMitra (req: Request, res: Response) {
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
         // console.log(metaData) // Debug.
         const permissions = metaData.permissions
+        const editor_id = metaData.user_id
         
         if (permissions.includes('update_mitra')) {
             const nama_mitra = metaData.nama_mitra || req.body.nama_mitra
@@ -294,6 +304,16 @@ async function updateMitra (req: Request, res: Response) {
             if (existingMitra.length > 0) {
                 
                 await pool.execute('UPDATE mitra SET alamat = ?, nomor_telepon = ? WHERE nama = ?', [alamat, nomor_telepon, nama_mitra])
+                
+                const [updatedMitra] = await pool.execute<RowDataPacket[]>('SELECT id FROM mitra WHERE nama = ?', [nama_mitra])
+                
+                await logger({
+                    rekaman_id: updatedMitra[0].id,
+                    user_id: editor_id,
+                    nama_tabel: 'mitra',
+                    perubahan: {nomor_telepon, alamat},
+                    aksi: 'update'
+                })
                 
                 res.status(200).json({
                     message: "Mitra successfully updated."

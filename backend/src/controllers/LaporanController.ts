@@ -4,7 +4,7 @@ import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
 import jwt from 'jsonwebtoken'
 import { Aktivitas, Cuaca, TenagaKerja } from "../types";
-import { uploadImages } from "../lib/utils";
+import { logger, uploadImages } from "../lib/utils";
 
 async function createLaporan(req: Request, res: Response) {
     const connection = await pool.getConnection()
@@ -218,6 +218,14 @@ async function createLaporan(req: Request, res: Response) {
             
             // Commit all the queries
             await connection.commit()
+            
+            await logger({
+                rekaman_id: laporanId,
+                user_id: creator_id,
+                nama_tabel: 'laporan',
+                perubahan: {tanggal, nama_mitra, nomor_kontrak, nama_pekerjaan, shift, tenaga_kerja_arr, aktivitas_arr, cuaca_arr},
+                aksi: 'insert'
+            })
     
             res.status(201).json({
                 message: "Laporan created successfully.",

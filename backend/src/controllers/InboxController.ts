@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { pool } from "../database";
 import { RowDataPacket } from "mysql2";
 import {v4 as uuidv4} from 'uuid'
+import { logger } from "../lib/utils";
 
 
 async function createInbox(req: Request, res: Response) {
@@ -64,7 +65,15 @@ async function createInbox(req: Request, res: Response) {
                 await pool.execute('INSERT INTO inbox (id, sender_id, receiver_id, receiver_type, judul, isi, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)', [inboxId, sender_id, receiver_id, 'mitra', subject.toLowerCase(), content, sender_id])
                 
             }
-                        
+            
+            await logger({
+                rekaman_id: inboxId,
+                user_id: sender_id,
+                nama_tabel: 'inbox',
+                perubahan: {email_receiver, subject, content},
+                aksi: 'insert'
+            })
+            
             // Debug.
             res.status(201).json({
                 message: "Inbox created successfully.",
