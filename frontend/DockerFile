@@ -11,7 +11,7 @@ RUN npm install
 # Copy all other files into the container
 COPY . .
 
-# Expose frontend port (adjust port as needed)
+# Expose frontend port
 EXPOSE 5173
 
 # Start frontend application

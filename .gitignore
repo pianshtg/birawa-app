@@ -1,2 +1,5 @@
-# Environment
 .env
+*.crt
+*.key
+*.key.backup
+*.conf

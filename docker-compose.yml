@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   mysql:
@@ -16,6 +14,12 @@ services:
       - mysql-data:/var/lib/mysql  # Persisting MySQL data across restarts
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   backend:
     build:
@@ -40,11 +44,27 @@ services:
       context: ./frontend  # The folder where your frontend Dockerfile is located
     container_name: frontend
     ports:
-      - "5173:5173"  # Exposing frontend port
+      - "5173:5173"
     networks:
       - app-network
     depends_on:
       - backend  # Frontend depends on backend to be running first
+      
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS
+    volumes:
+      - ${NGINX_CONF_PATH_CONTAINER}:${NGINX_CONF_PATH_HOST}     # Nginx configuration
+      - ${SSL_CERT_PATH_CONTAINER}:${SSL_CERT_PATH_HOST}         # SSL certificate directory
+      - ${SSL_KEY_PATH_CONTAINER}:${SSL_KEY_PATH_HOST}           # SSL key directory
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
 
 networks:
   app-network:

@@ -20,8 +20,8 @@ const csrfConfig = csrf({
 export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
   
     // Skip CSRF protection for specific routes
-    if (req.path === '/api/auth/verify-email') {
-      console.log('Skipping CSRF protection for /api/auth/verify-email route.');
+    if (req.path === '/api/auth/verify-email' || req.path === '/') {
+      console.log('Skipping CSRF protection.');
       return next(); // Skip CSRF protection for this route
     }
   

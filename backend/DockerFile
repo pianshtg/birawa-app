@@ -11,10 +11,10 @@ RUN npm install
 # Copy all other files into the container
 COPY . .
 
-# Run database seeding (you can adjust this to your needs)
+# Run database seeding
 RUN npm run seed
 
-# Expose backend port (adjust port as needed)
+# Expose backend port
 EXPOSE 3030
 
 # Start backend application
