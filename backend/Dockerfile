@@ -11,8 +11,11 @@ RUN npm install
 # Copy all other files into the container
 COPY . .
 
-# Expose frontend port
-EXPOSE 5173
+# Run database seeding
+RUN npm run seed
 
-# Start frontend application
-CMD ["npm", "run", "dev", "--", "--host"]
+# Expose backend port
+EXPOSE 3030
+
+# Start backend application
+CMD ["npm", "run", "dev"]
