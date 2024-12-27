@@ -338,8 +338,6 @@ async function updateMitra (req: Request, res: Response) {
     }
 }
 
-async function deleteMitra (req: Request, res: Response) {}
-
 export default {
     createMitra,
     getMitra,
@@ -347,5 +345,4 @@ export default {
     getMitraKontraks,
     getMitras,
     updateMitra,
-    deleteMitra
 }

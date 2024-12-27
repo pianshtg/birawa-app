@@ -61,7 +61,7 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
   }, [isOpen])
 
   // Handle the "Verifikasi Pengguna" button click
-  const handleVerifyUser = () => {
+  function handleVerifyUser () {
     setStatus((prevStatus) => (prevStatus === 0 ? 1 : 0)); // Toggle between 0 and 1
   };
 

@@ -164,7 +164,7 @@ const InboxComponent = () => {
     setShowNewMessage(false);
   }
 
-  const handleReplyClick = () => {
+  function handleReplyClick () {
     setShowReply(true);
     // Scroll to the reply section
     setTimeout(() => {

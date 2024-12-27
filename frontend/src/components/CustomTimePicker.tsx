@@ -18,11 +18,11 @@ const CustomTimePicker = ({ value, onChange, disabled = false, className, arrowD
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  function handleFocus (e: React.FocusEvent<HTMLInputElement>) {
     e.target.select(); // Automatically select the entire input when focused
   };
 
-  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleHourChange (e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target.value.replace(/\D/g, ""); // Allow only digits
     if (input.length > 2) return; // Prevent more than 2 digits
 
@@ -41,7 +41,7 @@ const CustomTimePicker = ({ value, onChange, disabled = false, className, arrowD
     }
   };
 
-  const handleHourBlur = () => {
+  function handleHourBlur () {
     if (hour.length === 1) {
       setHour(hour.padStart(2, "0")); // Pad with zero if only one digit
     } else if (hour === "") {
@@ -51,7 +51,7 @@ const CustomTimePicker = ({ value, onChange, disabled = false, className, arrowD
     onChange(formattedTime);
   };
 
-  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleMinuteChange (e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target.value.replace(/\D/g, ""); // Allow only digits
     if (input.length > 2) return; // Prevent more than 2 digits
     if (input.length === 1 && parseInt(input, 10) > 5) {
@@ -68,7 +68,7 @@ const CustomTimePicker = ({ value, onChange, disabled = false, className, arrowD
     }
   };
 
-  const handleMinuteBlur = () => {
+  function handleMinuteBlur () {
     if (minute.length === 1) {
       setMinute(minute.padStart(2, "0")); // Pad with zero if only one digit
     } else if (minute === "") {
@@ -78,7 +78,7 @@ const CustomTimePicker = ({ value, onChange, disabled = false, className, arrowD
     onChange(formattedTime);
   };
 
-  const handleTimeSelect = (time: string) => {
+  function handleTimeSelect (time: string) {
     const [selectedHour, selectedMinute] = time.split(":");
     setHour(selectedHour);
     setMinute(selectedMinute);

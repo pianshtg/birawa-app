@@ -460,15 +460,9 @@ async function getLaporans(req: Request, res: Response) {
     }
 }
 
-async function updateLaporan(req: Request, res: Response) {}
-
-async function deleteLaporan(req: Request, res: Response) {}
-
 export default {
     createLaporan,
     getLaporan,
     getPekerjaanLaporans,
     getLaporans,
-    updateLaporan,
-    deleteLaporan
 }

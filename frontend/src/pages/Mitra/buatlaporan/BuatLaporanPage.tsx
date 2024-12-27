@@ -29,7 +29,7 @@ export default function BuatLaporanPage() {
   
   // console.log({nama_mitra, nomor_kontrak, nama_pekerjaan}) //Debug.
 
-  const handleSubmit = async (formData: FormData) => {
+  async function handleSubmit (formData: FormData) {
     try {
 
       console.log("Submitting laporan:", formData); // Debug.

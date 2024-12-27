@@ -88,8 +88,6 @@ async function createKontrak(req: Request, res: Response) {
     }
 }
 
-async function getKontrak(req: Request, res: Response) {}
-
 async function getKontrakPekerjaans(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
@@ -176,15 +174,8 @@ async function getKontraks(req: Request, res: Response) {
     }
 }
 
-async function updateKontrak(req: Request, res: Response) {}
-
-async function deleteKontrak(req: Request, res: Response) {}
-
 export default {
     createKontrak,
-    getKontrak,
     getKontrakPekerjaans,
     getKontraks,
-    updateKontrak,
-    deleteKontrak
 }

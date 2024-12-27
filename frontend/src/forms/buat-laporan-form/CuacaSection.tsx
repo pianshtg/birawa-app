@@ -53,7 +53,7 @@ export default function CuacaSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCuaca, setSelectedCuaca] = useState("");
 
-  const handleTambahCuaca = (data: { tipe: string; waktu_mulai: string; waktu_berakhir: string }) => {
+  function handleTambahCuaca (data: { tipe: string; waktu_mulai: string; waktu_berakhir: string }) {
     const startMinutes = parseTimeToMinutes(data.waktu_mulai);
     const endMinutes = parseTimeToMinutes(data.waktu_berakhir);
   

@@ -11,7 +11,7 @@ export default function Layout({ children }: Props) {
 
   // Set the initial state of the sidebar based on screen width
   useEffect(() => {
-    const handleResize = () => {
+    function handleResize () {
       if (window.innerWidth < 1024 && isSidebarOpen) {
         setIsSidebarOpen(false)
       } else if (window.innerWidth >= 1024 && !isSidebarOpen) {

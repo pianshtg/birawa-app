@@ -144,7 +144,7 @@ const CekLaporan = () => {
 
   const daysInMonth = getDaysInMonth(currentMonth);
 
-  const handleShowPDF = () => {
+  function handleShowPDF () {
     const selectedDateKey = format(selectedDate || new Date(), 'yyyy-MM-dd');
     const laporanId = dateToLaporanIdMap[selectedDateKey];
 

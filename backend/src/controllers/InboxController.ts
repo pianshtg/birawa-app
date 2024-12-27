@@ -51,7 +51,7 @@ async function createInbox(req: Request, res: Response) {
             } else {
                 
                 if (!nama_mitra || email_receiver) {
-                    res.status(400).json({message: "Bad request (admin)!"})
+                    res.status(400).json({message: "Bad request!"})
                     return
                 }
                 

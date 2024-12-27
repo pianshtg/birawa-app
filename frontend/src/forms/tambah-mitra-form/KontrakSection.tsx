@@ -46,7 +46,7 @@ const KontrakSection = () => {
     setIsDialogOpen(true)
   };
 
-  const handleSavePekerjaan = (data: Pekerjaan) => {
+  function handleSavePekerjaan (data: Pekerjaan) {
     if (currentPekerjaanIndex === null) {
       // Add new pekerjaan
       append(data)

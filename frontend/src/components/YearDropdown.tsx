@@ -15,7 +15,7 @@ const YearDropdown = ({ date, changeYear, minYear, maxYear }: Props) => {
     setIsOpen(!isOpen);
   };
 
-  const handleOptionClick = (year: number) => {
+  function handleOptionClick (year: number) {
     changeYear(year);
     setIsOpen(false); // Close the dropdown after selecting an option
   };

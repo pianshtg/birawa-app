@@ -11,7 +11,7 @@ const ForgotPass: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit =  async (e: React.FormEvent) => {
+  async function handleSubmit (e: React.FormEvent) {
     e.preventDefault();
     navigate('/');
     

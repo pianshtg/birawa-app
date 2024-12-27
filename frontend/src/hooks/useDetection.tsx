@@ -9,7 +9,7 @@ const useDetection = (maxWidth = 620) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
+    function handleResize () {
       setIsMobile(window.innerWidth <= maxWidth);
     };
 

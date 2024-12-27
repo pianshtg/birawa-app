@@ -87,12 +87,8 @@ export default function AktivitasSection() {
     console.log(getValues('aktivitas_arr'))
     console.log(getValues('image_arr'))
   }, [getValues('aktivitas_arr'), getValues('image_arr')]) //Debug.
-  
-  // useEffect(() => {
-  //   validateLapanganActivities();
-  // }, [getValues("aktivitas_arr"), getValues("tenaga_kerja_arr")])
 
-  const handleTambahAktivitas = async (data: AktivitasFormData) => {
+  async function handleTambahAktivitas (data: AktivitasFormData) {
     const { dokumentasi, ...aktivitasData } = data;
     const currentAktivitasArr = getValues("aktivitas_arr") || [];
     const currentImageArr = getValues("image_arr") || [];
@@ -142,14 +138,14 @@ export default function AktivitasSection() {
       ],
     });
 
-    setSelectedKategoriPekerjaan(""); // Reset selected category
-    setIsDialogOpen(false);
-    setCurrentAktivitasIndex(null);
+    setSelectedKategoriPekerjaan("")
+    setIsDialogOpen(false)
+    setCurrentAktivitasIndex(null)
   }
   
-  const handleHapusAktivitas = (index: number) => {
-    const currentAktivitasArr = getValues("aktivitas_arr") || [];
-    const currentImageArr = getValues("image_arr") || [];
+  function handleHapusAktivitas (index: number) {
+    const currentAktivitasArr = getValues("aktivitas_arr") || []
+    const currentImageArr = getValues("image_arr") || []
   
     // Each activity has two associated images; calculate their indices
     const imageStartIndex = index * 2;
@@ -167,30 +163,6 @@ export default function AktivitasSection() {
     ];
     setValue("image_arr", updatedImageArr);
   }
-
-  // const validateLapanganActivities = () => {
-  //   const tenagaKerjaArr = getValues("tenaga_kerja_arr") || [];
-  //   const aktivitasArr = getValues("aktivitas_arr") || [];
-  
-  //   const lapanganItems = tenagaKerjaArr.filter(
-  //     (tenaga: TenagaKerja) => tenaga.tipe.toLowerCase() === "lapangan"
-  //   );
-  
-  //   const missingActivities = lapanganItems.filter((lapangan: TenagaKerja) =>
-  //     !aktivitasArr.some((aktivitas: Aktivitas) =>
-  //       aktivitas.tipe.toLowerCase() === lapangan.peran.toLowerCase()
-  //     )
-  //   );
-  
-  //   if (missingActivities.length > 0) {
-  //     setValidationError(
-  //       "Setiap tenaga kerja dengan tipe 'Lapangan' harus memiliki setidaknya satu aktivitas."
-  //     );
-  //   } else {
-  //     setValidationError(null);
-  //   }
-  // };
-  
   
   const KategoriPekerjaanOptions = useMemo(() => {
     if (!tenagaKerjaArr) return [];
@@ -206,7 +178,7 @@ export default function AktivitasSection() {
     if (Array.from(setOfTipeAktivitas).length !== lapanganItems.length) {
       console.log("Set of tipe aktivitas:", setOfTipeAktivitas) //Debug.
       console.log("Tenaga kerja lapangan:", lapanganItems) //Debug.
-      console.log("AKtivitas array:", aktivitasArr) //Debug.
+      console.log("Aktivitas array:", aktivitasArr) //Debug.
       setValidationError(
         "Setiap aktivitas harus memiliki koresponden tenaga kerja lapangan."
       );

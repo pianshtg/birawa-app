@@ -85,7 +85,7 @@ export default function TenagaKerjaSection() {
   const defaultTenagaKerja = ["pekerja arsitektur", "pekerja furnitur", "pekerja mekanikal elektrik", "pekerja sipil"];
   const manajemenFieldLength = tenagaKerjaFields.filter((field) => field.tipe === 'Manajemen').length
   
-  const handleTentukanShift = (data: Shift) => {
+  function handleTentukanShift (data: Shift) {
     
     data.waktu_mulai += ":00"
     data.waktu_berakhir += ":00"
@@ -96,7 +96,7 @@ export default function TenagaKerjaSection() {
     setIsShiftDialogOpen(false)
   }
   
-  const handleTambahTenagaKerja = (data: {nama: string, jumlah: number}) => {
+  function handleTambahTenagaKerja (data: {nama: string, jumlah: number}) {
     
     const existingTenagaKerja = getValues("tenaga_kerja_arr").map((item) => item.peran.toLowerCase());
     if (existingTenagaKerja.includes(data.nama.toLowerCase())) {
@@ -109,7 +109,7 @@ export default function TenagaKerjaSection() {
     setIsTenagaKerjaDialogOpen(false);
   };
 
-  const handleHapusTenagaKerja = (index: number) => {
+  function handleHapusTenagaKerja (index: number) {
     removeTenagaKerja(index + manajemenFieldLength)
   }
   

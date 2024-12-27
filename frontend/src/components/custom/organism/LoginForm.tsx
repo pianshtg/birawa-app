@@ -12,7 +12,7 @@ const LoginForm: React.FC = () => {
   });
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleChange (e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target; // Destructure id and value from the event target
     
     // Debugging statements to understand what's happening
@@ -34,7 +34,7 @@ const LoginForm: React.FC = () => {
   };
   
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit (e: React.FormEvent) {
     e.preventDefault();
     try {
       const response = await fetch('http://localhost:3030/api/auth/signin', {

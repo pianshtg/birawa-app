@@ -53,8 +53,8 @@ export function Combobox({
           >
             {isLoading ? (
               <Loader2 className="animate-spin h-4 w-4" />
-            ) : selected ? (
-              options.find((option) => option.value === selected)?.label
+            ) : selected ? capitalizeWords(
+              options.find((option) => option.value === selected)?.label!
             ) : (
               placeholder
             )}

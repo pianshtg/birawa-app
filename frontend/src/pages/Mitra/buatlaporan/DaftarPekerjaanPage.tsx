@@ -61,7 +61,7 @@ const DaftarPekerjaan = () => {
   }
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData () {
       if (mitraKontraks?.mitra_kontraks?.length) {
         setIsLoading(true);
         const allData: TableFormattedPekerjaan[] = [];
@@ -143,18 +143,18 @@ const DaftarPekerjaan = () => {
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
-  const handlePageChange = (page: number) => {
+  function handlePageChange (page: number) {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page)
       setSelectedRow(null) // Reset selection when changing pages
     }
   }
 
-  const handleCheckboxChange = (index: number) => {
+  function handleCheckboxChange (index: number) {
     setSelectedRow(index === selectedRow ? null : index)
   }
 
-  const handleBuatLaporanClick = () => {
+  function handleBuatLaporanClick () {
     if (selectedRow !== null) {
       const selectedJob = paginatedData[selectedRow]
       navigate('/daftarpekerjaan/buatlaporan', {

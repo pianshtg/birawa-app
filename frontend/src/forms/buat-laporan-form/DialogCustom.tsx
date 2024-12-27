@@ -21,7 +21,7 @@ export default function DialogCustom({ type, onSubmit }: DialogCustomProps) {
   const { control,getValues } = useFormContext();
 
   // Fungsi untuk menangani pengiriman data berdasarkan tipe
-  const handleSubmit = () => {
+  function handleSubmit () {
     if (type === "shift") {
       const shiftData = {
         nama: selectedShift,

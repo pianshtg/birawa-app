@@ -158,7 +158,7 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
     console.log("Validation errors:", form.formState.errors)
   }, [form.formState.errors]) //Debug.
 
-  const handleSubmit = (formData: buatLaporanFormData) => {
+  function handleSubmit (formData: buatLaporanFormData) {
     const formDataPayload = new FormData();
   
     const shiftStart = parseTimeToMinutes(formData.shift.waktu_mulai);
@@ -245,7 +245,7 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
     onSubmit(formDataPayload);
   };
   
-  const handleRawSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  function handleRawSubmit (event: React.FormEvent<HTMLFormElement>) {
     console.log("FORM IS ABOUT TO BE SUBMITTED......")
     event.preventDefault() // Prevent form submission
     event.stopPropagation()
