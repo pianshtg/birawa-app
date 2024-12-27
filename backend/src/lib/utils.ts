@@ -2,6 +2,7 @@ import sharp from "sharp"
 import cloudinary from 'cloudinary'
 import { Log } from "../types"
 import { pool } from "../database"
+import {v4 as uuidv4} from 'uuid'
 
 export async function uploadImages(
     files: Express.Multer.File[], 
@@ -54,7 +55,8 @@ export async function uploadImages(
 
 export async function logger({rekaman_id, user_id, nama_tabel, perubahan, aksi}: Log) {
     try {
-        await pool.execute('INSERT INTO log (rekaman_id, user_id, nama_tabel, perubahan, aksi) VALUES (?, ?, ?, ?, ?)', [rekaman_id, user_id, nama_tabel, perubahan, aksi])        
+        const logId = uuidv4()
+        await pool.execute('INSERT INTO log (id, rekaman_id, user_id, nama_tabel, perubahan, aksi) VALUES (?, ?, ?, ?, ?, ?)', [logId, rekaman_id, user_id, nama_tabel, perubahan, aksi])        
     } catch (error) {
         console.error(error) //Debug.
         return
