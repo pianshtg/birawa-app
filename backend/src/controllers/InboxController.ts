@@ -203,12 +203,6 @@ async function getInbox(req: Request, res: Response) {
                 return
             }
             
-            if (!subject) {
-                res.status(400).json({ message: "Subject is required." });
-                return;
-            }
-            
-            
             let inboxMessages
             
             const [existingMitraUsers] = await pool.execute<RowDataPacket[]>('SELECT user_id FROM mitra_users INNER JOIN mitra ON mitra_users.mitra_id = mitra.id WHERE mitra.nama = ?', [nama_mitra])

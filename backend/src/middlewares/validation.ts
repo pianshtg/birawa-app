@@ -61,7 +61,7 @@ async function handleValidationErrors (req: Request, res: Response, next: NextFu
     next()
 }
 
-export const validateUserRequest = [
+export const validateCreateUserRequest = [
     body("nama_lengkap").isString().notEmpty().withMessage("Nama lengkap user must be a string."),
     body("email").trim().isEmail().notEmpty().withMessage("Email user must be valid."),
     body("nomor_telepon").isMobilePhone("any", {strictMode: true}).notEmpty().withMessage("Nomor telepon user must be a string."),
@@ -69,17 +69,19 @@ export const validateUserRequest = [
     handleValidationErrors
 ]
 
-export const validatePekerjaanRequest = [
-    body("nama_mitra").isString().notEmpty().withMessage("Nama mitra pekerjaan must be a string."),
-    body("nomor_kontrak").isString().notEmpty().withMessage("Nomor kontrak pekerjaan must be a string."),
-    body("pekerjaan_arr").isArray().withMessage("Pekerjaan must be an array."),
-    body("pekerjaan_arr.*").isObject().withMessage("Each pekerjaan must be an object."),
-    body("pekerjaan_arr.*.nama").isString().notEmpty().withMessage("Nama pekerjaan must be a string."),
-    body("pekerjaan_arr.*.lokasi").isString().notEmpty().withMessage("Lokasi pekerjaan must be a string."),
+export const validateUpdateUserRequest = [
+    body("nama_lengkap").isString().notEmpty().withMessage("Nama lengkap user must be a string."),
+    body("email").trim().isEmail().notEmpty().withMessage("Email user must be valid."),
+    body("nomor_telepon").isMobilePhone("any", {strictMode: true}).notEmpty().withMessage("Nomor telepon user must be a string."),
     handleValidationErrors
 ]
 
-export const validateMitraRequest = [
+export const validateDeleteUserRequest = [
+    body("email").trim().isEmail().notEmpty().withMessage("Email user must be valid."),
+    handleValidationErrors
+]
+
+export const validateCreateMitraRequest = [
     body("mitra").isObject().notEmpty().withMessage("Mitra must be an object."),
     body("mitra.nama").isString().notEmpty().withMessage("Nama mitra must be a string."),
     body("mitra.nomor_telepon").isMobilePhone("any", {strictMode: true}).notEmpty().withMessage("Nomor telepon mitra must be a string."),
@@ -101,7 +103,33 @@ export const validateMitraRequest = [
     handleValidationErrors
 ]
 
-export const validateLaporanRequest = [
+export const validateGetMitraUsersRequest = [
+    body("nama_mitra").isString().notEmpty().withMessage("Nama mitra  user must be a string."),
+    handleValidationErrors
+]
+
+export const updateMitraRequest = [
+    body("alamat").isString().notEmpty().withMessage("Alamat mitra must be a string."),
+    body("nomor_telepon").isMobilePhone("any", {strictMode: true}).notEmpty().withMessage("Nomor telepon user must be a string."),
+    handleValidationErrors
+]
+
+export const validateCreateKontrakRequest = [
+    body("nama_mitra").isString().notEmpty().withMessage("Nama mitra kontrak must be a string."),
+    body("nama").isString().notEmpty().withMessage("Nama kontrak must be a string."),
+    body("nomor").isString().notEmpty().withMessage("Nomor kontrak must be a string."),
+    body("tanggal").isISO8601().withMessage("Tanggal kontrak must be a valid date."),
+    body("nilai").isInt({min: 1}).notEmpty().withMessage("Nilai kontrak must be an integer."),
+    body("jangka_waktu").isInt({min: 1}).notEmpty().withMessage("Jangka waktu kontrak must be an integer."),
+    handleValidationErrors
+]
+
+export const validateGetKontrakPekerjaansRequest = [
+    body("nomor_kontrak").isString().notEmpty().withMessage("Nomor kontrak must be a string."),
+    handleValidationErrors
+]
+
+export const validateCreateLaporanRequest = [
     parseBodyData,
     body("nama_mitra").isString().notEmpty().withMessage("Nama mitra laporan must be a string."),
     body("nomor_kontrak").isString().notEmpty().withMessage("Nomor kontrak laporan must be a string."),
@@ -129,12 +157,19 @@ export const validateLaporanRequest = [
     handleValidationErrors
 ]
 
-export const validateKontrakRequest = [
-    body("nama_mitra").isString().notEmpty().withMessage("Nama mitra kontrak must be a string."),
-    body("nama").isString().notEmpty().withMessage("Nama kontrak must be a string."),
-    body("nomor").isString().notEmpty().withMessage("Nomor kontrak must be a string."),
-    body("tanggal").isISO8601().withMessage("Tanggal kontrak must be a valid date."),
-    body("nilai").isInt({min: 1}).notEmpty().withMessage("Nilai kontrak must be an integer."),
-    body("jangka_waktu").isInt({min: 1}).notEmpty().withMessage("Jangka waktu kontrak must be an integer."),
+export const validateGetPekerjaanLaporansRequest = [
+    body("nomor_kontrak").isString().notEmpty().withMessage("Nomor kontrak laporan must be a string."),
+    body("nama_pekerjaan").isString().notEmpty().withMessage("Nama pekerjaan laporan must be a string."),
+    handleValidationErrors
+]
+
+export const validateCreateInboxRequest = [
+    body("subject").isString().notEmpty().withMessage("Subject must be a string."),
+    body("content").isString().notEmpty().withMessage("Content must be a string."),
+    handleValidationErrors
+]
+
+export const validateGetInboxRequest = [
+    body("subject").isString().notEmpty().withMessage("Subject must be a string."),
     handleValidationErrors
 ]

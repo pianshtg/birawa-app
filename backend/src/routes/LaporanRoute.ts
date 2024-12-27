@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import LaporanController from '../controllers/LaporanController'
-import { validateLaporanRequest, validateNumberOfFiles } from '../middlewares/validation'
+import { validateCreateLaporanRequest, validateGetPekerjaanLaporansRequest, validateNumberOfFiles } from '../middlewares/validation'
 
 const router = express.Router()
 
@@ -13,11 +13,9 @@ const upload = multer({
     }
 })
 
-router.post('/', upload.array('files'), validateLaporanRequest, validateNumberOfFiles, LaporanController.createLaporan)
+router.post('/', upload.array('files'), validateCreateLaporanRequest, validateNumberOfFiles, LaporanController.createLaporan)
 router.get('/all', LaporanController.getLaporans)
-router.post('/laporan-pekerjaan', LaporanController.getPekerjaanLaporans)
+router.post('/laporan-pekerjaan', validateGetPekerjaanLaporansRequest, LaporanController.getPekerjaanLaporans)
 router.get('/:laporanId', LaporanController.getLaporan)
-router.patch('/', LaporanController.updateLaporan)
-router.delete('/', LaporanController.deleteLaporan)
 
 export default router

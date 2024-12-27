@@ -1,15 +1,14 @@
 import express from 'express'
 import MitraController from '../controllers/MitraController'
-import { validateMitraRequest } from '../middlewares/validation'
+import { updateMitraRequest, validateCreateMitraRequest, validateGetMitraUsersRequest } from '../middlewares/validation'
 
 const router = express.Router()
 
-router.post('/', validateMitraRequest, MitraController.createMitra)
+router.post('/', validateCreateMitraRequest, MitraController.createMitra)
 router.get('/', MitraController.getMitra)
-router.post('/users', MitraController.getMitraUsers)
+router.post('/users', validateGetMitraUsersRequest, MitraController.getMitraUsers)
 router.post('/kontraks', MitraController.getMitraKontraks)
 router.get('/all', MitraController.getMitras)
-router.patch('/', MitraController.updateMitra)
-router.delete('/', MitraController.deleteMitra)
+router.patch('/', updateMitraRequest, MitraController.updateMitra)
 
 export default router
