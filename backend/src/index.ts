@@ -12,6 +12,7 @@ import kontrakRoute from './routes/KontrakRoute'
 import userRoute from './routes/UserRoute'
 import laporanRoute from './routes/LaporanRoute'
 import inboxRoute from './routes/InboxRoute'
+import logRoute from './routes/LogRoute'
 import { clientType, jwtCheck } from './middlewares/auth'
 import { testConnection } from './database'
 
@@ -48,6 +49,7 @@ app.use("/api/kontrak", clientType, jwtCheck, kontrakRoute)
 app.use("/api/user", clientType, jwtCheck, userRoute)
 app.use("/api/laporan", clientType, jwtCheck, laporanRoute)
 app.use("/api/inbox", clientType, jwtCheck, inboxRoute)
+app.use("/api/log", clientType, jwtCheck, logRoute)
 
 // Start Server
 async function startServer() {

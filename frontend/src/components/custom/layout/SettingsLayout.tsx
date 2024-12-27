@@ -1,12 +1,32 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { RiArrowLeftSLine } from "react-icons/ri";
+import { getAccessToken } from '@/lib/utils';
+import { CustomJwtPayload } from '@/types';
+import { jwtDecode } from 'jwt-decode';
 
 interface SettingsProp {
     children: React.ReactNode;
 }
 
 const SettingsLayout: React.FC<SettingsProp> = ({ children }) => {
+  
+  const accessToken = getAccessToken()
+  let metaData: CustomJwtPayload = { user_id: '', permissions: [] };
+
+  if (typeof accessToken === 'string' && accessToken.trim() !== '') {
+    try {
+      metaData = jwtDecode<CustomJwtPayload>(accessToken)
+      // console.log('Decoded Token:', metaData) //Debug.
+    } catch (error) {
+      console.error('Error decoding token:', error) //Debug.
+    }
+  } else {
+    console.error('Token is undefined or invalid') //Debug.
+  }
+  
+  const isAdmin = metaData.nama_mitra ? false : true
+  
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -37,16 +57,19 @@ const SettingsLayout: React.FC<SettingsProp> = ({ children }) => {
                     Profil
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to="/settings/logging"
-                    className={`w-full block text-left rounded-md py-2 px-4 font-medium ${
-                      location.pathname === '/settings/logging' ? 'bg-primary text-white' : 'text-primary hover:bg-opacitynav'
-                    }`}
-                  >
-                    Logging
-                  </Link>
-                </li>
+                {isAdmin && (
+                  <li>
+                    <Link
+                      to="/settings/logging"
+                      className={`w-full block text-left rounded-md py-2 px-4 font-medium ${
+                        location.pathname === '/settings/logging' ? 'bg-primary text-white' : 'text-primary hover:bg-opacitynav'
+                      }`}
+                      reloadDocument
+                    >
+                      Logging
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link
                     to="/settings/resetpassword"

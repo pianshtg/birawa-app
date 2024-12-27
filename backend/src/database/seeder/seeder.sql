@@ -314,6 +314,8 @@ JOIN (
     UNION ALL
     SELECT 'admin', 'create_inbox'
     UNION ALL
+    SELECT 'admin', 'view_logs'
+    UNION ALL
     SELECT 'mitra', 'get_user'
     UNION ALL
     SELECT 'mitra', 'update_user'

@@ -1,42 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useGetLogs } from '@/api/LogApi';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const Logging = () => {
-  const logs = [
-    {
-      role: 'Admin',
-      time: '2024-11-12T14:30',
-      action: 'Delete',
-      impactTo: 'User 123',
-      description: 'Menghapus akun user dengan ID 123'
-    },
-    {
-      role: 'User',
-      time: '2024-11-11T10:15',
-      action: 'Create',
-      impactTo: 'Order #456',
-      description: 'Membuat pesanan baru dengan ID 456'
-    },
-    {
-      role: 'Manager',
-      time: '2024-11-10T09:00',
-      action: 'Edit',
-      impactTo: 'Product #789',
-      description: 'Mengedit detail produk dengan ID 789'
-    },
-  ];
+  
+  const {logs, isLoading} = useGetLogs();
+  const logData = logs?.logs
 
   const [selectedDate, setSelectedDate] = useState('');
-  const [filteredLogs, setFilteredLogs] = useState(logs);
+  const [filteredLogs, setFilteredLogs] = useState(logData || []);
 
-  const handleFilterLogs = () => {
-    const newFilteredLogs = logs.filter(log => {
+  function handleFilterLogs () {
+    const newFilteredLogs = logData.filter((log: any) => {
       if (!selectedDate) return true;
-      const logDate = log.time.split('T')[0];
+      const logDate = log.created_at.split('T')[0];
       return logDate === selectedDate;
     });
     setFilteredLogs(newFilteredLogs);
   };
+  
+  useEffect(() => {
+    if (logData) {
+      setFilteredLogs(logData)
+    }
+  }, [logData]);
+  
+  if (isLoading) {
+    return <LoadingScreen/>
+  }
 
   return (
     <div className='flex flex-col gap-y-7'>
@@ -63,27 +55,27 @@ const Logging = () => {
           <table className="min-w-full bg-white border border-gray-200">
             <thead className='bg-gray-200'>
               <tr>
-                <th className="py-2 px-4 border-b text-left text-black font-semibold">Role</th>
-                <th className="py-2 px-4 border-b text-left text-black font-semibold">Time</th>
-                <th className="py-2 px-4 border-b text-left text-black font-semibold">Action</th>
-                <th className="py-2 px-4 border-b text-left text-black font-semibold">Impact To Who</th>
-                <th className="py-2 px-4 border-b text-left text-black font-semibold">Description</th>
+                <th className="py-2 px-4 border-b text-center text-black font-semibold">User</th>
+                <th className="py-2 px-4 border-b text-center text-black font-semibold">Waktu</th>
+                <th className="py-2 px-4 border-b text-center text-black font-semibold">Data</th>
+                <th className="py-2 px-4 border-b text-center text-black font-semibold">Perubahan</th>
+                <th className="py-2 px-4 border-b text-center text-black font-semibold">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filteredLogs.length > 0 ? (
-                filteredLogs.map((log, index) => (
-                  <tr key={index} className="hover:bg-gray-100">
-                    <td className="py-2 text-sm px-4 border-b text-gray-700">{log.role}</td>
-                    <td className="py-2 text-sm px-4 border-b text-gray-700">{new Date(log.time).toLocaleString()}</td>
-                    <td className="py-2 text-sm px-4 border-b text-gray-700">{log.action}</td>
-                    <td className="py-2 text-sm px-4 border-b text-gray-700">{log.impactTo}</td>
-                    <td className="py-2 text-sm px-4 border-b text-gray-700">{log.description}</td>
+                filteredLogs.map((log: any, index: number) => (
+                  <tr key={index} className="hover:bg-gray-100 truncate">
+                    <td className="py-2 text-sm px-4 border-b text-gray-700 text-center">{log.email}</td>
+                    <td className="py-2 text-sm px-4 border-b text-gray-700 text-center">{new Date(log.created_at).toLocaleString()}</td>
+                    <td className="py-2 text-sm px-4 border-b text-gray-700 text-center tracking-[1px]">{log.nama_tabel.toUpperCase()}</td>
+                    <td className="py-2 text-sm px-4 border-b text-gray-700 text-left max-w-[200px] truncate">{JSON.stringify(log.perubahan)}</td>
+                    <td className="py-2 text-sm px-4 border-b text-gray-700 text-center">{log.aksi.toUpperCase().substr(0, 3)}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">No logs found for the selected date.</td>
+                  <td colSpan={5} className="text-center py-4 text-gray-500">{logData.length > 0 ? 'No logs found.' : 'No logs found for the selected date.'}</td>
                 </tr>
               )}
             </tbody>
