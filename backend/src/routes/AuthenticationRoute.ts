@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.post('/', clientType, AuthenticationController.authenticateUser)
 router.post('/signin', AuthenticationController.loginUser)
-router.post('/logout', clientType, AuthenticationController.logoutUser)
+router.post('/logout', clientType, jwtCheck, AuthenticationController.logoutUser)
 router.post('/pass', clientType, jwtCheck, AuthenticationController.changePassword)
 router.get('/verify-email', AuthenticationController.verifyEmail)
 router.get('/csrf-token', csrfToken)
