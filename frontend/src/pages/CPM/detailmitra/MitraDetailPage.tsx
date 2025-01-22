@@ -145,7 +145,6 @@ const MitraDetailPage = () => {
       };
       
       await createKontrak(kontrakData);
-      console.log(kontrakData) //Debug.
   
       setIsAddContractDialogOpen(false);
   
@@ -163,30 +162,12 @@ const MitraDetailPage = () => {
         nomor_telepon: data.nomor_telepon,
       };
       
-  
-      //Logging
-      // console.log('User data yang akan dikirim:', userData);
-
       await createUser(userData);  // Create user
-      console.log("User successfully created:", userData) //Debug.
   
-      // Invalidate and refetch the users query
-
-      // Optionally, refetch users or add the new user manually to the state
-      setIsAddUserDialogOpen(false);  // Close the dialog after successful submission
-  
-      // Show a success toast
-      // toast({
-      //   title: "User Baru berhasil ditambah",
-      //   description: "Mohon Refresh halaman page",
-      //   variant: "success",
-      // });
-  
-      // Optionally, fetch the updated list of users if necessary
-      // Example: await refetchUsers(); (if you have a refetch method from the API)
+      setIsAddUserDialogOpen(false)
   
     } catch (error) {
-      console.error("Error creating user:", error) //Debug.
+      return
     }
   };
   
@@ -204,12 +185,11 @@ const MitraDetailPage = () => {
       };
       
       await updateUser(updatedUserData);  // Call the API to update the user
-      console.log("User successfully updated:", updatedUserData) //Debug.
 
       setIsEditUserDialogOpen(false);  // Close the dialog after submission
   
     } catch (error) {
-      console.error("Error updating user:", error);
+      return
     }
   };
   
@@ -293,7 +273,6 @@ const MitraDetailPage = () => {
         title: "Berhasil delete user!",
         variant: 'success'
       })
-      console.log("Successfully delete user!") //Debug.
       refetchMitraUsers()
     }
   }, [isSuccessDeletingUser])

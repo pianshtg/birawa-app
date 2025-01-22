@@ -12,11 +12,8 @@ async function createMitra (req: Request, res: Response) {
     const connection = await pool.getConnection()
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
 
@@ -35,13 +32,11 @@ async function createMitra (req: Request, res: Response) {
                 // Generate mitra id and insert mitra into the database
             const mitraId = uuidv4()
             await connection.execute('INSERT INTO mitra (id, nama, nomor_telepon, alamat, created_by) VALUES (?, ?, ?, ?, ?)', [mitraId, mitra.nama, mitra.nomor_telepon, mitra.alamat, creator_id])
-            console.log("Mitra successfully created:", mitraId, mitra) //Debug.
             
             // Creating kontrak
                 // Generate kontrak id and insert kontrak into the database
             const kontrakId = uuidv4()
             await connection.execute('INSERT INTO kontrak (id, mitra_id, nama, nomor, tanggal, nilai, jangka_waktu, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [kontrakId, mitraId, kontrak.nama, kontrak.nomor, kontrak.tanggal, kontrak.nilai, kontrak.jangka_waktu, creator_id])
-            console.log("Kontrak successfully created:", kontrakId, kontrak)
     
             // Creating pekerjaan
                 // Mapping array of pekerjaan
@@ -50,10 +45,8 @@ async function createMitra (req: Request, res: Response) {
                 // Generate pekerjaan_id and insert it into the database.
                     const pekerjaanId = uuidv4()
                     await connection.execute('INSERT INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi, created_by) VALUES (?, ?, ?, ?, ?)', [pekerjaanId, kontrakId, pekerjaan.nama, pekerjaan.lokasi, creator_id])
-                    console.log(`Pekerjaan "${pekerjaan.nama}" di "${pekerjaan.lokasi}" successfully created.`) //Debug.
                 })
             )
-            console.log("Pekerjaan successfully created:", pekerjaan_arr) //Debug.
     
             // Creating user
                 //Checking if the user is already exists.
@@ -124,7 +117,6 @@ async function createMitra (req: Request, res: Response) {
     } catch (error) {
         // Rollback the connection if there's error.
         await connection.rollback()
-        console.error(error) // Debug.
         res.status(500).json({message: "Error creating Mitra."})
         return
         
@@ -136,11 +128,8 @@ async function createMitra (req: Request, res: Response) {
 async function getMitra(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const userId = metaData.user_id
         const permissions = metaData.permissions
 
@@ -162,7 +151,6 @@ async function getMitra(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting mitras."})
         return
     }
@@ -171,11 +159,8 @@ async function getMitra(req: Request, res: Response) {
 async function getMitraUsers(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('get_mitra_users')) {
@@ -198,7 +183,6 @@ async function getMitraUsers(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting mitra's users."})
         return
     }
@@ -207,11 +191,8 @@ async function getMitraUsers(req: Request, res: Response) {
 async function getMitraKontraks(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('get_mitra_kontraks')) {
@@ -238,12 +219,10 @@ async function getMitraKontraks(req: Request, res: Response) {
                 return
             }
         } else {
-            console.log(permissions) //Debug.
             res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting mitra's kontraks."})
         return
     }
@@ -252,11 +231,8 @@ async function getMitraKontraks(req: Request, res: Response) {
 async function getMitras(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
 
         if (permissions.includes('view_all_mitra')) {
@@ -272,7 +248,6 @@ async function getMitras(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting mitras."})
         return
     }
@@ -281,11 +256,8 @@ async function getMitras(req: Request, res: Response) {
 async function updateMitra (req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const editor_id = metaData.user_id
         
@@ -332,7 +304,6 @@ async function updateMitra (req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error updating mitra."})
         return
     }

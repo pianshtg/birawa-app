@@ -9,16 +9,14 @@ export async function getCsrfToken() {
   const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token`, {
       method: "GET",
       headers: {
-        "X-Client-Type": "web", // Explicitly set the client type
+        "X-Client-Type": "web",
       },
-      credentials: "include", // Includes cookies
+      credentials: "include",
   });
   if (response.ok) {
       const data = await response.json();
-      // console.log("CSRF Token fetched:", data.csrfToken); // Debug
       return data.csrfToken;
   } else {
-      // console.error("Failed to retrieve CSRF token:", await response.text());
       throw new Error("Failed to retrieve CSRF token");
   }
 }
@@ -94,8 +92,8 @@ export function useSignOutUser() {
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message); // Throw the error to be caught by `onError`
+      const data = await response.json()
+      throw new Error(data.message)
     }
 
     return response.json();
@@ -108,8 +106,8 @@ export function useSignOutUser() {
       toast({
         title: "Successfully logged out",
         variant: "success",
-      });
-      navigate("/") // Redirect after logout
+      })
+      navigate("/")
     }
   }, [isSuccess])
   

@@ -18,8 +18,6 @@ const EditContractDialog: React.FC<AddContractDialogProps> = ({ isOpen, onClose,
   
   const {control} = useFormContext()
 
-  console.log(contract);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>

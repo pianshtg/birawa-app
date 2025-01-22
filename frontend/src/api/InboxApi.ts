@@ -12,14 +12,13 @@ type CreateInboxRequest = {
 
 export function useCreateInbox() {
     async function useCreateInboxRequest(inbox: CreateInboxRequest) {
-        console.log(JSON.stringify(inbox)) //Debug.
         const csrfToken = await getCsrfToken() // Hasn't implemented csrf token yet.
         const response = await fetch(`${API_BASE_URL}/api/inbox`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
                 "X-Client-Type": "web",
-                "X-CSRF-TOKEN": csrfToken // Hasn't implemented csrf token yet.
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify(inbox),
             credentials: 'include'

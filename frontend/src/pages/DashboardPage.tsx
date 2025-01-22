@@ -2,8 +2,7 @@ import React, { useState } from "react"
 import { FaUserFriends, FaFileAlt, FaInbox } from "react-icons/fa"
 import SummaryCard from "@/components/custom/moleculs/CustomCard"
 import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom"
-import DetailMitraPage from "./DetailMitraPage"
+import { Link, useNavigate } from "react-router-dom"
 import { z } from "zod"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -28,6 +27,7 @@ import { CustomJwtPayload, Mitra } from "@/types"
 import { EditIcon, TrashIcon } from "lucide-react"
 import { getAccessToken } from "@/lib/utils"
 import {jwtDecode} from "jwt-decode"
+import LoadingScreen from "@/components/LoadingScreen"
 
 // Zod Schema
 const formEditMitraSchema = z.object({
@@ -39,6 +39,9 @@ const formEditMitraSchema = z.object({
 export type EditMitraSchema = z.infer<typeof formEditMitraSchema>
 
 const DashboardPage = () => {
+  
+  const navigate = useNavigate()
+  
   const accessToken = getAccessToken()
   let metaData: CustomJwtPayload = { user_id: "", permissions: [] }
   let isAdmin = false
@@ -70,9 +73,11 @@ const DashboardPage = () => {
   })
 
   // Handlers
-  const handleMitraClick = (mitra: Mitra) => setSelectedMitra(mitra)
-  const handleBackToDashboard = () => setSelectedMitra(null)
-
+  const handleMitraClick = (mitra: Mitra) => {
+    navigate(`/daftarmitra/detailmitra/${mitra.nama}`)
+    setSelectedMitra(mitra)
+  }
+  
   const handleEditClick = (e: React.MouseEvent, mitra: Mitra) => {
     e.stopPropagation()
     setMitraToEdit(mitra)
@@ -85,11 +90,10 @@ const DashboardPage = () => {
 
   const handleDelete = (e: React.MouseEvent, mitra: Mitra) => {
     e.stopPropagation()
-    console.log("Deleted Mitra:", mitra)
   }
 
   if (isGettingMitras) {
-    return <div>Loading...</div>
+    return <LoadingScreen/>
   }
 
   return (

@@ -119,7 +119,6 @@ async function loginUser (req: Request, res: Response) {
 async function logoutUser (req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
         const user_id = metaData.user_id
         
@@ -149,21 +148,16 @@ async function logoutUser (req: Request, res: Response) {
 }
 
 async function authenticateUser(req: Request, res: Response) {
-    console.log("Jwt checking...") // Debug.
     try {
         const accessToken = req.accessToken
-        
         // If access token exists and is valid, authenticate the user
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
-            console.log('Successfully authenticating with access token.') // Debug.
             res.status(201).json({ message: "User successfully authenticated." });
             return;
         } else {
             let refreshToken = req.refreshToken
             if (refreshToken) {
                 // If there's no access token but a refresh token is available, renew the access token
-                console.log("No access token, but refresh token is available. Renewing access token...");
-    
                 // Decode the refresh token to get the user information
                 try {
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
@@ -189,9 +183,7 @@ async function authenticateUser(req: Request, res: Response) {
     
                     // Generate the new access token
                     const newAccessToken = generateAccessToken({ user_id, permissions, nama_mitra });
-    
-                    console.log("Successfully renewed the access token:", newAccessToken); // Debug.
-    
+        
                     // If the client is web, set the new access token in the cookie
                     const clientType = req.headers['x-client-type'];
                     if (clientType === 'web') {
@@ -212,7 +204,6 @@ async function authenticateUser(req: Request, res: Response) {
                         return;
                     }
                 } catch (error) {
-                    console.error("Error verifying or renewing access token:", error); // Debug.
                     res.status(401).json({ message: "Unauthorized." });
                     return
                 }
@@ -226,9 +217,7 @@ async function authenticateUser(req: Request, res: Response) {
         if (error instanceof jwt.TokenExpiredError) {
             let refreshToken = req.refreshToken
             if (refreshToken) {
-                // If there's no access token but a refresh token is available, renew the access token
-                console.log("No access token, but refresh token is available. Renewing access token...");
-    
+                // If there's no access token but a refresh token is available, renew the access token    
                 // Decode the refresh token to get the user information
                 try {
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
@@ -255,7 +244,6 @@ async function authenticateUser(req: Request, res: Response) {
                     // Generate the new access token
                     const newAccessToken = generateAccessToken({ user_id, permissions, nama_mitra });
     
-                    console.log("Successfully renewed the access token:", newAccessToken); // Debug.
     
                     // If the client is web, set the new access token in the cookie
                     const clientType = req.headers['x-client-type'];
@@ -277,7 +265,6 @@ async function authenticateUser(req: Request, res: Response) {
                         return;
                     }
                 } catch (error) {
-                    console.error("Error verifying or renewing access token:", error); // Debug.
                     res.status(401).json({ message: "Unauthorized." });
                     return
                 }
@@ -286,7 +273,6 @@ async function authenticateUser(req: Request, res: Response) {
                 return
             }
         } else {
-            console.log("Error in authentication:", error); // Debug.
             res.status(401).json({ message: "Unauthorized." });
             return
         }
@@ -309,28 +295,22 @@ async function verifyEmail(req: Request, res: Response) {
         return
 
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({ message: 'Failed to verify email.' })
         return
     }
 }
 
 async function changePassword(req: Request, res: Response) {
-    console.log(req.body)
+
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const userId = metaData.user_id
         const permissions = metaData.permissions
         
         if (permissions.includes('update_user')) {
             const {old_password, new_password} = req.body
-            console.log("Old:", old_password) //Debug.
-            console.log("New:", new_password) //Debug.
             
             if (!old_password || !new_password) {
                 res.status(400).json({message: "Missing password!"})

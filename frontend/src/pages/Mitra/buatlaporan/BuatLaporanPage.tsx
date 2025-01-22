@@ -27,20 +27,16 @@ export default function BuatLaporanPage() {
     );
   }
   
-  // console.log({nama_mitra, nomor_kontrak, nama_pekerjaan}) //Debug.
-
   async function handleSubmit (formData: FormData) {
     try {
-
-      console.log("Submitting laporan:", formData); // Debug.
 
       // Trigger API call
       await createLaporan(formData);
 
-      console.log("Laporan created successfully!");
       navigate("/daftarpekerjaan")
+
     } catch (error) {
-      console.error("Error creating laporan:", error) //Debug.
+      return
     }
   };
   

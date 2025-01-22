@@ -12,11 +12,8 @@ async function createUser(req: Request, res: Response) {
     const connection = await pool.getConnection()
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
         
@@ -35,7 +32,6 @@ async function createUser(req: Request, res: Response) {
 
             // Check if user exists
             const [user] = await connection.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email])
-            console.log(user)
             if (user.length > 0) {
                 res.status(409).json({message: "User already exists."})
                 return;
@@ -62,7 +58,9 @@ async function createUser(req: Request, res: Response) {
             // Delivering the verification email to the user process
                 // Creating the transporter
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
                 auth: {
                     user: process.env.TRANSPORTER_EMAIL as string,
                     pass: process.env.TRANSPORTER_PASSWORD as string
@@ -111,7 +109,6 @@ async function createUser(req: Request, res: Response) {
     } catch (error) {
         // Rollback the connection if there's error.
         await connection.rollback()
-        console.error(error) // Debug.
         res.status(500).json({message: "Error creating user."})
         return
     } finally {
@@ -123,22 +120,17 @@ async function createUser(req: Request, res: Response) {
 async function getUser(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
 
         if (permissions.includes('get_user')) {
             // Check if user exists in the database.
             const [user] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [metaData.user_id])
             if (user.length === 0) {
-                // console.log("User doesn't exist.") // Debug.
                 res.status(409).json({message: "User not found."})
                 return
             } else {
-                // console.log(user) // Debug.
                 res.status(200).json({
                     user: user[0],
                     newAccessToken
@@ -151,7 +143,6 @@ async function getUser(req: Request, res: Response) {
         }
         
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error reading user."})
         return
     }
@@ -160,11 +151,8 @@ async function getUser(req: Request, res: Response) {
 async function getUsers(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = accessToken ? jwt.decode(accessToken!) as jwt.JwtPayload : jwt.decode(newAccessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('view_all_user')) {
@@ -181,12 +169,10 @@ async function getUsers(req: Request, res: Response) {
                 return
             }
         } else {
-            console.log(permissions) //Debug.
             res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting users."})
         return
     }
@@ -195,11 +181,8 @@ async function getUsers(req: Request, res: Response) {
 async function updateUser(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const userId = metaData.user_id
         const permissions = metaData.permissions
 
@@ -244,7 +227,6 @@ async function updateUser(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error updating mitra."})
         return
     }
@@ -253,11 +235,8 @@ async function updateUser(req: Request, res: Response) {
 async function deleteUser(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const userId = metaData.user_id
         const permissions = metaData.permissions
         
@@ -294,7 +273,6 @@ async function deleteUser(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error deleting user."})
         return
     }

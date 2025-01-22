@@ -18,6 +18,7 @@ import { CustomJwtPayload } from "@/types"
 import { jwtDecode } from "jwt-decode"
 import { useSignOutUser } from "@/api/AuthApi"
 import { useGetUser } from "@/api/UserApi"
+import LoadingScreen from "./LoadingScreen"
 
 type SidebarProps = {
   isOpen: boolean
@@ -35,13 +36,10 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   if (typeof accessToken === 'string' && accessToken.trim() !== '') {
     try {
       metaData = jwtDecode<CustomJwtPayload>(accessToken)
-      // console.log('Decoded Token:', metaData) //Debug.
       isAdmin = !!!metaData.nama_mitra
     } catch (error) {
-      console.error('Error decoding token:', error) //Debug.
     }
   } else {
-    console.error('Token is undefined or invalid') //Debug.
   }
   
   const allMenuItems = [
@@ -66,8 +64,12 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     try {
       await signOutUser()
     } catch (error) {
-      console.error("Failed to log out:", error) //Debug.
+      return
     }
+  }
+  
+  if (isLogoutLoading) {
+    return <LoadingScreen/>
   }
   
   return (

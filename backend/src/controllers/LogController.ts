@@ -6,11 +6,8 @@ import jwt from 'jsonwebtoken'
 async function getLoggings(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const isAdmin = !metaData.nama_mitra
 
@@ -30,7 +27,6 @@ async function getLoggings(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error getting logs."})
         return
     }

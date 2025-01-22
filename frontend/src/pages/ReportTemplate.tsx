@@ -317,28 +317,19 @@ const shiftList = ['1', '2']
 
 const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_kontrak, nama_pekerjaan, tanggal, laporan, cuaca}: Props) => {
   
-  console.log("Pencetak laporan:", pencetak_laporan) //Debug.
-  console.log("Pembuat laporan:", pembuat_laporan) //Debug.
-  
   const accessToken = getAccessToken();
-  // console.log("Access token:", accessToken) //Debug.
-
-  // const metaData = jwtDecode<CustomJwtPayload>(accessToken!);
   let metaData: CustomJwtPayload = { user_id: '', permissions: [] };
 
   if (typeof accessToken === 'string' && accessToken.trim() !== '') {
     try {
       metaData = jwtDecode<CustomJwtPayload>(accessToken)
-      // console.log('Decoded Token:', metaData) //Debug.
     } catch (error) {
-      // console.error('Error decoding token:', error) //Debug.
+      return
     }
   } else {
-    console.error('Token is undefined or invalid') //Debug.
+    return
   }
-  
-  console.log("LAPORAN:", laporan) //Debug.
-  
+    
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -666,7 +657,6 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
 
             // Iterate over shifts
             laporan.forEach((shift) => {
-              console.log(shift.peran_tenaga_kerja_arr) //Debug.
               shift.peran_tenaga_kerja_arr.forEach((tenagaKerja) => {
                 const typeWord =
                   tenagaKerja.nama.toLowerCase().startsWith("pekerja") &&
@@ -688,7 +678,6 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
                 typeTracker.add(typeWord);
               });
             });
-            console.log("All activities:", allActivities) //Debug.
 
             // Map activities to rows
             return allActivities.flatMap((item) =>

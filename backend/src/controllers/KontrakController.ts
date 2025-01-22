@@ -9,11 +9,8 @@ import { logger } from "../lib/utils";
 async function createKontrak(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
 
@@ -46,10 +43,8 @@ async function createKontrak(req: Request, res: Response) {
                 // Generate pekerjaan_id and insert it into the database.
                     const pekerjaanId = uuidv4()
                     await pool.execute('INSERT INTO kontrak_ss_pekerjaan (id, kontrak_id, nama, lokasi, created_by) VALUES (?, ?, ?, ?, ?)', [pekerjaanId, kontrakId, pekerjaan.nama, pekerjaan.lokasi, creator_id])
-                    console.log(`Pekerjaan "${pekerjaan.nama}" di "${pekerjaan.lokasi}" successfully created.`) //Debug.
                 })
             )
-            console.log("Pekerjaan successfully created:", pekerjaan_arr) //Debug.
             
             await logger({
                 rekaman_id: kontrakId,
@@ -59,19 +54,8 @@ async function createKontrak(req: Request, res: Response) {
                 aksi: 'insert' 
             })
             
-            // Debug.
             res.status(201).json({
                 message: "Kontrak created successfully.",
-                created_kontrak: {
-                    nama_mitra,
-                    id: kontrakId,
-                    nama,
-                    nomor,
-                    tanggal,
-                    nilai,
-                    jangka_waktu,
-                    pekerjaan_arr
-                },
                 newAccessToken
             })
             return
@@ -82,7 +66,6 @@ async function createKontrak(req: Request, res: Response) {
         }
         
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error creating Kontrak."})
         return
     }
@@ -91,11 +74,8 @@ async function createKontrak(req: Request, res: Response) {
 async function getKontrakPekerjaans(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('get_kontrak_pekerjaans')) {
@@ -136,7 +116,6 @@ async function getKontrakPekerjaans(req: Request, res: Response) {
         }
         
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error getting kontrak's pekerjaan(s)."})
         return
     }
@@ -145,11 +124,8 @@ async function getKontrakPekerjaans(req: Request, res: Response) {
 async function getKontraks(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
 
         // Check the user permission
@@ -168,7 +144,6 @@ async function getKontraks(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error getting kontraks."})
         return
     }

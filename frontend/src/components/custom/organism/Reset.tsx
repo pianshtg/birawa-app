@@ -75,13 +75,12 @@ const Reset = () => {
 
     async function handleResetPassword (data: ResetPasswordSchema) {
         try {
-            console.log("Credentials:", data)
             await changePassword({
               old_password: data.currentPassword,
               new_password: data.newPassword,
             })
           } catch (error) {
-            console.error("Error editing user (profile):", error) //Debug.
+            return
           }
     }
     

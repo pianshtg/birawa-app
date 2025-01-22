@@ -50,7 +50,6 @@ const EditUserDialog = ({ isOpen, onClose, onSubmit, user, isLoading }: Props) =
 
   // Synchronize the status with form state when it's updated
   useEffect(() => {
-    console.log('Status:', status)
     form.setValue('status', status)
   }, [status]);
   

@@ -10,7 +10,6 @@ export function getCookies (cookieName: string) {
   const cookieFilter = cookiesJar.split(`; ${cookieName}=`)[1]
   if (cookieFilter) {
     const cookie = cookieFilter.split(';').shift()
-    // console.log(`Cookie (${cookieName})`, cookie) //Debug.
     return cookie
   }
 }

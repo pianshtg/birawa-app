@@ -19,7 +19,6 @@ async function test (req: Request, res: Response) {
         res.status(200).json({
             message: `Successfully changed password for: [${email}]`,
             new_hashed_password_arr,
-            // message: "Hello World!",
             accessToken
         })
         return

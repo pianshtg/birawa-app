@@ -45,7 +45,7 @@ const Login = () => {
     try {
       await signInUser(data)
     } catch (error) {
-      console.error(error) //Debug.
+      return
     }
   }
   

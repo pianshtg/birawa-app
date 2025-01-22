@@ -12,8 +12,6 @@ interface DeleteContractDialogProps {
 const DeleteContractDialog: React.FC<DeleteContractDialogProps> = ({ isOpen, onClose, contract }) => {
   async function handleDelete () {
     if (contract) {
-      // Logika untuk menghapus kontrak (misalnya panggil API delete)
-      console.log('Deleting contract:', contract);
       // Setelah berhasil, tutup dialog
       onClose();
     }

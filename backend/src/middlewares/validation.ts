@@ -2,9 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { body, validationResult } from "express-validator";
 
 function parseBodyData(req: Request, res: Response, next: NextFunction) {
-    try {
-        console.log("Validating Laporan Request...") // Debug.
-        
+
+    try {        
         if (req.body && req.body.data) {
             try {
                 const parsedData = JSON.parse(req.body.data);
@@ -25,7 +24,6 @@ function parseBodyData(req: Request, res: Response, next: NextFunction) {
 
 export function validateNumberOfFiles(req: Request, res: Response, next: NextFunction) {
     
-    console.log('Validating Number of Images...') // Debug.
     try {
         const files = req.files as Express.Multer.File[]
         const {aktivitas_arr} = req.body
@@ -38,8 +36,6 @@ export function validateNumberOfFiles(req: Request, res: Response, next: NextFun
             })
             return
         }
-        
-        console.log("Number of Images Validated. Proceeding to the controller...") // Debug.
         
         next() 
         
@@ -56,9 +52,8 @@ async function handleValidationErrors (req: Request, res: Response, next: NextFu
         return
     }
     
-    console.log("Request Validated. Proceeding to the next middleware ...") // Debug.
-    
     next()
+    
 }
 
 export const validateCreateUserRequest = [

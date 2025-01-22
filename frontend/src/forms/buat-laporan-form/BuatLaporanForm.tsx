@@ -89,10 +89,6 @@ type Props = {
 
 export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerjaan, onSubmit, isLoading }: Props) {
   
-  // console.log("Nama mitra (blf):", nama_mitra) //Debug.
-  // console.log("Nomor kontrak (blf):", nomor_kontrak) //Debug.
-  // console.log("Nama pekerjaan (blf):", nama_pekerjaan) //Debug.
-  
   const form = useForm<buatLaporanFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -153,10 +149,6 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
       image_arr: []
     },
   })
-  
-  useEffect(() => {
-    console.log("Validation errors:", form.formState.errors)
-  }, [form.formState.errors]) //Debug.
 
   function handleSubmit (formData: buatLaporanFormData) {
     const formDataPayload = new FormData();
@@ -174,9 +166,7 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
     
       return count; // Otherwise, return the current count
     }, 0); // Initialize count to 0
-    
-    console.log("Expected cuaca arr length:", expected_cuaca_arr_length)
-    
+        
     if (formData.cuaca_arr.length !== expected_cuaca_arr_length) {
       // Iterate through each time segment to find missing ones
       timeSegments.forEach((segment) => {
@@ -246,10 +236,9 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
   };
   
   function handleRawSubmit (event: React.FormEvent<HTMLFormElement>) {
-    console.log("FORM IS ABOUT TO BE SUBMITTED......")
-    event.preventDefault() // Prevent form submission
+    event.preventDefault()
     event.stopPropagation()
-    const rawData = form.getValues() // Get form data before validation
+    const rawData = form.getValues()
     
     const shiftStart = parseTimeToMinutes(rawData.shift.waktu_mulai);
     const shiftEnd = parseTimeToMinutes(rawData.shift.waktu_berakhir)
@@ -264,8 +253,6 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
     
       return count; // Otherwise, return the current count
     }, 0); // Initialize count to 0
-    
-    console.log("Expected cuaca arr length:", expected_cuaca_arr_length)
     
     if (rawData.cuaca_arr.length !== expected_cuaca_arr_length) {
       // Iterate through each time segment to find missing ones
@@ -320,8 +307,6 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
       cuaca_arr: rawData.cuaca_arr,
       image_arr: rawData.image_arr
     }
-    console.log("Raw Form Data (before validation):", rawData) //Debug.
-    console.log("Raw Form Data (after data processing):", formDataPayload) //Debug.
   
     // Now trigger validation
     form.handleSubmit(handleSubmit)();
@@ -329,7 +314,6 @@ export default function BuatLaporanForm({ nama_mitra, nomor_kontrak, nama_pekerj
 
   return (
     <Form {...form}>
-      {/* <form onSubmit={form.handleSubmit(handleSubmit)}> */}
       <form onSubmit={handleRawSubmit}>
         <TenagaKerjaSection />
         <AktivitasSection />

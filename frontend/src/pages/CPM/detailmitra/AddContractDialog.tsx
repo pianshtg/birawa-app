@@ -73,12 +73,9 @@ const AddContractDialog = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
   })
 
   const addPekerjaan = (data: AddPekerjaanSchema) => {
-    console.log(formAddPekerjaan.formState.errors) //Debug.
-    console.log("Before added:", formAddContract.getValues('pekerjaan_arr')) //Debug.
     append(data);
     setShowPekerjaanModal(false);
     formAddPekerjaan.reset();
-    console.log("After added:", formAddContract.getValues('pekerjaan_arr')) //Debug.
   };
 
   // Scroll to bottom after pekerjaan is added or updated

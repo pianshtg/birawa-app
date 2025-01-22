@@ -32,12 +32,11 @@ const CekLaporan = () => {
   if (typeof accessToken === 'string' && accessToken.trim() !== '') {
     try {
       metaData = jwtDecode<CustomJwtPayload>(accessToken)
-      // console.log('Decoded Token:', metaData) //Debug.
     } catch (error) {
-      console.error('Error decoding token:', error) //Debug.
+      return
     }
   } else {
-    console.error('Token is undefined or invalid') //Debug.
+    return
   }
   
   const isAdmin = metaData.nama_mitra ? false : true
@@ -191,10 +190,6 @@ const CekLaporan = () => {
   };
   
   const {user, isLoading: isUserLoading} = useGetUser()
-  
-  // useEffect(() => {
-  //   console.log('Fetched user:', user)
-  // }, [user]) //Debug.
   
   const pencetak_laporan = user?.user?.nama_lengkap || ''
 

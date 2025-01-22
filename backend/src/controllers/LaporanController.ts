@@ -10,11 +10,8 @@ async function createLaporan(req: Request, res: Response) {
     const connection = await pool.getConnection()
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const creator_id = metaData.user_id
 
@@ -26,8 +23,6 @@ async function createLaporan(req: Request, res: Response) {
             const {nama_mitra, nomor_kontrak, nama_pekerjaan, tanggal, shift, tenaga_kerja_arr, aktivitas_arr, cuaca_arr} = req.body
             // Get request files (images)
             const files = req.files as Express.Multer.File[]
-
-            console.log("Request values: ", {nama_mitra, nomor_kontrak, nama_pekerjaan, tanggal, shift, tenaga_kerja_arr, aktivitas_arr, cuaca_arr}) //Debug.
 
             // Check if pekerjaan exists.
             const [pekerjaan] = await connection.execute<RowDataPacket[]>('SELECT kontrak_ss_pekerjaan.id FROM kontrak INNER JOIN kontrak_ss_pekerjaan ON kontrak.id = kontrak_ss_pekerjaan.kontrak_id WHERE kontrak.nomor = ? AND kontrak_ss_pekerjaan.nama = ?', [nomor_kontrak, nama_pekerjaan])
@@ -52,12 +47,9 @@ async function createLaporan(req: Request, res: Response) {
                     // Generate shift id if it doesn't exist already and insert it into the database.
                 if (existingShift.length > 0) {
                     shiftId = existingShift[0].id
-                    console.log("Shift that is already exists in the database:", existingShift[0]) //Debug.
                 } else {
                     shiftId = uuidv4()
-                    console.log("Shift to create:", shift) //Debug.
                     await connection.execute('INSERT INTO shift (id, nama, waktu_mulai, waktu_berakhir, created_by) VALUES (?, ?, ?, ?, ?)', [shiftId, shift.nama, shift.waktu_mulai, shift.waktu_berakhir, creator_id])
-                    console.log("Shift successfully created:", shift) //Debug.
                 }
             }
             
@@ -65,7 +57,6 @@ async function createLaporan(req: Request, res: Response) {
                 // Mapping array of tenaga_kerja.
             await Promise.all(
                 tenaga_kerja_arr.map(async (tenaga_kerja: TenagaKerja) => {
-                    console.log("Tenaga kerja to create:", tenaga_kerja) //Debug.
                 // Checking if peran_tenaga_kerja exists.
                     const [peranTenagaKerja] = await connection.execute<RowDataPacket[]>('SELECT id FROM peran_tenaga_kerja WHERE nama = ?', [tenaga_kerja.peran])
                     // Initiating peran_tenaga_kerja_id.
@@ -74,7 +65,6 @@ async function createLaporan(req: Request, res: Response) {
                     // Generate peran_tenaga_kerja_id and insert new peran_tenaga_kerja into the database if peran_tenaga_kerja doesn't exist.
                         peranTenagaKerjaId = uuidv4()
                         await connection.execute('INSERT INTO peran_tenaga_kerja (id, tipe_tenaga_kerja_id, nama, created_by) VALUES (?, (SELECT id FROM tipe_tenaga_kerja WHERE nama = ?), ?, ?)', [peranTenagaKerjaId, tenaga_kerja.tipe, tenaga_kerja.peran, creator_id])
-                        console.log(`Tenaga kerja "${tenaga_kerja.peran}" berhasil dibuat.`) //Debug.
                     } else {
                     // Assign peran_tenaga_kerja_id to the existing peran_tenaga_kerja's id
                         peranTenagaKerjaId = peranTenagaKerja[0].id
@@ -82,24 +72,20 @@ async function createLaporan(req: Request, res: Response) {
                 // Generate tenaga_kerja_id and insert tenaga_kerja into the database
                     const tenagaKerjaId = uuidv4()
                     await connection.execute('INSERT INTO tenaga_kerja (id, kontrak_ss_pekerjaan_id, shift_id, peran_tenaga_kerja_id, jumlah, tanggal, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)', [tenagaKerjaId, kontrak_ss_pekerjaan_id, shiftId, peranTenagaKerjaId, tenaga_kerja.jumlah, tanggal, creator_id])
-                    console.log(`Tenaga kerja "${tenaga_kerja.peran}" dengan jumlah ${tenaga_kerja.jumlah} orang successfully created pada tanggal "${tanggal}}".`) //Debug.
                 })
             )
-            console.log("Tenaga Kerja successfully created:", tenaga_kerja_arr) //Debug.
             
     
             // Creating aktivitas.
                 // Checking the existence of tipe_aktivitas in the database.    
                 for (const aktivitas of aktivitas_arr) {
                     const [existingTipeAktivitas] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_aktivitas WHERE nama = ?', [aktivitas.tipe])
-                    console.log(existingTipeAktivitas) //Debug.
                 // Initiating tipe_aktivitas_id 
                     let tipeAktivitasId
                     if (existingTipeAktivitas.length === 0){
                 // Generate tipe_aktivitas_id and insert new tipe_aktivitas into the database if tipe_aktivitas doesn't exist.
                     tipeAktivitasId = uuidv4()
                     await connection.execute('INSERT INTO tipe_aktivitas (id, nama, created_by) VALUES (?, ?, ?)', [tipeAktivitasId, aktivitas.tipe, creator_id])
-                    console.log(`Tipe aktivitas "${aktivitas.tipe}" berhasil dibuat.`) //Debug.
                 } else {
                 // Assign tipe_aktivitas_id to the existing tipe_aktivitas's id.
                     tipeAktivitasId = existingTipeAktivitas[0].id
@@ -108,40 +94,33 @@ async function createLaporan(req: Request, res: Response) {
                 // Mapping array of aktivitas.
             let imagesContainer_debug: string[] = [] //Debug.
             await Promise.all(
-                aktivitas_arr.map(async (aktivitas: Aktivitas, index_aktivitas: number) => {
-                    console.log("Aktivitas to create:", aktivitas) //Debug.
-                
+                aktivitas_arr.map(async (aktivitas: Aktivitas, index_aktivitas: number) => {                
                 // Generate aktivitas_id and insert aktivitas into the database.
                     const aktivitasId = uuidv4()
                     await connection.execute('INSERT INTO aktivitas (id, kontrak_ss_pekerjaan_id, shift_id, tipe_aktivitas_id, nama, tanggal, created_by) VALUES (?, ?, ?, (SELECT id FROM tipe_aktivitas WHERE nama = ?), ?, ?, ?)', [aktivitasId, kontrak_ss_pekerjaan_id, shiftId, aktivitas.tipe, aktivitas.nama, tanggal, creator_id])
-                    console.log(`Aktivitas "${aktivitas.nama}" berhasil dibuat pada pekerjaan "${nama_pekerjaan}" pada tanggal ${tanggal}`) //Debug.
 
                 // Creating documentation
                     // Get images (2) for each activity
-                const activityImageFiles = files.slice(index_aktivitas * 2, (index_aktivitas * 2) + 2)
-                    // Upload both images and get the URLs
-                const uploadedImageUrls = await uploadImages(activityImageFiles, nama_mitra, nomor_kontrak, nama_pekerjaan, aktivitas.nama, tanggal)
-                for (const url of uploadedImageUrls) {imagesContainer_debug.push(url)} // Debug.
+                    const activityImageFiles = files.slice(index_aktivitas * 2, (index_aktivitas * 2) + 2)
+                // Upload both images and get the URLs
+                    const uploadedImageUrls = await uploadImages(activityImageFiles, nama_mitra, nomor_kontrak, nama_pekerjaan, aktivitas.nama, tanggal)
+                    for (const url of uploadedImageUrls) {imagesContainer_debug.push(url)} // Debug.
                 // Loop through the uploaded images
-                await Promise.all(
-                    uploadedImageUrls.map(async (imageUrl: string, index_dokumentasi: number) => {
-                    // Generate dokumentasi_id and insert dokumentasi into the database
-                        const dokumentasiId = uuidv4()
-                        const deskripsiDokumentasi = aktivitas.dokumentasi[index_dokumentasi].deskripsi
-                        await connection.execute('INSERT INTO dokumentasi (id, aktivitas_id, link, deskripsi, created_by) VALUES (?, ?, ?, ?, ?)', [dokumentasiId, aktivitasId, imageUrl, deskripsiDokumentasi, creator_id])
-                        console.log(`Dokumentasi aktivitas "${aktivitas.tipe}" dengan link "${imageUrl}" dan deskripsi "${deskripsiDokumentasi}" berhasil dibuat.`) //Debug.
-                    })
-                )
-                console.log("Dokumentasi successfully created:", uploadedImageUrls, aktivitas.dokumentasi) //Debug.
+                    await Promise.all(
+                        uploadedImageUrls.map(async (imageUrl: string, index_dokumentasi: number) => {
+                        // Generate dokumentasi_id and insert dokumentasi into the database
+                            const dokumentasiId = uuidv4()
+                            const deskripsiDokumentasi = aktivitas.dokumentasi[index_dokumentasi].deskripsi
+                            await connection.execute('INSERT INTO dokumentasi (id, aktivitas_id, link, deskripsi, created_by) VALUES (?, ?, ?, ?, ?)', [dokumentasiId, aktivitasId, imageUrl, deskripsiDokumentasi, creator_id])
+                        })
+                    )
                 })
             )
-            console.log("Aktivitas successfully created:", aktivitas_arr) //Debug.
     
             // Creating cuaca.
                 // Mapping array of cuaca.
             await Promise.all(
                 cuaca_arr.map(async (cuaca: Cuaca) => {
-                    console.log("Cuaca to create:", cuaca) //Debug.
                 // Checking if tipe_cuaca exists.
                     const [tipeCuaca] = await connection.execute<RowDataPacket[]>('SELECT id FROM tipe_cuaca WHERE nama = ?', [cuaca.tipe])
                     if (tipeCuaca.length === 0) {
@@ -199,22 +178,17 @@ async function createLaporan(req: Request, res: Response) {
                           [formattedEarliestWaktuMulai, waktu_berakhir, existingCuaca[0].id]
                         );
                         
-                        console.log(`Cuaca updated for ${cuaca.tipe} on ${tanggal} with earliest waktu_mulai.`); // Debug.                        
                     } else {
                     // Generate cuaca_id and insert it into the database if tipe_cuaca exists.
                         const cuacaId = uuidv4()
                         await connection.execute('INSERT INTO cuaca (id, kontrak_ss_pekerjaan_id, tipe_cuaca_id, waktu, waktu_mulai, waktu_berakhir, tanggal, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [cuacaId, kontrak_ss_pekerjaan_id, tipeCuaca[0].id, cuaca.waktu, waktu_mulai, waktu_berakhir, tanggal, creator_id])
-                        console.log(`Cuaca "${cuaca.tipe}" berhasil dibuat untuk tanggal ${tanggal}`) //Debug.
                     }
                 })
             )
-            console.log("Cuaca successfully created:", cuaca_arr) //Debug.
             
             // Creating laporan
             const laporanId = uuidv4()
             await connection.execute('INSERT INTO laporan (id, kontrak_ss_pekerjaan_id, tanggal, created_by) VALUES (?, ?, ?, ?)', [laporanId, kontrak_ss_pekerjaan_id, tanggal, creator_id])
-            console.log("Laporan created successfully.")
-            
             
             // Commit all the queries
             await connection.commit()
@@ -258,11 +232,8 @@ async function createLaporan(req: Request, res: Response) {
 async function getLaporan(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('get_laporan')) {
@@ -348,7 +319,6 @@ async function getLaporan(req: Request, res: Response) {
                 
                 // Get pembuat laporan
                 const [user] = await pool.execute<RowDataPacket[]>('SELECT nama_lengkap FROM users WHERE id = ?', [existingLaporan[0].created_by])
-                console.log(existingLaporan[0].created_by) //Debug.
                 if (user.length === 0) {
                     res.status(409).json({message: "Failed to find pembuat laporan."})
                     return
@@ -369,12 +339,10 @@ async function getLaporan(req: Request, res: Response) {
                 return
             }
         } else {
-            console.log(permissions) //Debug.
             res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error retrieving laporan."})
         return
     }
@@ -383,11 +351,8 @@ async function getLaporan(req: Request, res: Response) {
 async function getPekerjaanLaporans(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('get_pekerjaan_laporans')) {
@@ -415,12 +380,10 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
                 return
             }
         } else {
-            console.log(permissions) //Debug.
             res.status(401).json({message: "Unauthorized."})
             return
         }
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error retrieving pekerjaan's laporans."})
         return
     }
@@ -429,11 +392,8 @@ async function getPekerjaanLaporans(req: Request, res: Response) {
 async function getLaporans(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         
         if (permissions.includes('view_all_laporan')) {
@@ -454,7 +414,6 @@ async function getLaporans(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) // Debug.
         res.status(500).json({message: "Error retrieving all laporan."})
         return
     }

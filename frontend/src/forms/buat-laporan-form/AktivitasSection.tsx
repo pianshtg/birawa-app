@@ -81,12 +81,6 @@ export default function AktivitasSection() {
     aktivitasForm.setValue("tipe", selectedKategoriPekerjaan)
     aktivitasForm.clearErrors("tipe")
   }, [selectedKategoriPekerjaan, aktivitasForm]);
-  
-  useEffect(() => {
-    console.log(getValues('tenaga_kerja_arr'))
-    console.log(getValues('aktivitas_arr'))
-    console.log(getValues('image_arr'))
-  }, [getValues('aktivitas_arr'), getValues('image_arr')]) //Debug.
 
   async function handleTambahAktivitas (data: AktivitasFormData) {
     const { dokumentasi, ...aktivitasData } = data;
@@ -176,12 +170,11 @@ export default function AktivitasSection() {
     const setOfTipeAktivitas = new Set(aktivitasArr.map((aktivitas: Aktivitas) => aktivitas.tipe))
     
     if (Array.from(setOfTipeAktivitas).length !== lapanganItems.length) {
-      console.log("Set of tipe aktivitas:", setOfTipeAktivitas) //Debug.
-      console.log("Tenaga kerja lapangan:", lapanganItems) //Debug.
-      console.log("Aktivitas array:", aktivitasArr) //Debug.
+
       setValidationError(
         "Setiap aktivitas harus memiliki koresponden tenaga kerja lapangan."
-      );
+      )
+      
     } else {
       setValidationError(null);
     }

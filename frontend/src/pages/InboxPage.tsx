@@ -28,12 +28,11 @@ const InboxComponent = () => {
   if (typeof accessToken === 'string' && accessToken.trim() !== '') {
     try {
       metaData = jwtDecode<CustomJwtPayload>(accessToken)
-      // console.log('Decoded Token:', metaData) //Debug.
     } catch (error) {
-      console.error('Error decoding token:', error) //Debug.
+      return
     }
   } else {
-    console.error('Token is undefined or invalid') //Debug.
+    return
   }
   
   const isAdmin = metaData.nama_mitra ? false : true
@@ -114,11 +113,6 @@ const InboxComponent = () => {
   }, [isErrorCreatingInbox]);
   
   useEffect(() => {
-    console.log("Validation errors:", messageForm.formState.errors)
-    console.log(messageForm.getValues('email_receiver'))
-  }, [messageForm.formState.errors]) //Debug.
-  
-  useEffect(() => {
     messageForm.setValue('nama_mitra', selectedMitra)
     setSelectedInbox('')
   }, [selectedMitra])
@@ -180,11 +174,10 @@ const InboxComponent = () => {
         subject: selectedInbox,
         content: data.content
       }
-      console.log("Payload:", payload) //Debug.
       await createInbox(payload)
       messageForm.setValue('content', '');
     } catch (error) {
-      console.error(error) //Debug.
+      return
     }
   }
   
@@ -201,16 +194,14 @@ const InboxComponent = () => {
         return
       }
       
-      console.log("datafirst",data); //Debug.
       const datafull = await createInbox({
         ...data,
         nama_mitra: isAdmin ? selectedMitra : undefined,
         email_receiver: isAdmin ? undefined : 'birawaprj@gmail.com'
       })
-      console.log("data submit",datafull);
       messageForm.reset()
     } catch (error) {
-      console.error(error) //Debug.
+      return
     }
   };
   
@@ -237,9 +228,6 @@ const InboxComponent = () => {
   if (isInboxesLoading || isInboxMessagesLoading) {
     return <LoadingScreen/>
   }
-
-  const hasReplied = mitraInboxMessages && mitraInboxMessages.length > 2
-  console.log("replied", hasReplied)
   
   return (
     <div className="relative flex h-[93vh]">

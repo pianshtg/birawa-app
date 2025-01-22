@@ -9,11 +9,8 @@ import { logger } from "../lib/utils";
 async function createInbox(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
         const sender_id = metaData.user_id
 
@@ -74,16 +71,8 @@ async function createInbox(req: Request, res: Response) {
                 aksi: 'insert'
             })
             
-            // Debug.
             res.status(201).json({
                 message: "Inbox created successfully.",
-                created_inbox: {
-                    sender_id,
-                    email_receiver,
-                    nama_mitra,
-                    subject,
-                    content
-                },
                 newAccessToken
             })
             return
@@ -94,7 +83,6 @@ async function createInbox(req: Request, res: Response) {
         }
         
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error creating inbox."})
         return
     }
@@ -103,11 +91,8 @@ async function createInbox(req: Request, res: Response) {
 async function getInboxes(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
 
         // Check the user permission
@@ -152,18 +137,13 @@ async function getInboxes(req: Request, res: Response) {
                 `;
                 const [rows] = await pool.execute<RowDataPacket[]>(dynamicQuery, [...existingMitraUsersId, ...existingMitraUsersId]);
                 inboxes = rows
-                console.log("Inboxes:", inboxes) //Debug.
-                console.log('Existing mitra users:', existingMitraUsersId) //Debug.
             } else {
-                console.log(existingMitraUsers) //Debug.
                 res.status(409).json({message: "Failed to find any of mitra's user."})
                 return
             }
             
-            // Debug.
             res.status(201).json({
                 message: "Inboxes retrieved successfully.",
-                inboxes,
                 newAccessToken
             })
             return
@@ -173,7 +153,6 @@ async function getInboxes(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting inboxes."})
         return
     }
@@ -182,15 +161,12 @@ async function getInboxes(req: Request, res: Response) {
 async function getInbox(req: Request, res: Response) {
     try {
         const accessToken = req.accessToken
-        // console.log("Access token received:", accessToken) // Debug.
         const newAccessToken = req.newAccessToken
-        // console.log("New access token received:", newAccessToken) // Debug.
         const metaData = jwt.decode(accessToken!) as jwt.JwtPayload
-        // console.log(metaData) // Debug.
         const permissions = metaData.permissions
 
         // Check the user permission
-        if (permissions.includes('create_inbox')) { // don't forget to change the permission (get_inboxes)
+        if (permissions.includes('create_inbox')) {
             // Get nama_mitra
             const nama_mitra = metaData.nama_mitra || req.body.nama_mitra
             const {subject} = req.body
@@ -264,18 +240,14 @@ async function getInbox(req: Request, res: Response) {
                 `;
                 const [rows] = await pool.execute<RowDataPacket[]>(dynamicQuery, [...existingMitraUsersId, ...existingMitraUsersId, subject]);
                 inboxMessages = rows
-                console.log("Inboxes:", inboxMessages) //Debug.
-                console.log('Existing mitra users:', existingMitraUsersId) //Debug.
+                
             } else {
-                console.log(existingMitraUsers) //Debug.
                 res.status(409).json({message: "Failed to find any of mitra's user."})
                 return
             }
             
-            // Debug.
             res.status(201).json({
                 message: "Inbox messages retrieved successfully.",
-                inboxMessages,
                 newAccessToken
             })
             return
@@ -285,7 +257,6 @@ async function getInbox(req: Request, res: Response) {
             return
         }
     } catch (error) {
-        console.error(error) //Debug.
         res.status(500).json({message: "Error getting inbox."})
         return
     }

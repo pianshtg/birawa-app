@@ -73,7 +73,6 @@ const TambahMitraForm = ({onSubmit, isLoading}: Props) => {
     })
     
     function handleSubmit(formData: tambahMitraFormData) {
-        console.log(formData) //Debug.
         onSubmit(formData)
     }
     

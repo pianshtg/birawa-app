@@ -15,12 +15,7 @@ const LoginForm: React.FC = () => {
   function handleChange (e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target; // Destructure id and value from the event target
     
-    // Debugging statements to understand what's happening
-    console.log("Field ID:", id); // Logs the `id` of the input field being changed
-    console.log("New Value:", value); // Logs the `value` entered by the user
-  
     setLoginForm((prevForm) => {
-      console.log("Previous State:", prevForm); // Logs the state before the update
   
       // Create a new state object with the updated value for the field identified by `id`
       const updatedForm = {
@@ -28,8 +23,8 @@ const LoginForm: React.FC = () => {
         [id]: value, // Use computed property name to dynamically update the correct property
       };
   
-      console.log("Updated State:", updatedForm); // Logs the state after the update
       return updatedForm; // Update the state
+ 
     });
   };
   

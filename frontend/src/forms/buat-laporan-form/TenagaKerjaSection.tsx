@@ -92,7 +92,6 @@ export default function TenagaKerjaSection() {
     
     setValue('shift', data)
     
-    // console.log(isShiftDialogOpen) //Debug.
     setIsShiftDialogOpen(false)
   }
   
@@ -113,21 +112,13 @@ export default function TenagaKerjaSection() {
     removeTenagaKerja(index + manajemenFieldLength)
   }
   
-  // useEffect (() => {
-  //   const tenagaKerjaArr = getValues('tenaga_kerja_arr')
-  //   const shift = getValues('shift')
-  //   console.log(tenagaKerjaArr) 
-  //   console.log(defaultTenagaKerja) 
-  //   console.log(shift)
-  // }, [tenagaKerjaFields, defaultTenagaKerja, selectedShift]) //Debug.
-  
   const ShiftDialog = (
     <form 
       className="flex flex-col gap-4"
       onSubmit={(e) => {
-        e.preventDefault();  // Prevent parent form submission
-        e.stopPropagation(); // Stop event from bubbling up to parent form
-        shiftForm.handleSubmit(handleTentukanShift)(e);  // Handle shift submission
+        e.preventDefault()
+        e.stopPropagation()
+        shiftForm.handleSubmit(handleTentukanShift)(e)
       }}
     >
       {/* Shift Selection */}

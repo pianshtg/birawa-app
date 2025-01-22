@@ -112,7 +112,7 @@ const Profile = () => {
         nomor_telepon: data.personalPhone
       })
     } catch (error) {
-      console.error("Error editing user (profile):", error) //Debug.
+      return
     }
   }
     

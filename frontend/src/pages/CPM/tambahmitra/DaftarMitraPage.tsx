@@ -113,11 +113,6 @@ const DaftarMitra = () => {
     setIsEditDialogOpen(true);
   }
 
-  // function handleDelete()  {
-  //   console.log('delete dilakukan');
-  //   setIsDeleteDialogOpen(false);
-  // };
-
   async function handleEditSubmit(data: EditFormSchema)  {
     if (!selectedMitra) return;
 

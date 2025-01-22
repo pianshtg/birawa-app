@@ -25,9 +25,7 @@ export function generateRefreshToken (data: any) {
 }
 
 export async function clientType(req: Request, res: Response, next: NextFunction) {
-    
-    console.log("\nChecking the client type...") // Debug.
-    
+        
     try {
         const clientType = req.headers['x-client-type']
         let accessToken: string | undefined
@@ -52,7 +50,6 @@ export async function clientType(req: Request, res: Response, next: NextFunction
 
         // Check if there's refresh token
         if (!refreshToken) {
-            // console.log("There's no refresh token.") // Debug.
             res.status(401).json({message: "Invalid refresh token."})
             return
         }
@@ -61,9 +58,8 @@ export async function clientType(req: Request, res: Response, next: NextFunction
         req.accessToken = accessToken
         req.refreshToken = refreshToken
         
-        console.log("Client type:", clientType) //Debug.
-        console.log("Proceeding to check jwt...\n") //Debug.
         next()
+        
     } catch (error) {
         console.error("Error fetching client type:", error)
         res.status(401).json({message: "Error fetching client type"})
@@ -71,20 +67,17 @@ export async function clientType(req: Request, res: Response, next: NextFunction
 }
 
 export async function jwtCheck(req: Request, res: Response, next: NextFunction) {
-    console.log("JWT checking..."); // Debug.
+
     try {
         const accessToken = req.accessToken
 
         // If there's an access token, validate it normally
         if (accessToken && jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY as string)) {
-            console.log('Successfully authenticating with access token. Proceeding to the controller...'); // Debug.
             next()
         } else {
             let refreshToken = req.refreshToken
             if (refreshToken) {
                 // If no access token but there is a refresh token, we try to renew the access token
-                console.log("Access token is expired or missing, but refresh token is present. Renewing access token...")
-    
                 // Decode the refresh token
                 try {
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
@@ -125,11 +118,9 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                         req.newAccessToken = newAccessToken;
                     }
     
-                    console.log("Successfully renewed access token:", newAccessToken); // Debug.
                     next(); // Proceed to the next middleware or controller
                     
                 } catch (error) {
-                    console.log("Error while renewing access token:", error); // Debug.
                     res.status(401).json({ message: "Unauthorized." });
                     return
                 }
@@ -144,8 +135,6 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
             let refreshToken = req.refreshToken
             if (refreshToken) {
                 // If no access token but there is a refresh token, we try to renew the access token
-                console.log("Access token is expired or missing, but refresh token is present. Renewing access token...");
-    
                 // Decode the refresh token
                 try {
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY as string) as jwt.JwtPayload;
@@ -186,16 +175,13 @@ export async function jwtCheck(req: Request, res: Response, next: NextFunction) 
                         req.newAccessToken = newAccessToken;
                     }
     
-                    console.log("Successfully renewed access token:", newAccessToken); // Debug.
                     next(); // Proceed to the next middleware or controller
                     
                 } catch (error) {
-                    console.log("Error while renewing access token:", error); // Debug.
                     res.status(401).json({ message: "Unauthorized." });
                     return
                 }
             } else {
-                console.log("JWT verification failed:", error); // Debug.
                 res.status(401).json({ message: "Unauthorized." });
                 return
             }

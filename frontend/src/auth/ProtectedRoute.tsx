@@ -7,8 +7,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ roles }: ProtectedRouteProps) => {
+  
   const accessToken = getAccessToken()
-  // console.log("Access token:", accessToken) //Debug.
 
   if (!accessToken) {
     return <Navigate to="/" replace />

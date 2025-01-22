@@ -17,12 +17,11 @@ const SettingsLayout: React.FC<SettingsProp> = ({ children }) => {
   if (typeof accessToken === 'string' && accessToken.trim() !== '') {
     try {
       metaData = jwtDecode<CustomJwtPayload>(accessToken)
-      // console.log('Decoded Token:', metaData) //Debug.
     } catch (error) {
-      console.error('Error decoding token:', error) //Debug.
+      return
     }
   } else {
-    console.error('Token is undefined or invalid') //Debug.
+    return
   }
   
   const isAdmin = metaData.nama_mitra ? false : true
