@@ -139,6 +139,7 @@ async function logoutUser (req: Request, res: Response) {
         }
         
         res.status(200).json({message: "Successfully logged out user."})
+        return;
         
     } catch (error) {
         console.error(error)
