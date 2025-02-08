@@ -1,6 +1,5 @@
 "use client"
 
-// Inspired by react-hot-toast library
 import * as React from "react"
 
 import type {
@@ -9,14 +8,14 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 2000 // Sesuaikan dengan durasi yang Anda inginkan
+const TOAST_REMOVE_DELAY = 2000 
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
-  timestamp?: number // Tambahkan timestamp untuk tracking
+  timestamp?: number 
 }
 
 const actionTypes = {
