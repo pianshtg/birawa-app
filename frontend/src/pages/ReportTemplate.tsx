@@ -762,22 +762,6 @@ const ReportTemplate = ({pencetak_laporan, pembuat_laporan, nama_mitra, nomor_ko
           })}
         </View>
 
-        {/* Issues Section */}
-        <View wrap={false} style={styles.issuesSection}>
-          <View style={styles.tableRow}>
-            <View style={[styles.tableCell, { flex: 1 }]}>
-              <Text>Permasalahan yang timbul</Text>
-            </View>
-            <View style={[styles.tableCell, { flex: 1 }]}>
-              <Text>Penyelesaian</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={[styles.tableCell, {minHeight : 124}]}/>
-            <View style={[styles.tableCell, {minHeight : 1}]}/>
-          </View>
-        </View>
-
         {/* Footer */}
         <View wrap={false} style={styles.footer}>
           <View style={styles.footerRow}>
